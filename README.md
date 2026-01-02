@@ -1,2 +1,4 @@
 # cpspace-social
-Repository serving as the single source of truth for the CPSpace system, with modular development and integration between independently developed subsystems.
+This repository serves as the single source of truth for the CPSpace social and emotion-sharing subsystem.
+
+Code will be added incrementally.
