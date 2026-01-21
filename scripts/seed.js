@@ -15,6 +15,7 @@ async function main() {
   await db.collection("users").doc("user00001").set({
     createdAt: FieldValue.serverTimestamp(),
     userName: "Brian Chen",
+    pseudonym: "FirebaseIsLit55",
     activeStatus: "active",
     roles: ["admin"],
     preferences: {
@@ -38,6 +39,7 @@ async function main() {
   await db.collection("users").doc("user00002").set({
     createdAt: FieldValue.serverTimestamp(),
     userName: "Kevin Ng",
+    pseudonym: "dunkMeme1231",
     activeStatus: "active",
     roles: ["admin"],
     preferences: {
@@ -61,6 +63,7 @@ async function main() {
   await db.collection("users").doc("user00003").set({
     createdAt: FieldValue.serverTimestamp(),
     userName: "Sara Goh",
+    pseudonym: "youngBoyIsBroke",
     activeStatus: "active",
     roles: ["user"],
     preferences: {
@@ -84,6 +87,7 @@ async function main() {
   await db.collection("users").doc("user00004").set({
     createdAt: FieldValue.serverTimestamp(),
     userName: "Muthu Sami",
+    pseudonym: "weRtheBest",
     activeStatus: "active",
     roles: ["user"],
     preferences: {
@@ -107,6 +111,7 @@ async function main() {
   await db.collection("users").doc("user00005").set({
     createdAt: FieldValue.serverTimestamp(),
     userName: "Kamilah",
+    pseudonym: "work_King",
     activeStatus: "active",
     roles: ["user"],
     preferences: {
@@ -130,6 +135,7 @@ async function main() {
   await db.collection("users").doc("user00006").set({
     createdAt: FieldValue.serverTimestamp(),
     userName: "Jamima",
+    pseudonym: "hyer22",
     activeStatus: "active",
     roles: ["user"],
     preferences: {
