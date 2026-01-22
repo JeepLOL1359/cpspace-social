@@ -5,6 +5,9 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import "./mainLayout.css";
 
+//temp
+import { signOut } from "firebase/auth";
+
 const COLOR_MAP = {
   blue: { accent: "#60a5fa", soft: "#dbeafe" },
   green: { accent: "#34d399", soft: "#d1fae5" },
@@ -76,7 +79,23 @@ export default function MainLayout() {
         <NavLink to="/chatbot" className="main-link">Chatbot</NavLink>
         <NavLink to="/coping-hub" className="main-link">Coping Hub</NavLink>
         <NavLink to="/assessments" className="main-link">Assessments</NavLink>
-        <NavLink to="/settings" className="main-link">Settings</NavLink></nav>
+        <NavLink to="/settings" className="main-link">Settings</NavLink>
+        </nav>
+
+                <button
+          onClick={() => signOut(auth)}
+          style={{
+            marginTop: "auto",
+            padding: "0.75rem",
+            background: "#ef4444",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+          }}
+        >
+          Log out
+        </button>
 
         {userData && (
           <div className="sidebar-user">

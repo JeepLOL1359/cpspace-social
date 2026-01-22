@@ -14,26 +14,26 @@ async function main() {
   /*Users Entires, 6 entries*/
   await db.collection("users").doc("user00001").set({
     createdAt: FieldValue.serverTimestamp(),
-    userName: "Brian Chen",
-    pseudonym: "FirebaseIsLit55",
-    activeStatus: "active",
-    roles: ["admin"],
+    userName: "Brian Chen", // default is empty just ""
+    pseudonym: "FirebaseIsLit55", // default is like what you generated randomly
+    activeStatus: "active", // default is active
+    roles: ["admin"], // default is user, it is either user or admin but sign in is as user only
     preferences: {
-      theme: "light",
-      colorPalette: "default",
-      chatbotTone: "default",
-      autoPersonalisation: true,
-      revealToFamiliarity: true,
-      notifyOnConsent: true,
-      enableDMRequests: true,
-      contentFilters: true,
-      language: "en",
+      theme: "light", 
+      colorPalette: "default", // default is default
+      chatbotTone: "default", // default is default
+      autoPersonalisation: true, // default is true
+      revealToFamiliarity: true, // default is true
+      notifyOnConsent: true, // default is true
+      enableDMRequests: true, // default is true
+      contentFilters: true, // default is true
+      language: "en", // default is en
       feelings: {
         added: { pos: [], neu: [], neg: [] },
         removed: { pos: [], neu: [], neg: [] }
-      }
+      } // default is empty
     },
-    blockedUsers: []
+    blockedUsers: [] // default is empty
   });
 
   await db.collection("users").doc("user00002").set({

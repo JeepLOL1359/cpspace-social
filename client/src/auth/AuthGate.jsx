@@ -26,18 +26,17 @@ export default function AuthGate({ onAuth }) {
         let cred;
 
         if (mode === "signup") {
-            cred = await createUserWithEmailAndPassword(auth, email, password);
+        cred = await createUserWithEmailAndPassword(auth, email, password);
 
-            // create Firestore user profile
-            await setDoc(doc(db, "users", cred.user.uid), {
-            createdAt: serverTimestamp(),
-            role: "user",
-            status: "active",
-            pseudonym: generatePseudonym(),
-            isPublicAnonymous: true,
-            });
+        const userRef = doc(db, "users", cred.user.uid);
+
+        await setDoc(
+            userRef,
+            createDefaultUserProfile(generatePseudonym()),
+            { merge: true }
+        );
         } else {
-            cred = await signInWithEmailAndPassword(auth, email, password);
+        cred = await signInWithEmailAndPassword(auth, email, password);
         }
 
         onAuth(cred.user);
@@ -47,27 +46,20 @@ export default function AuthGate({ onAuth }) {
     }
 
     async function handleGoogleSignIn() {
-        setError("");
-        try {
-            const cred = await signInWithPopup(auth, provider);
+    setError("");
+    try {
+        const cred = await signInWithPopup(auth, provider);
 
-            // Ensure Firestore profile exists
-            await setDoc(
-            doc(db, "users", cred.user.uid),
-            {
-                createdAt: serverTimestamp(),
-                role: "user",
-                status: "active",
-                pseudonym: generatePseudonym(),
-                isPublicAnonymous: true,
-            },
-            { merge: true }
-            );
+        await setDoc(
+        doc(db, "users", cred.user.uid),
+        createDefaultUserProfile(generatePseudonym()),
+        { merge: true }
+        );
 
-            onAuth(cred.user);
-        } catch (err) {
-            setError(err.message);
-        }
+        onAuth(cred.user);
+    } catch (err) {
+        setError(err.message);
+    }
     }
 
   return (
@@ -128,6 +120,34 @@ function generatePseudonym() {
     animals[Math.floor(Math.random() * animals.length)] +
     Math.floor(Math.random() * 100)
   );
+}
+
+function createDefaultUserProfile(pseudonym) {
+  return {
+    createdAt: serverTimestamp(),
+    userName: "",
+    pseudonym,
+    activeStatus: "active",
+    roles: ["user"],
+
+    preferences: {
+      theme: "light",
+      colorPalette: "default",
+      chatbotTone: "default",
+      autoPersonalisation: true,
+      revealToFamiliarity: true,
+      notifyOnConsent: true,
+      enableDMRequests: true,
+      contentFilters: true,
+      language: "en",
+      feelings: {
+        added: { pos: [], neu: [], neg: [] },
+        removed: { pos: [], neu: [], neg: [] }
+      }
+    },
+
+    blockedUsers: []
+  };
 }
 
 const styles = {
