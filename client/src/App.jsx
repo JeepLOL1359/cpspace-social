@@ -4,6 +4,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 import MainLayout from "./pages/mainLayout";
 import AuthGate from "./auth/AuthGate";
+import { sendEmailVerification } from "firebase/auth";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -20,10 +21,29 @@ function App() {
 
   if (loading) return null;
 
-  // 🔑 THIS is what makes logout work
   if (!user) {
     return <AuthGate />;
   }
+
+  if (user && !user.emailVerified) {
+    return (
+      <div style={styles.verifyWrapper}>
+        <h2>Please verify your email</h2>
+        <p>
+          A verification email has been sent to <b>{user.email}</b>.
+        </p>
+
+        <button onClick={() => sendEmailVerification(user)}>
+          Resend verification email
+        </button>
+
+        <button onClick={() => signOut(auth)}>
+          Sign out
+        </button>
+      </div>
+    );
+  }
+
 
   return (
     <BrowserRouter>

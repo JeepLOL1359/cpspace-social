@@ -8,15 +8,31 @@ import { auth, db } from "../firebaseConfig";
 import {
   GoogleAuthProvider,
   signInWithPopup,
+  sendPasswordResetEmail,
+  sendEmailVerification 
 } from "firebase/auth";
 
 const provider = new GoogleAuthProvider();
 
 export default function AuthGate({ onAuth }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [mode, setMode] = useState("login"); // login | signup
-  const [error, setError] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [mode, setMode] = useState("login"); // login | signup
+    const [error, setError] = useState("");
+
+    async function handlePasswordReset() {
+        if (!email) {
+            setError("Please enter your email first.");
+            return;
+        }
+
+        try {
+            await sendPasswordResetEmail(auth, email);
+            setError("Password reset email sent. Check your inbox.");
+        } catch (err) {
+            setError(err.message);
+        }
+    }
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -26,15 +42,16 @@ export default function AuthGate({ onAuth }) {
         let cred;
 
         if (mode === "signup") {
-        cred = await createUserWithEmailAndPassword(auth, email, password);
+            cred = await createUserWithEmailAndPassword(auth, email, password);
 
-        const userRef = doc(db, "users", cred.user.uid);
+            await setDoc(
+                doc(db, "users", cred.user.uid),
+                createDefaultUserProfile(generatePseudonym()),
+                { merge: true }
+            );
 
-        await setDoc(
-            userRef,
-            createDefaultUserProfile(generatePseudonym()),
-            { merge: true }
-        );
+            // 🔔 send verification email
+            await sendEmailVerification(cred.user);
         } else {
         cred = await signInWithEmailAndPassword(auth, email, password);
         }
@@ -91,6 +108,17 @@ export default function AuthGate({ onAuth }) {
             </form>
 
             <div style={styles.footer}>
+            <p>
+                {mode === "login" && (
+                <button
+                    type="button"
+                    onClick={handlePasswordReset}
+                    style={styles.linkBtn}
+                >
+                    Forgot password?
+                </button>
+                )}
+            </p>
             <p>
                 {mode === "login" ? "No account?" : "Already have an account?"}{" "}
                 <button onClick={() => setMode(mode === "login" ? "signup" : "login")}>
@@ -192,5 +220,13 @@ const styles = {
         background: "#fff",
         color: "#000",
         border: "1px solid #ccc",
+    },
+    linkBtn: {
+        background: "none",
+        border: "none",
+        color: "#aaa",
+        fontSize: "0.85rem",
+        cursor: "pointer",
+        marginTop: "0.5rem",
     },
 };
