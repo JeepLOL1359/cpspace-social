@@ -11,6 +11,7 @@ import {
   sendPasswordResetEmail,
   sendEmailVerification 
 } from "firebase/auth";
+import { bootstrapUser } from "../services/userBootstrap";
 
 const provider = new GoogleAuthProvider();
 
@@ -44,11 +45,11 @@ export default function AuthGate({ onAuth }) {
         if (mode === "signup") {
             cred = await createUserWithEmailAndPassword(auth, email, password);
 
-            await setDoc(
-                doc(db, "users", cred.user.uid),
-                createDefaultUserProfile(generatePseudonym()),
-                { merge: true }
-            );
+            const pseudonym = generatePseudonym();
+            await bootstrapUser(cred.user.uid, pseudonym);
+
+            // send verification email
+            await sendEmailVerification(cred.user);
 
             // 🔔 send verification email
             await sendEmailVerification(cred.user);
@@ -67,11 +68,8 @@ export default function AuthGate({ onAuth }) {
     try {
         const cred = await signInWithPopup(auth, provider);
 
-        await setDoc(
-        doc(db, "users", cred.user.uid),
-        createDefaultUserProfile(generatePseudonym()),
-        { merge: true }
-        );
+        const pseudonym = generatePseudonym();
+        await bootstrapUser(cred.user.uid, pseudonym);
 
         onAuth(cred.user);
     } catch (err) {
@@ -148,34 +146,6 @@ function generatePseudonym() {
     animals[Math.floor(Math.random() * animals.length)] +
     Math.floor(Math.random() * 100)
   );
-}
-
-function createDefaultUserProfile(pseudonym) {
-  return {
-    createdAt: serverTimestamp(),
-    userName: "",
-    pseudonym,
-    activeStatus: "active",
-    roles: ["user"],
-
-    preferences: {
-      theme: "light",
-      colorPalette: "default",
-      chatbotTone: "default",
-      autoPersonalisation: true,
-      revealToFamiliarity: true,
-      notifyOnConsent: true,
-      enableDMRequests: true,
-      contentFilters: true,
-      language: "en",
-      feelings: {
-        added: { pos: [], neu: [], neg: [] },
-        removed: { pos: [], neu: [], neg: [] }
-      }
-    },
-
-    blockedUsers: []
-  };
 }
 
 const styles = {
