@@ -303,6 +303,64 @@ console.log("Default Feelings seeded");
     });
 console.log("Diaries seeded");
 
+  /*Users's Assessment*/
+  await db
+  .collection("users")
+  .doc("user00001")
+  .collection("assessments")
+  .add({
+    type: "PHQ-9",
+    score: 6,
+    severity: "Mild",
+    createdAt: FieldValue.serverTimestamp()
+  });
+
+  await db
+    .collection("users")
+    .doc("user00001")
+    .collection("assessments")
+    .add({
+      type: "GAD-7",
+      score: 4,
+      severity: "Minimal",
+      createdAt: FieldValue.serverTimestamp()
+    });
+
+  await db
+    .collection("users")
+    .doc("user00002")
+    .collection("assessments")
+    .add({
+      type: "PHQ-9",
+      score: 14,
+      severity: "Moderate",
+      createdAt: FieldValue.serverTimestamp()
+    });
+
+  await db
+    .collection("users")
+    .doc("user00003")
+    .collection("assessments")
+    .add({
+      type: "GAD-7",
+      score: 16,
+      severity: "Severe",
+      createdAt: FieldValue.serverTimestamp()
+    });
+
+  await db
+    .collection("users")
+    .doc("user00003")
+    .collection("assessments")
+    .add({
+      type: "PHQ-9",
+      score: 18,
+      severity: "Moderately Severe",
+      createdAt: FieldValue.serverTimestamp()
+    });
+console.log("Assessments seeded");
+
+
 
 
 
@@ -854,8 +912,87 @@ console.log("Conversation seeded");
       hiddenUntilConsent: false
     });
   }
+console.log("Messages seeded");
 
-  console.log("Messages seeded");
+
+
+
+/* Chatbot Conversation, 2 entries */
+  const chatbotConvoRef1 = await db
+    .collection("users")
+    .doc("user00001")
+    .collection("chatbotConversations")
+    .doc("bot_user00001_001")
+    .set({
+      participants: ["user00001", "bot"],
+      nextSeq: 4,
+      lastMessageAt: FieldValue.serverTimestamp(),
+      mood: "unpleasant",
+      moderationStatus: "Visible",
+      title: "Feeling Overwhelmed"
+    });
+
+    
+  const chatbotConvoRef2 = await db
+    .collection("users")
+    .doc("user00002")
+    .collection("chatbotConversations")
+    .doc("bot_user00002_001")
+    .set({
+      participants: ["user00002", "bot"],
+      nextSeq: 4,
+      lastMessageAt: FieldValue.serverTimestamp(),
+      mood: "unpleasant",
+      moderationStatus: "Visible",
+      title: "Late Night Thoughts"
+    });
+console.log("Chatbot conversation seeded");
+
+
+/* Chatbot Conversation, 2 entries */
+  const chatbot1Msgs = [
+    { seq: 1, s: "bot", b: "Hello Brian. I’m here to listen. What’s been weighing on you lately?" },
+    { seq: 2, s: "user00001", b: "I feel like everything is piling up and I can’t keep up." },
+    { seq: 3, s: "bot", b: "That sounds exhausting. It’s okay to take things one step at a time." }
+  ];
+
+  for (const m of chatbot1Msgs) {
+    await db
+      .collection("users")
+      .doc("user00001")
+      .collection("chatbotConversations")
+      .doc("bot_user00001_001")
+      .collection("messages")
+      .add({
+        senderId: m.s,
+        body: m.b,
+        seq: m.seq,
+        createdAt: FieldValue.serverTimestamp()
+      });
+  }
+
+  const chatbot2Msgs = [
+    { seq: 1, s: "bot", b: "Hi Kevin. You seem thoughtful tonight. Want to share what’s on your mind?" },
+    { seq: 2, s: "user00002", b: "I’m worried about my future after graduation." },
+    { seq: 3, s: "bot", b: "That’s a very common worry. You’re not alone in feeling this way." }
+  ];
+
+  for (const m of chatbot2Msgs) {
+    await db
+      .collection("users")
+      .doc("user00002")
+      .collection("chatbotConversations")
+      .doc("bot_user00002_001")
+      .collection("messages")
+      .add({
+        senderId: m.s,
+        body: m.b,
+        seq: m.seq,
+        createdAt: FieldValue.serverTimestamp()
+      });
+  }
+  console.log("Chatbot conversation messages seeded");
+
 }
 
 main()

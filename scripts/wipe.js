@@ -41,14 +41,28 @@ async function deleteSubcollection(parentRef, subcollectionName) {
 async function wipe() {
   console.log("🔥 Starting database wipe...");
 
-  /* ---- USERS → DIARIES ---- */
   const usersSnap = await db.collection("users").get();
+
+  /* ---- USERS → ALL SUBCOLLECTIONS ---- */
   for (const user of usersSnap.docs) {
-    await deleteCollection(
-      db.collection("users").doc(user.id).collection("diaries")
-    );
+    // diaries
+    await deleteSubcollection(user.ref, "diaries");
+
+    // assessments
+    await deleteSubcollection(user.ref, "assessments");
+
+    // chatbot conversations → messages → convo docs
+    const chatbotSnap = await user.ref
+      .collection("chatbotConversations")
+      .get();
+
+    for (const convo of chatbotSnap.docs) {
+      await deleteSubcollection(convo.ref, "messages");
+      await convo.ref.delete();
+    }
   }
-  console.log("✅ Diaries wiped");
+
+  console.log("✅ User subcollections wiped");
 
   /* ---- POSTS → COMMENTS ---- */
   const postsSnap = await db.collection("posts").get();
@@ -78,16 +92,14 @@ async function wipe() {
     console.log("✅ defaultFeelings wiped");
   }
 
-  console.log("🎉 WIPE COMPLETE");
-}
-
-  /* ---- USERS ---- */
-  /* DO NOT run this block if users are created with Firebase Auth */
-  const usersSnap = await db.collection("users").get();
+  /* ---- USERS (LAST, ALWAYS LAST) ---- */
   for (const user of usersSnap.docs) {
-    await user.ref.delete(); // 🔥 THIS IS THE MISSING LINE
+    await user.ref.delete();
   }
   console.log("✅ Users wiped");
+
+  console.log("🎉 WIPE COMPLETE");
+}
 
 /* ============================
    RUN
