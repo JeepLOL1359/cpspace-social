@@ -1,0 +1,33 @@
+.help-panel {
+  background: var(--bg-card);
+  width: 100%;               /* fill available space */
+  max-width: none;           /* remove centering constraint */
+  border-radius: 16px;
+  padding: 48px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+  text-align: left;
+}
+
+.help-panel h2 {
+  margin-bottom: 24px;
+}
+
+.help-panel section {
+  margin-bottom: 24px;
+}
+
+.help-panel h4 {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.help-panel h2,
+.help-panel h4 {
+  color: var(--text-main);
+}
+
+.help-panel p {
+  color: var(--text-main);
+  line-height: 1.6;
+}
+

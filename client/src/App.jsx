@@ -6,6 +6,13 @@ import MainLayout from "./pages/mainLayout";
 import AuthGate from "./auth/AuthGate";
 import "./App.css";
 
+import SettingsLayout from "./pages/settings/settingsLayout";
+
+import Profile from "./pages/settings/profile";
+import Preferences from "./pages/settings/preferences";
+import About from "./pages/settings/about";
+import Help from "./pages/settings/help";
+
 function App() {
   const auth = getAuth();
   const [user, setUser] = useState(null);
@@ -91,10 +98,22 @@ function App() {
     );
   }
 
-  return (
+    return (
     <BrowserRouter>
       <Routes>
-        <Route path="/*" element={<MainLayout />} />
+        {/* MAIN APP */}
+        <Route path="/" element={<MainLayout />}>
+          
+          {/* SETTINGS */}
+          <Route path="settings" element={<SettingsLayout />}>
+            <Route index element={<Profile />} />   {/* /settings */}
+            <Route path="profile" element={<Profile />} />
+            <Route path="preferences" element={<Preferences />} />
+            <Route path="about" element={<About />} />
+            <Route path="help" element={<Help />} />
+          </Route>
+
+        </Route>
       </Routes>
     </BrowserRouter>
   );

@@ -1,0 +1,114 @@
+.personalization-panel {
+  max-width: 700px;
+  background: var(--bg-card);
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+}
+
+.personalization-panel h2 {
+  margin-bottom: 30px;
+}
+
+.setting-row {
+  margin-bottom: 28px;
+}
+
+.setting-row label {
+  font-weight: 500;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.setting-row select {
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-main);
+}
+
+/* Theme toggle */
+.theme-toggle {
+  display: flex;
+  gap: 16px;
+}
+
+.theme-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.theme-circle.dark {
+  background: #374151;
+  border-color: var(--border-color);
+}
+
+.theme-circle.active {
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Color palette */
+.color-palette {
+  display: flex;
+  gap: 16px;
+}
+
+.color-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.color-circle.selected {
+  outline: 3px solid #60a5fa;
+}
+
+.color-circle.blue { background: #7dd3fc; }
+.color-circle.green { background: #a7f3d0; }
+.color-circle.yellow { background: #fde68a; }
+.color-circle.orange { background: #fdba74; }
+.color-circle.pink { background: #f9a8d4; }
+
+/* Yes / No buttons */
+.yes-no {
+  display: flex;
+  gap: 12px;
+}
+
+.yes-no button {
+  padding: 6px 18px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-main);
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+/* Selected option */
+.yes-no button.active {
+  background: var(--border-color);
+  border-color: var(--border-color);
+}
+
+/* Unselected option (subtle) */
+.yes-no button:not(.active) {
+  background: var(--bg-card);
+}
+
+.yes-no button:hover {
+  background: var(--border-color);
+}
+
+.description {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
