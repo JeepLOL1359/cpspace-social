@@ -12,7 +12,7 @@ export default function SettingsLayout() {
             Profile
           </NavLink>
           <NavLink to="preferences" end className="settings-link">
-            Personalization & Preferences
+            Preferences
           </NavLink>
           <NavLink to="help" end className="settings-link">
             Help

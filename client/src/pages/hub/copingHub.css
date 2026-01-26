@@ -1,0 +1,179 @@
+/* =========================
+   COPING HUB PAGE
+========================= */
+.copinghub-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  min-width: 0;
+  background: var(--bg-main);
+  color: var(--text-main);
+}
+
+/* =========================
+   HEADER
+========================= */
+.copinghub-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.hub-title {
+  font-weight: 700;
+  color: var(--text-main);
+  margin-left: 54px;
+}
+
+.hub-search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+}
+
+.hub-search input {
+  width: 100%;
+  max-width: 720px;
+  min-width: 280px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 2px solid var(--accent);
+  background: var(--bg-card);
+  color: var(--text-main);
+}
+
+.hub-search input::placeholder {
+  color: var(--text-muted);
+}
+
+.hub-search button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.bookmark-icon {
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+}
+
+[data-theme="dark"] .bookmark-icon {
+  filter: invert(1);
+}
+
+/* =========================
+   CONTENT LAYOUT
+========================= */
+.copinghub-content {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  flex: 1;
+}
+
+/* =========================
+   LEFT COLUMN (RECOMMENDED)
+========================= */
+.copinghub-left {
+  padding: 16px;
+  background: var(--bg-card);
+  border-right: 1px solid var(--border-color);
+}
+
+.strategy-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.strategy-card a {
+  font-weight: 700;
+  color: var(--text-main);
+  text-decoration: none;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.strategy-card a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.author {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.tag {
+  font-size: 13px;
+  color: var(--accent);
+}
+
+.desc {
+  font-size: 14px;
+  margin-top: 6px;
+  color: var(--text-main);
+}
+
+/* =========================
+   STRATEGY TITLE LINKS
+========================= */
+.strategy-link {
+  color: var(--text-main);
+  text-decoration: none;
+  font-weight: 700;
+  transition: color 0.2s ease;
+}
+
+.strategy-link:visited {
+  color: var(--text-main);
+}
+
+.strategy-link:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+/* =========================
+   RIGHT COLUMN (RESULTS)
+========================= */
+.copinghub-right {
+  padding: 16px;
+  overflow-y: auto;
+  background: var(--bg-main);
+}
+
+.result-card {
+  position: relative;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.result-card h4 {
+  font-weight: 700;
+  color: var(--accent-soft);
+}
+
+.result-card h4:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.bookmark {
+  position: absolute;
+  top: 12px;
+  right: 0;
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}

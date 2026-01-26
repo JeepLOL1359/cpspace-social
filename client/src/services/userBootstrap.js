@@ -1,13 +1,13 @@
-import { doc, setDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebaseConfig";
+import { doc, setDoc, getDoc, collection, serverTimestamp } from "firebase/firestore";
 
 export async function bootstrapUser(uid, pseudonym) {
   const userRef = doc(db, "users", uid);
+  const snap = await getDoc(userRef);
 
-  // 1. Root user document
-  await setDoc(
-    userRef,
-    {
+  // 1. Create root user document ONLY if it doesn't exist
+  if (!snap.exists()) {
+    await setDoc(userRef, {
       createdAt: serverTimestamp(),
       userName: "",
       pseudonym,
@@ -31,11 +31,10 @@ export async function bootstrapUser(uid, pseudonym) {
       },
 
       blockedUsers: []
-    },
-    { merge: true }
-  );
+    });
+  }
 
-  // 2. diaries/meta
+  // 2. diaries/meta (safe to merge)
   await setDoc(
     doc(collection(userRef, "diaries"), "meta"),
     {

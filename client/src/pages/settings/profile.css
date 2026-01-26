@@ -34,14 +34,10 @@
   padding: 8px 14px;
   border-radius: 6px;
   border: 1px solid var(--border-color);
-  background: var(--bg-card);
-  color: var(--text-main);
+  background: var(--accent-soft);
+  color: #000000;
   cursor: pointer;
   font-size: 13px;
-}
-
-.profile-avatar button:hover {
-  background: var(--accent-soft);
 }
 
 /* ---------- PROFILE INFO (ROW BY ROW) ---------- */
@@ -52,6 +48,7 @@
 }
 
 .profile-row {
+  min-height: 28px;
   display: grid;
   grid-template-columns: 160px minmax(300px, 1fr) 140px;
   align-items: center;

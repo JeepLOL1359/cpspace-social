@@ -1,12 +1,9 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import "./mainLayout.css";
-
-//temp
-import { signOut } from "firebase/auth";
 
 const COLOR_MAP = {
   blue: { accent: "#60a5fa", soft: "#dbeafe" },
@@ -17,72 +14,88 @@ const COLOR_MAP = {
 };
 
 export default function MainLayout() {
-  const [userData, setUserData] = useState(null);
   const auth = getAuth();
 
+  const [userData, setUserData] = useState(null);
   const [ready, setReady] = useState(false);
+  const isAdmin = userData?.roles?.includes("admin");
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (user) => {
+    let unsubUser = null;
+
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
       if (!user) {
+        setUserData(null);
         setReady(true);
         return;
       }
 
-      const snap = await getDoc(doc(db, "users", user.uid));
-      if (!snap.exists()) {
-        setReady(true);
-        return;
-      }
+      const userRef = doc(db, "users", user.uid);
 
-      const data = snap.data();
-      setUserData(data);
+      // 🔥 REALTIME LISTENER (single source of truth)
+      unsubUser = onSnapshot(userRef, (snap) => {
+        if (!snap.exists()) return;
 
-      const p = data.personalization;
-      if (p) {
-        document.documentElement.setAttribute(
-          "data-theme",
-          p.themeMode || "light"
-        );
+        const data = snap.data();
+        console.log("🔥 Sidebar user update:", data);
 
-        if (p.colorPalette && COLOR_MAP[p.colorPalette]) {
-          document.documentElement.style.setProperty(
-            "--accent",
-            COLOR_MAP[p.colorPalette].accent
+        setUserData(data);
+
+        // Apply theme immediately
+        const p = data.personalization;
+        if (p) {
+          document.documentElement.setAttribute(
+            "data-theme",
+            p.themeMode || "light"
           );
-          document.documentElement.style.setProperty(
-            "--accent-soft",
-            COLOR_MAP[p.colorPalette].soft
-          );
+
+          if (p.colorPalette && COLOR_MAP[p.colorPalette]) {
+            document.documentElement.style.setProperty(
+              "--accent",
+              COLOR_MAP[p.colorPalette].accent
+            );
+            document.documentElement.style.setProperty(
+              "--accent-soft",
+              COLOR_MAP[p.colorPalette].soft
+            );
+          }
         }
-      }
 
-      // ✅ Mark app as ready ONLY after theme applied
-      setReady(true);
+        setReady(true);
+      });
     });
 
-    return () => unsub();
+    return () => {
+      unsubAuth();
+      if (unsubUser) unsubUser();
+    };
   }, [auth]);
 
   if (!ready) return null;
 
   return (
     <div className="app-container">
-      {/* MAIN SIDEBAR */}
+      {/* SIDEBAR */}
       <aside className="sidebar main-sidebar">
         <div className="logo">CPSPACE</div>
 
         <nav>
-        <NavLink to="/diary" className="main-link">Diary</NavLink>
-        <NavLink to="/social" className="main-link">Social Space</NavLink>
-        <NavLink to="/chats" className="main-link">Chats</NavLink>
-        <NavLink to="/chatbot" className="main-link">Chatbot</NavLink>
-        <NavLink to="/coping-hub" className="main-link">Coping Hub</NavLink>
-        <NavLink to="/assessments" className="main-link">Assessments</NavLink>
-        <NavLink to="/settings" className="main-link">Settings</NavLink>
+          <NavLink to="/diary" className="main-link">Diary</NavLink>
+          <NavLink to="/social" className="main-link">Social Space</NavLink>
+          <NavLink to="/chats" className="main-link">Chats</NavLink>
+          <NavLink to="/chatbot" className="main-link">Chatbot</NavLink>
+          <NavLink to="/coping-hub" className="main-link">Coping Hub</NavLink>
+          <NavLink to="/assessments" className="main-link">Assessments</NavLink>
+          <NavLink to="/settings" className="main-link">Settings</NavLink>
+
+          {isAdmin && (
+            <NavLink to="/admin/strategies" className="main-link">
+              Manage Strategies
+            </NavLink>
+          )}
         </nav>
 
-                <button
+        <button
           onClick={() => signOut(auth)}
           style={{
             marginTop: "auto",
@@ -97,18 +110,22 @@ export default function MainLayout() {
           Log out
         </button>
 
+        {/* USER INFO */}
         {userData && (
           <div className="sidebar-user">
             <img
               src={userData.profileImageUrl || "/avatar.jpg"}
               alt="User"
+              referrerPolicy="no-referrer"
             />
-            <span>{userData.profileDisplayName || userData.username}</span>
+            <span>
+              {userData.profileDisplayName || userData.username}
+            </span>
           </div>
         )}
       </aside>
 
-      {/* NESTED CONTENT (Settings / Others) */}
+      {/* MAIN CONTENT */}
       <Outlet />
     </div>
   );
