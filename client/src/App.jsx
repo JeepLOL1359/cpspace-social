@@ -40,6 +40,9 @@ import StrategyList from "./pages/hub/adminHub/strategyList";
 import AddStrategy from "./pages/hub/adminHub/addStrategy";
 import EditStrategy from "./pages/hub/adminHub/editStrategy";
 
+// Diary
+import DiaryPage from "./pages/diaries/diaryPage";
+
 function App() {
   const auth = getAuth();
   const [user, setUser] = useState(null);
@@ -173,6 +176,9 @@ function App() {
 
         {/* MAIN APP */}
         <Route element={<MainLayout />}>
+
+          {/* DIARY */}
+          <Route path="diary" element={<DiaryPage />} />
 
           {/* CHATBOT */}
           <Route path="chatbot" element={<Chatbot />} />

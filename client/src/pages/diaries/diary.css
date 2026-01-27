@@ -1,0 +1,300 @@
+/* ---------- DIARY LAYOUT ---------- */
+.diary-layout {
+  display: flex;
+  width: 100%;
+  gap: 32px;
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+/* ---------- MAIN DIARY AREA ---------- */
+.diary-main {
+  flex: 1;
+  background: var(--bg-card);
+  border-radius: 14px;
+  padding: 32px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ---------- TOP ACTION BUTTONS ---------- */
+.diary-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.diary-actions button {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: none;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.diary-actions button:hover {
+  background: var(--accent);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.diary-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ---------- DIARY TEXTAREA ---------- */
+.diary-textarea {
+  width: 100%;
+  min-height: 260px;
+  resize: vertical;
+  border-radius: 12px;
+  padding: 18px;
+  border: 1px solid var(--border-color);
+  font-size: 15px;
+  line-height: 1.6;
+  background: #fff;
+  color: var(--text-main);
+  outline: none;
+}
+
+.diary-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.diary-textarea:focus {
+  border-color: var(--accent);
+}
+
+/* ---------- RIGHT SIDE PANEL ---------- */
+.diary-side {
+  width: 320px;
+  background: var(--bg-card);
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.diary-side h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.diary-side button {
+  align-self: flex-start;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: none;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* ---------- MODAL BACKDROP ---------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* ---------- MODAL ---------- */
+.modal {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modal h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+/* ---------- EMOTION CATEGORIES ---------- */
+.emotion-categories {
+  display: flex;
+  gap: 10px;
+}
+
+.emotion-categories button {
+  flex: 1;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  padding: 8px 0;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.emotion-categories button.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ---------- FEELING TAGS ---------- */
+.feelings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tag {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  background: var(--border-color);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.tag.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ---------- MODAL ACTIONS ---------- */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.modal-actions button {
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+}
+
+.modal-actions button:first-child {
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.modal-actions button:last-child {
+  background: var(--accent);
+  color: #fff;
+}
+
+.modal-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.diary-placeholder {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.diary-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.diary-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.diary-emotion {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+.diary-body {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-main);
+  white-space: pre-wrap;
+}
+
+/* ---------- EMOTION FILTER BAR ---------- */
+.emotion-filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.filter-btn {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.filter-btn.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ---------- EMOTION BUBBLES WITH TIMESTAMP ---------- */
+.emotion-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--text-main);
+  font-size: 13px;
+  margin: 4px 6px 4px 0;
+}
+
+.emotion-time {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.emotion-feelings {
+  white-space: nowrap;
+}
+
+.emotion-action {
+  margin-left: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.emotion-action:hover {
+  opacity: 1;
+}
