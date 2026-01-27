@@ -13,9 +13,14 @@ const { FieldValue } = admin.firestore;
 async function main() {
   /*Users Entires, 6 entries*/
   await db.collection("users").doc("user00001").set({
+    uid: "user00001", // 
     createdAt: FieldValue.serverTimestamp(),
-    userName: "Brian Chen", // default is empty just ""
     pseudonym: "FirebaseIsLit55", // default is like what you generated randomly
+    username: {
+      value: "BrianChen", // default is same as pseudonym
+      discriminator: "4821", // random 4 digit number
+      lastChangedAt: FieldValue.serverTimestamp() // creation is same as user creation time so same
+    }, 
     activeStatus: "active", // default is active
     roles: ["admin"], // default is user, it is either user or admin but sign in is as user only
     preferences: {
@@ -37,9 +42,14 @@ async function main() {
   });
 
   await db.collection("users").doc("user00002").set({
+    uid: "user00002",
     createdAt: FieldValue.serverTimestamp(),
-    userName: "Kevin Ng",
     pseudonym: "dunkMeme1231",
+    username: {
+      value: "KevinNg",
+      discriminator: "4206",
+      lastChangedAt: FieldValue.serverTimestamp()
+    }, 
     activeStatus: "active",
     roles: ["admin"],
     preferences: {
@@ -61,9 +71,14 @@ async function main() {
   });
 
   await db.collection("users").doc("user00003").set({
+    uid: "user00003",
     createdAt: FieldValue.serverTimestamp(),
-    userName: "Sara Goh",
     pseudonym: "youngBoyIsBroke",
+    username: {
+      value: "SaraGoh",
+      discriminator: "7852",
+      lastChangedAt: FieldValue.serverTimestamp()
+    }, 
     activeStatus: "active",
     roles: ["user"],
     preferences: {
@@ -85,9 +100,14 @@ async function main() {
   });
 
   await db.collection("users").doc("user00004").set({
-    createdAt: FieldValue.serverTimestamp(),
-    userName: "Muthu Sami",
+    uid: "user00004",
+    createdAt: FieldValue.serverTimestamp(), 
     pseudonym: "weRtheBest",
+    username: {
+      value: "MuthuSami",
+      discriminator: "5107",
+      lastChangedAt: FieldValue.serverTimestamp()
+    },
     activeStatus: "active",
     roles: ["user"],
     preferences: {
@@ -109,9 +129,14 @@ async function main() {
   });
 
   await db.collection("users").doc("user00005").set({
+    uid: "user00005",
     createdAt: FieldValue.serverTimestamp(),
-    userName: "Kamilah",
     pseudonym: "work_King",
+    username: {
+      value: "Kamilah",
+      discriminator: "1448",
+      lastChangedAt: FieldValue.serverTimestamp()
+    }, 
     activeStatus: "active",
     roles: ["user"],
     preferences: {
@@ -133,9 +158,14 @@ async function main() {
   });
 
   await db.collection("users").doc("user00006").set({
+    uid: "user00006",
     createdAt: FieldValue.serverTimestamp(),
-    userName: "Jamima",
     pseudonym: "hyer22",
+    username: {
+      value: "Jamima",
+      discriminator: "9666",
+      lastChangedAt: FieldValue.serverTimestamp()
+    }, 
     activeStatus: "active",
     roles: ["user"],
     preferences: {

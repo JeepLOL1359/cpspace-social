@@ -5,7 +5,7 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 
-/*node scripts/wipe.js*/
+/* node scripts/wipe.js */
 
 const db = admin.firestore();
 
