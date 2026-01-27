@@ -43,6 +43,9 @@ import EditStrategy from "./pages/hub/adminHub/editStrategy";
 // Diary
 import DiaryPage from "./pages/diaries/diaryPage";
 
+// Social Space
+import SocialSpace from "./pages/socialSpace/SocialSpace";
+
 function App() {
   const auth = getAuth();
   const [user, setUser] = useState(null);
@@ -179,6 +182,9 @@ function App() {
 
           {/* DIARY */}
           <Route path="diary" element={<DiaryPage />} />
+
+          {/* SOCIAL SPACE */}
+          <Route path="social-space" element={<SocialSpace />} />
 
           {/* CHATBOT */}
           <Route path="chatbot" element={<Chatbot />} />

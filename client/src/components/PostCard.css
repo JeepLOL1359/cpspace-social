@@ -1,0 +1,30 @@
+.post-card {
+  padding: 16px 18px;
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  color: #fff;
+}
+
+.post-card p {
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
+.post-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.post-actions button {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+}
+
+.post-actions button:hover {
+  color: var(--accent);
+}

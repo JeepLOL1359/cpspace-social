@@ -12,11 +12,10 @@ export function useComments(postId) {
       orderBy("createdAt", "asc")
     );
 
-    const unsub = onSnapshot(q, (snapshot) => {
-      setComments(snapshot.docs.map(d => ({
-        id: d.id,
-        ...d.data()
-      })));
+    const unsub = onSnapshot(q, snap => {
+      setComments(
+        snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      );
     });
 
     return () => unsub();

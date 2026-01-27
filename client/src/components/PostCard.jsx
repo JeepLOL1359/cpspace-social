@@ -1,22 +1,23 @@
-import { useState } from "react";
 import CommentList from "./CommentList";
+import "./PostCard.css";
 
 export default function PostCard({ post }) {
-  const [open, setOpen] = useState(false);
-
   return (
     <div className="post-card">
+      <div className="post-header">
+        <strong>{post.pseudonym ?? "Anonymous"}</strong>
+      </div>
+
       <p>{post.body}</p>
 
       <div className="post-actions">
         <button>▲ {post.stats?.up ?? 0}</button>
         <button>▼ {post.stats?.down ?? 0}</button>
-        <button onClick={() => setOpen(v => !v)}>
-          💬 {open ? "Hide" : "View"} comments
-        </button>
+        <button>💬 Comment</button>
       </div>
 
-      {open && <CommentList postId={post.id} />}
+      {/* Inline comments */}
+      <CommentList postId={post.id} />
     </div>
   );
 }

@@ -81,7 +81,7 @@ export default function MainLayout() {
 
         <nav>
           <NavLink to="/diary" className="main-link">Diary</NavLink>
-          <NavLink to="/social" className="main-link">Social Space</NavLink>
+          <NavLink to="/social-space" className="main-link">Social Space</NavLink>
           <NavLink to="/chats" className="main-link">Chats</NavLink>
           <NavLink to="/chatbot" className="main-link">Chatbot</NavLink>
           <NavLink to="/coping-hub" className="main-link">Coping Hub</NavLink>

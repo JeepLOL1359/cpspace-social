@@ -1,0 +1,59 @@
+/* ===== Social Space Container ===== */
+.social-space {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 24px 16px 80px;
+}
+
+/* ===== Search Bar ===== */
+.social-space__search {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 20px;
+
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+
+  font-size: 0.95rem;
+}
+
+.social-space__search::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.social-space__search:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ===== Feed ===== */
+.social-space__feed {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ===== Load More ===== */
+.social-space__load-more {
+  margin: 28px auto 0;
+  padding: 10px 22px;
+
+  border-radius: 999px;
+  border: none;
+
+  background: var(--accent);
+  color: #000;
+  font-weight: 600;
+  font-size: 0.9rem;
+
+  cursor: pointer;
+}
+
+.social-space__load-more:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
