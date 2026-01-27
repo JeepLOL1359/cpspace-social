@@ -42,7 +42,7 @@ export default function MainLayout() {
         setUserData(data);
 
         // Apply theme immediately
-        const p = data.personalization;
+        const p = data.preferences;
         if (p) {
           document.documentElement.setAttribute(
             "data-theme",
@@ -119,7 +119,8 @@ export default function MainLayout() {
               referrerPolicy="no-referrer"
             />
             <span>
-              {userData.profileDisplayName || userData.username}
+              {userData.profileDisplayName ||
+                `${userData.username?.value}#${userData.username?.discriminator}`}
             </span>
           </div>
         )}

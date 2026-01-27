@@ -13,7 +13,7 @@ const { FieldValue } = admin.firestore;
 async function main() {
   /*Users Entires, 6 entries*/
   await db.collection("users").doc("user00001").set({
-    uid: "user00001", // 
+    uid: "user00001", // SHA256 of email and random 6 digits. This can be simple because it is for friend adding purpose only and the 6 digits is generated one-time
     createdAt: FieldValue.serverTimestamp(),
     pseudonym: "FirebaseIsLit55", // default is like what you generated randomly
     username: {

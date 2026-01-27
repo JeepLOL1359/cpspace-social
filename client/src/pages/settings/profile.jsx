@@ -97,7 +97,7 @@ export default function Profile() {
     }
 
     if (field === "username") {
-      setNewUsername(userData.username || "");
+      setNewUsername(userData.username?.value || "");
     }
 
     if (field === "age") {
@@ -142,12 +142,17 @@ export default function Profile() {
     setSaving(true);
     try {
       await updateDoc(doc(db, "users", auth.currentUser.uid), {
-        username: newUsername.trim(),
+        "username.value": newUsername.trim(),
+        "username.lastChangedAt": serverTimestamp(),
       });
 
       setUserData((prev) => ({
         ...prev,
-        username: newUsername.trim(),
+        username: {
+          ...prev.username,
+          value: newUsername.trim(),
+          lastChangedAt: new Date(),
+        },
       }));
 
       setEditingField(null);
@@ -155,6 +160,7 @@ export default function Profile() {
       setSaving(false);
     }
   };
+
 
   const saveAge = async () => {
     const age = Number(newAge);
@@ -272,7 +278,11 @@ export default function Profile() {
                   disabled={saving}
                 />
               ) : (
-                <p>{userData.username}</p>
+                <p>
+                  {userData.username?.value}
+                  {userData.username?.discriminator &&
+                    `#${userData.username.discriminator}`}
+                </p>
               )}
             </div>
 
@@ -293,7 +303,7 @@ export default function Profile() {
           {/* Email */}
           <div className="profile-row">
             <span>Email</span>
-            <p>{userData.email}</p>
+            <p>{auth.currentUser?.email || "-"}</p>
             <div className="profile-action" />
           </div>
 
@@ -357,7 +367,7 @@ export default function Profile() {
           {/* Role */}
           <div className="profile-row">
             <span>Role</span>
-            <p>{userData.roles}</p>
+            <p>{userData.roles?.join(", ") || "-"}</p>
             <div className="profile-action" />
           </div>
 

@@ -2,149 +2,139 @@ import { useState } from "react";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-} from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db } from "../firebaseConfig";
-import {
-  GoogleAuthProvider,
-  signInWithPopup,
   sendPasswordResetEmail,
-  sendEmailVerification 
+  sendEmailVerification,
+  GoogleAuthProvider,
+  signInWithPopup
 } from "firebase/auth";
+import { auth } from "../firebaseConfig";
 import { bootstrapUser } from "../services/userBootstrap";
 
 const provider = new GoogleAuthProvider();
 
 export default function AuthGate({ onAuth }) {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [mode, setMode] = useState("login"); // login | signup
-    const [error, setError] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [mode, setMode] = useState("login"); // login | signup
+  const [error, setError] = useState("");
 
-    async function handlePasswordReset() {
-        if (!email) {
-            setError("Please enter your email first.");
-            return;
-        }
-
-        try {
-            await sendPasswordResetEmail(auth, email);
-            setError("Password reset email sent. Check your inbox.");
-        } catch (err) {
-            setError(err.message);
-        }
+  async function handlePasswordReset() {
+    if (!email) {
+      setError("Please enter your email first.");
+      return;
     }
 
-    async function handleSubmit(e) {
-        e.preventDefault();
-        setError("");
-
-        try {
-        let cred;
-
-        if (mode === "signup") {
-            cred = await createUserWithEmailAndPassword(auth, email, password);
-
-            const pseudonym = generatePseudonym();
-            await bootstrapUser(cred.user.uid, pseudonym);
-
-            // send verification email
-            await sendEmailVerification(cred.user);
-
-            // 🔔 send verification email
-            await sendEmailVerification(cred.user);
-        } else {
-        cred = await signInWithEmailAndPassword(auth, email, password);
-        }
-
-        onAuth(cred.user);
-        } catch (err) {
-        setError(err.message);
-        }
-    }
-
-    async function handleGoogleSignIn() {
-    setError("");
     try {
-        const cred = await signInWithPopup(auth, provider);
-
-        const pseudonym = generatePseudonym();
-        await bootstrapUser(cred.user.uid, pseudonym);
-
-        onAuth(cred.user);
+      await sendPasswordResetEmail(auth, email);
+      setError("Password reset email sent. Check your inbox.");
     } catch (err) {
-        setError(err.message);
+      setError(err.message);
     }
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
+
+    try {
+      let cred;
+
+      if (mode === "signup") {
+        cred = await createUserWithEmailAndPassword(auth, email, password);
+
+        // 🔐 Create user document (idempotent)
+        await bootstrapUser(cred.user.uid);
+
+        // 📧 Send verification email ONCE
+        await sendEmailVerification(cred.user);
+      } else {
+        cred = await signInWithEmailAndPassword(auth, email, password);
+
+        // 🔐 Ensure user exists (safe even if already created)
+        await bootstrapUser(cred.user.uid);
+      }
+
+      onAuth(cred.user);
+    } catch (err) {
+      setError(err.message);
     }
+  }
+
+  async function handleGoogleSignIn() {
+    setError("");
+
+    try {
+      const cred = await signInWithPopup(auth, provider);
+
+      // 🔐 Create user document if missing
+      await bootstrapUser(cred.user.uid);
+
+      onAuth(cred.user);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
 
   return (
     <div style={styles.wrapper}>
-        <div style={styles.container}>
-            <h2>{mode === "login" ? "Log In" : "Sign Up"}</h2>
+      <div style={styles.container}>
+        <h2>{mode === "login" ? "Log In" : "Sign Up"}</h2>
 
-            <form onSubmit={handleSubmit} style={styles.form}>
-                <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                required
-                onChange={(e) => setEmail(e.target.value)}
-                />
-                <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                required
-                onChange={(e) => setPassword(e.target.value)}
-                />
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            required
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            required
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-                {error && <p style={styles.error}>{error}</p>}
+          {error && <p style={styles.error}>{error}</p>}
 
-                <button type="submit">
-                {mode === "login" ? "Log In" : "Create Account"}
-                </button>
-            </form>
+          <button type="submit">
+            {mode === "login" ? "Log In" : "Create Account"}
+          </button>
+        </form>
 
-            <div style={styles.footer}>
-            <p>
-                {mode === "login" && (
-                <button
-                    type="button"
-                    onClick={handlePasswordReset}
-                    style={styles.linkBtn}
-                >
-                    Forgot password?
-                </button>
-                )}
-            </p>
-            <p>
-                {mode === "login" ? "No account?" : "Already have an account?"}{" "}
-                <button onClick={() => setMode(mode === "login" ? "signup" : "login")}>
-                {mode === "login" ? "Sign up" : "Log in"}
-                </button>
-            </p>
-            </div>
-
+        <div style={styles.footer}>
+          {mode === "login" && (
             <button
-                type="button"
-                onClick={handleGoogleSignIn}
-                style={styles.googleBtn}
+              type="button"
+              onClick={handlePasswordReset}
+              style={styles.linkBtn}
             >
-                Continue with Google
+              Forgot password?
             </button>
+          )}
 
+          <p>
+            {mode === "login" ? "No account?" : "Already have an account?"}{" "}
+            <button
+              onClick={() =>
+                setMode(mode === "login" ? "signup" : "login")
+              }
+            >
+              {mode === "login" ? "Sign up" : "Log in"}
+            </button>
+          </p>
         </div>
-    </div>
-  );
-}
 
-function generatePseudonym() {
-  const animals = ["Fox", "Owl", "Wolf", "Whale", "Raven"];
-  const traits = ["Quiet", "Silent", "Calm", "Lost", "Gentle"];
-  return (
-    traits[Math.floor(Math.random() * traits.length)] +
-    animals[Math.floor(Math.random() * animals.length)] +
-    Math.floor(Math.random() * 100)
+        <button
+          type="button"
+          onClick={handleGoogleSignIn}
+          style={styles.googleBtn}
+        >
+          Continue with Google
+        </button>
+      </div>
+    </div>
   );
 }
 
