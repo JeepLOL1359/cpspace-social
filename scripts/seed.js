@@ -13,7 +13,8 @@ const { FieldValue } = admin.firestore;
 async function main() {
   /*Users Entires, 6 entries*/
   await db.collection("users").doc("user00001").set({
-    uid: "user00001", // SHA256 of email and random 6 digits. This can be simple because it is for friend adding purpose only and the 6 digits is generated one-time
+    firebaseID: "user00001", // for linking and handling purpose
+    publicUID: "user00001", // for adding friend purpose
     createdAt: FieldValue.serverTimestamp(),
     pseudonym: "FirebaseIsLit55", // default is like what you generated randomly
     username: {
@@ -42,7 +43,8 @@ async function main() {
   });
 
   await db.collection("users").doc("user00002").set({
-    uid: "user00002",
+    firebaseID: "user00002",
+    publicUID: "user00002",
     createdAt: FieldValue.serverTimestamp(),
     pseudonym: "dunkMeme1231",
     username: {
@@ -71,7 +73,8 @@ async function main() {
   });
 
   await db.collection("users").doc("user00003").set({
-    uid: "user00003",
+    firebaseID: "user00003",
+    publicUID: "user00003",
     createdAt: FieldValue.serverTimestamp(),
     pseudonym: "youngBoyIsBroke",
     username: {
@@ -100,7 +103,8 @@ async function main() {
   });
 
   await db.collection("users").doc("user00004").set({
-    uid: "user00004",
+    firebaseID: "user00004",
+    publicUID: "user00004",
     createdAt: FieldValue.serverTimestamp(), 
     pseudonym: "weRtheBest",
     username: {
@@ -129,7 +133,8 @@ async function main() {
   });
 
   await db.collection("users").doc("user00005").set({
-    uid: "user00005",
+    firebaseID: "user00005",
+    publicUID: "user00005",
     createdAt: FieldValue.serverTimestamp(),
     pseudonym: "work_King",
     username: {
@@ -158,7 +163,8 @@ async function main() {
   });
 
   await db.collection("users").doc("user00006").set({
-    uid: "user00006",
+    firebaseID: "user00006",
+    publicUID: "user00006",
     createdAt: FieldValue.serverTimestamp(),
     pseudonym: "hyer22",
     username: {
