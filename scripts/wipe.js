@@ -66,6 +66,9 @@ async function wipe() {
     // bookmarks (Coping Hub)
     await deleteSubcollection(user.ref, "bookmarks");
 
+    // public profile data
+    await deleteSubcollection(user.ref, "publicProfile");
+
     // chatbot conversations → messages → convo docs
     const chatbotSnap = await user.ref
       .collection("chatbotSessions")

@@ -26,9 +26,7 @@ async function main() {
   /*Users Entires, 6 entries*/
   await db.collection("users").doc("user00001").set({
     firebaseID: "user00001", // for linking and handling purpose
-    publicUID: "user00001", // for adding friend purpose
     createdAt: FieldValue.serverTimestamp(),
-    pseudonym: "FirebaseIsLit55", // default is like what you generated randomly
     username: {
       value: "BrianChen", // default is same as pseudonym
       discriminator: "4821", // random 4 digit number
@@ -56,9 +54,7 @@ async function main() {
 
   await db.collection("users").doc("user00002").set({
     firebaseID: "user00002",
-    publicUID: "user00002",
     createdAt: FieldValue.serverTimestamp(),
-    pseudonym: "dunkMeme1231",
     username: {
       value: "KevinNg",
       discriminator: "4206",
@@ -86,9 +82,7 @@ async function main() {
 
   await db.collection("users").doc("user00003").set({
     firebaseID: "user00003",
-    publicUID: "user00003",
     createdAt: FieldValue.serverTimestamp(),
-    pseudonym: "youngBoyIsBroke",
     username: {
       value: "SaraGoh",
       discriminator: "7852",
@@ -116,9 +110,7 @@ async function main() {
 
   await db.collection("users").doc("user00004").set({
     firebaseID: "user00004",
-    publicUID: "user00004",
     createdAt: FieldValue.serverTimestamp(), 
-    pseudonym: "weRtheBest",
     username: {
       value: "MuthuSami",
       discriminator: "5107",
@@ -146,9 +138,7 @@ async function main() {
 
   await db.collection("users").doc("user00005").set({
     firebaseID: "user00005",
-    publicUID: "user00005",
     createdAt: FieldValue.serverTimestamp(),
-    pseudonym: "work_King",
     username: {
       value: "Kamilah",
       discriminator: "1448",
@@ -176,9 +166,7 @@ async function main() {
 
   await db.collection("users").doc("user00006").set({
     firebaseID: "user00006",
-    publicUID: "user00006",
     createdAt: FieldValue.serverTimestamp(),
-    pseudonym: "hyer22",
     username: {
       value: "Jamima",
       discriminator: "9666",
@@ -239,6 +227,85 @@ console.log("Users seeded");
   });
 console.log("Default Feelings seeded");
 
+
+  /*Users's Public Data Entires, 6 entries*/
+  await db
+    .collection("users")
+    .doc("user00001")
+    .collection("publicProfile")
+    .add({
+      publicUID: "user00001", // for adding friend purpose
+      pseudonym: "FirebaseIsLit55", // default is like what you generated randomly
+      username: {
+        value: "BrianChen", // default is same as pseudonym
+        discriminator: "4821", // random 4 digit number
+      }, 
+  });
+
+  await db
+    .collection("users")
+    .doc("user00002")
+    .collection("publicProfile")
+    .add({
+      publicUID: "user00002", // for adding friend purpose
+      pseudonym: "dunkMeme1231", // default is like what you generated randomly
+      username: {
+        value: "KevinNg", // default is same as pseudonym
+        discriminator: "4206", // random 4 digit number
+      }, 
+  });
+
+  await db
+    .collection("users")
+    .doc("user00003")
+    .collection("publicProfile")
+    .add({
+      publicUID: "user00003", // for adding friend purpose
+      pseudonym: "youngBoyIsBroke", // default is like what you generated randomly
+      username: {
+        value: "SaraGoh", // default is same as pseudonym
+        discriminator: "7852", // random 4 digit number
+      }, 
+  });
+
+  await db
+    .collection("users")
+    .doc("user00004")
+    .collection("publicProfile")
+    .add({
+      publicUID: "user00004", // for adding friend purpose
+      pseudonym: "weRtheBest", // default is like what you generated randomly
+      username: {
+        value: "MuthuSami", // default is same as pseudonym
+        discriminator: "5107", // random 4 digit number
+      }, 
+  });
+
+  await db
+    .collection("users")
+    .doc("user00005")
+    .collection("publicProfile")
+    .add({
+      publicUID: "user00005", // for adding friend purpose
+      pseudonym: "work_King", // default is like what you generated randomly
+      username: {
+        value: "Kamilah", // default is same as pseudonym
+        discriminator: "1448", // random 4 digit number
+      }, 
+  });
+
+  await db
+    .collection("users")
+    .doc("user00006")
+    .collection("publicProfile")
+    .add({
+      publicUID: "user00006", // for adding friend purpose
+      pseudonym: "hyer22", // default is like what you generated randomly
+      username: {
+        value: "Jamima", // default is same as pseudonym
+        discriminator: "9666", // random 4 digit number
+      }, 
+  });
 
   /*Users's Diaries Entires, 10 entries*/
   await db
