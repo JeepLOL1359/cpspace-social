@@ -31,7 +31,7 @@ export default function StrategyDetail() {
     return <div className="strategy-not-found">Strategy not found.</div>;
   }
 
-  return (
+  return(
     <div className="strategy-detail-page">
       <h2 className="strategy-title">{strategy.title}</h2>
 
@@ -46,12 +46,12 @@ export default function StrategyDetail() {
         {strategy.description}
       </div>
 
-      {strategy.media?.type === "video" && (
-      <video controls src={strategy.media.url} />
+      {strategy.audioUrl && (
+        <audio controls src={strategy.audioUrl} />
       )}
 
-      {strategy.media?.type === "audio" && (
-      <audio controls src={strategy.media.url} />
+      {strategy.videoUrl && (
+        <video controls src={strategy.videoUrl} />
       )}
 
       <div className="strategy-description">

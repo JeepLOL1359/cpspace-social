@@ -126,18 +126,42 @@ export default function AddStrategy() {
         />
 
         <label>Audio (optional)</label>
-        <input
-          type="file"
-          accept="audio/*"
-          onChange={(e) => setAudioFile(e.target.files[0])}
-        />
+        <div className="file-input-row">
+          <input
+            type="file"
+            accept="audio/*"
+            onChange={(e) => setAudioFile(e.target.files[0])}
+          />
+
+          {audioFile && (
+            <button
+              type="button"
+              className="file-remove"
+              onClick={() => setAudioFile(null)}
+            >
+              ×
+            </button>
+          )}
+        </div>
 
         <label>Video (optional)</label>
-        <input
-          type="file"
-          accept="video/*"
-          onChange={(e) => setVideoFile(e.target.files[0])}
-        />
+        <div className="file-input-row">
+          <input
+            type="file"
+            accept="video/*"
+            onChange={(e) => setVideoFile(e.target.files[0])}
+          />
+
+          {videoFile && (
+            <button
+              type="button"
+              className="file-remove"
+              onClick={() => setVideoFile(null)}
+            >
+              ×
+            </button>
+          )}
+        </div>
 
         <div className="add-actions">
         <button type="submit">Add Strategy</button>

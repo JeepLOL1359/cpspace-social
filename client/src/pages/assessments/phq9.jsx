@@ -95,6 +95,7 @@ export default function PHQ9() {
   };
 
   return (
+    <div className="content">
     <div className="assessment-panel">
       <h2 className="form-title">PHQ-9 Assessment Form</h2>
 
@@ -147,6 +148,7 @@ export default function PHQ9() {
           Proceed
         </button>
       </div>
+    </div>
     </div>
   );
 }

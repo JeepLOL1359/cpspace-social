@@ -171,21 +171,69 @@ export default function EditStrategy() {
         {existingAudio && (
           <small>Existing audio will be kept unless replaced</small>
         )}
-        <input
-          type="file"
-          accept="audio/*"
-          onChange={(e) => setAudioFile(e.target.files[0])}
-        />
+
+        <div className="file-input-row">
+          <input
+            type="file"
+            accept="audio/*"
+            onChange={(e) => setAudioFile(e.target.files[0])}
+          />
+
+          {audioFile && (
+            <button
+              type="button"
+              className="file-remove"
+              onClick={() => setAudioFile(null)}
+            >
+              ×
+            </button>
+          )}
+
+          {existingAudio && !audioFile && (
+            <button
+              type="button"
+              className="file-remove"
+              onClick={() => setExistingAudio(null)}
+              title="Remove existing audio"
+            >
+              ×
+            </button>
+          )}
+        </div>
 
         <label>Video (optional)</label>
         {existingVideo && (
           <small>Existing video will be kept unless replaced</small>
         )}
-        <input
-          type="file"
-          accept="video/*"
-          onChange={(e) => setVideoFile(e.target.files[0])}
-        />
+
+        <div className="file-input-row">
+          <input
+            type="file"
+            accept="video/*"
+            onChange={(e) => setVideoFile(e.target.files[0])}
+          />
+
+          {videoFile && (
+            <button
+              type="button"
+              className="file-remove"
+              onClick={() => setVideoFile(null)}
+            >
+              ×
+            </button>
+          )}
+
+          {existingVideo && !videoFile && (
+            <button
+              type="button"
+              className="file-remove"
+              onClick={() => setExistingVideo(null)}
+              title="Remove existing video"
+            >
+              ×
+            </button>
+          )}
+        </div>
 
         <div className="edit-actions">
           <button type="submit">Save Changes</button>

@@ -3,8 +3,8 @@ import "./settingsLayout.css";
 
 export default function SettingsLayout() {
   return (
-    <>
-      {/* SETTINGS SIDEBAR ONLY */}
+    <div className="settings-page">
+      {/* SETTINGS SIDEBAR */}
       <aside className="sidebar settings-sidebar">
         <h3>Settings</h3>
         <nav>
@@ -24,9 +24,9 @@ export default function SettingsLayout() {
       </aside>
 
       {/* SETTINGS CONTENT */}
-      <main className="content">
+      <main className="settings-content">
         <Outlet />
       </main>
-    </>
+    </div>
   );
 }

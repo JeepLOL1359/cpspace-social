@@ -29,10 +29,11 @@ export default function Chatbot() {
   const [hoverRating, setHoverRating] = useState(0);
   const [feedbackText, setFeedbackText] = useState("");
   const [submittingFeedback, setSubmittingFeedback] = useState(false);
+  const [displayName, setDisplayName] = useState("");
 
-  const displayName = "Tan";
   const detectedEmotion = "depressed";
   const menuRef = useRef(null);
+  const sendingRef = useRef(false);
 
   const [chatbotTone, setChatbotTone] = useState("casual");
 
@@ -60,11 +61,12 @@ export default function Chatbot() {
 
       const userRef = doc(db, "users", currentUser.uid);
 
-      // ✅ DO NOT redeclare, just assign
       unsubPrefs = onSnapshot(userRef, (snap) => {
         if (snap.exists()) {
-          const prefs = snap.data().preferences;
-          setChatbotTone(prefs?.chatbotTone || "casual");
+          const data = snap.data();
+
+          setChatbotTone(data.preferences?.chatbotTone || "casual");
+          setDisplayName(data.profileDisplayName || "there");
         }
       });
 
@@ -79,7 +81,26 @@ export default function Chatbot() {
           };
         });
 
-        setSessions(loaded);
+        if (!sendingRef.current) {
+          setSessions(loaded);
+        }
+
+        const typingMessage = {
+          role: "bot",
+          text: "...",
+          timestamp: Date.now(),
+          typing: true,
+        };
+
+        const messagesWithTyping = [...messagesAfterUser, typingMessage];
+
+        setSessions((prev) =>
+          prev.map((s) =>
+            s.id === session.id
+              ? { ...s, messages: messagesWithTyping }
+              : s
+          )
+        );
 
         // 🔒 keep current session if it exists
         setActiveSessionId((prev) => {
@@ -154,11 +175,16 @@ export default function Chatbot() {
   const sendMessage = async () => {
     if (!input.trim() || !user || !activeSessionId) return;
 
+    sendingRef.current = true; // 🔒 LOCK snapshots
+
     const userText = input;
     setInput("");
 
     const session = sessions.find((s) => s.id === activeSessionId);
-    if (!session) return;
+    if (!session) {
+      sendingRef.current = false;
+      return;
+    }
 
     const userMessage = {
       role: "user",
@@ -168,10 +194,23 @@ export default function Chatbot() {
 
     const messagesAfterUser = [...session.messages, userMessage];
 
+    // Add typing indicator
+    const messagesWithTyping = [
+      ...messagesAfterUser,
+      {
+        role: "bot",
+        text: "...",
+        timestamp: Date.now(),
+        typing: true,
+      },
+    ];
+
     // Optimistic UI update
     setSessions((prev) =>
       prev.map((s) =>
-        s.id === session.id ? { ...s, messages: messagesAfterUser } : s
+        s.id === session.id
+          ? { ...s, messages: messagesWithTyping }
+          : s
       )
     );
 
@@ -196,13 +235,14 @@ export default function Chatbot() {
     try {
       const aiReply = await getAIReply(userText, messagesAfterUser);
 
-      const botMessage = {
-        role: "bot",
-        text: aiReply,
-        timestamp: Date.now(),
-      };
-
-      const finalMessages = [...messagesAfterUser, botMessage];
+      const finalMessages = [
+        ...messagesAfterUser,
+        {
+          role: "bot",
+          text: aiReply,
+          timestamp: Date.now(),
+        },
+      ];
 
       setSessions((prev) =>
         prev.map((s) =>
@@ -216,6 +256,8 @@ export default function Chatbot() {
       );
     } catch (err) {
       console.error("AI reply failed", err);
+    } finally {
+      sendingRef.current = false; // 🔓 UNLOCK snapshots
     }
   };
 

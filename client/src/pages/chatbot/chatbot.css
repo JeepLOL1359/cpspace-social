@@ -199,13 +199,26 @@
   justify-content: space-between;
   align-items: center;
   background: var(--bg-main);
+  border: 2px solid var(--border-color);
+  transition: background 0.15s ease, transform 0.1s ease;
 }
 
 .side-card:hover {
-  background: #4c4f55;
+  background: rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
 }
 
 .side-card.active {
+  background: rgba(0, 0, 0, 0.08);
+  font-weight: 600;
+}
+
+[data-theme="dark"] .side-card:hover {
+  background: #4c4f55;
+  transform: translateY(-1px);
+}
+
+[data-theme="dark"] .side-card.active {
   background: #6b7280;
   font-weight: 600;
 }

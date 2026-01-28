@@ -66,6 +66,7 @@ export default function AssessmentReport() {
   const { type, score, severity } = report;
 
   return (
+    <div className="content">
     <div className="assessment-panel report">
       <h2>{type} Assessment Report</h2>
 
@@ -112,6 +113,7 @@ export default function AssessmentReport() {
           View Coping Strategies
         </button>
       </div>
+    </div>
     </div>
   );
 }

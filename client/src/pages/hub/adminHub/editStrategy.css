@@ -90,3 +90,32 @@
 .edit-actions button:hover {
   opacity: 0.9;
 }
+
+.file-input-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.file-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  height: 32px;
+
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #ff6b6b;
+  line-height: 1;
+  padding: 0;
+}
+
+.file-remove:hover {
+  color: #ff4d4f;
+}

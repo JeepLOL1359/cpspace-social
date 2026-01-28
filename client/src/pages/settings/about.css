@@ -1,13 +1,13 @@
 .about-panel {
   background: var(--bg-card);
   width: 100%;
-  max-width: 900px;
+  max-width: 720px;
 
   height: calc(100vh - 160px);
   overflow-y: auto;
 
   padding: 32px;
-  margin-right: 40px;
+  margin: 48px auto 0;
 
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
@@ -18,24 +18,23 @@
 .about-panel h2 {
   font-size: 24px;
   font-weight: 600;
-  margin-bottom: 20px;   /* space below title */
+  margin-bottom: 20px;
 }
 
 .about-panel h4 {
   font-size: 18px;
   font-weight: 600;
-  margin-top: 32px;      /* space before section */
-  margin-bottom: 16px;  /* space after heading */
+  margin-top: 32px;
+  margin-bottom: 16px;
 }
 
 .about-panel p {
   font-size: 15px;
   line-height: 1.75;
   color: var(--text-main);
-  margin-bottom: 14px;  /* space between paragraphs */
+  margin-bottom: 14px;
 }
 
-/* Remove extra space after last paragraph */
 .about-panel p:last-child {
   margin-bottom: 0;
 }

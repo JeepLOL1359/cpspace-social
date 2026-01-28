@@ -46,7 +46,7 @@ export default function AdminStrategyList() {
   return (
     <div className="admin-strategy-page">
       <div className="admin-header">
-        <h2>Coping Strategies (Admin)</h2>
+        <h2>Manage Strategies</h2>
 
         <Link to="/admin/strategies/new" className="add-btn">
           + Add Strategy

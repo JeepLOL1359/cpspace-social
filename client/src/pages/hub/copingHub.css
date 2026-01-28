@@ -172,8 +172,17 @@
   position: absolute;
   top: 12px;
   right: 0;
+
   background: transparent;
   border: none;
-  font-size: 18px;
   cursor: pointer;
+
+  font-size: 22px;
+  line-height: 1;
+  color: #ffffff;
 }
+
+.bookmark.active {
+  color: #facc15;
+}
+

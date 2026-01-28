@@ -1,7 +1,7 @@
 .personalization-panel {
   width: 100%;
-  max-width: 700px;   /* ← wider */
-  margin-right: 40px;  /* space from right edge */
+  max-width: 720px;
+  margin: 76px auto 0;
   background: var(--bg-card);
   padding: 32px;
   border-radius: 12px;

@@ -126,8 +126,9 @@ export default function MainLayout() {
         )}
       </aside>
 
-      {/* MAIN CONTENT */}
-      <Outlet />
+      <div className="content">
+        <Outlet />
+      </div>
     </div>
   );
 }

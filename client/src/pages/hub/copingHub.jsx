@@ -7,6 +7,20 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getAllStrategies } from "../../services/copingStrategyService";
 
+import { getAuth } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  deleteDoc,
+  serverTimestamp,
+  collection,
+  getDocs,
+} from "firebase/firestore";
+
+import { db } from "../../firebaseConfig";
+
 import bookmarkIcon from "../../assets/bookmark.png";
 
 export default function CopingHub() {
@@ -14,6 +28,9 @@ export default function CopingHub() {
   const [searchQuery, setSearchQuery] = useState("");
   const [strategies, setStrategies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [bookmarkedIds, setBookmarkedIds] = useState([]);
+
+  const [user, setUser] = useState(null);
 
     useEffect(() => {
     async function fetchStrategies() {
@@ -46,6 +63,66 @@ export default function CopingHub() {
         tags.some(tag => tag.toLowerCase().includes(q))
     );
     });
+
+    const auth = getAuth();
+
+    const toggleBookmark = async (strategyId) => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const bookmarkRef = doc(
+        db,
+        "users",
+        user.uid,
+        "bookmarks",
+        strategyId
+      );
+
+      try {
+        const snap = await getDoc(bookmarkRef);
+
+        if (snap.exists()) {
+          await deleteDoc(bookmarkRef);
+          setBookmarkedIds((prev) =>
+            prev.filter((id) => id !== strategyId)
+          );
+        } else {
+          await setDoc(bookmarkRef, {
+            strategyId,
+            createdAt: serverTimestamp(),
+          });
+          setBookmarkedIds((prev) => [...prev, strategyId]);
+        }
+      } catch (err) {
+        console.error("Toggle bookmark failed:", err);
+      }
+    };
+
+    useEffect(() => {
+      const unsubscribe = onAuthStateChanged(auth, (u) => {
+        setUser(u);
+      });
+
+      return () => unsubscribe();
+    }, []);
+
+    useEffect(() => {
+      if (!user) return;
+
+      async function loadBookmarks() {
+        try {
+          const snap = await getDocs(
+            collection(db, "users", user.uid, "bookmarks")
+          );
+
+          setBookmarkedIds(snap.docs.map((doc) => doc.id));
+        } catch (err) {
+          console.error("Failed to load bookmarks:", err);
+        }
+      }
+
+      loadBookmarks();
+    }, [user]);
 
   return (
     <div className="copinghub-page">
@@ -140,8 +217,18 @@ export default function CopingHub() {
                 <p className="desc">
                 {strategy.description}
                 </p>
-
-                <button className="bookmark">🔖</button>
+                <button
+                  className={`bookmark ${
+                    bookmarkedIds.includes(strategy.id) ? "active" : ""
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    toggleBookmark(strategy.id);
+                  }}
+                >
+                  {bookmarkedIds.includes(strategy.id) ? "⭐" : "☆"}
+                </button>
             </div>
             ))
         )}
