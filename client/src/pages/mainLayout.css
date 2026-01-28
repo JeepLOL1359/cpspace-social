@@ -1,7 +1,16 @@
 /* ---------- MAIN CONTENT ---------- */
 .content {
-  flex: 1;
-  min-width: 0;
+  padding-top: 8px;
+  padding-bottom: 24px;
+  padding-left: 40px;
+  padding-right: 24px;
+
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+
+  overflow-y: auto;   /* 🔑 only scrollable area */
+  height: 100vh;
 }
 
 /* ---------- SHARED SETTINGS PANEL ---------- */
@@ -16,9 +25,11 @@
 
 /* ---------- APP LAYOUT ---------- */
 .app-container {
-  display: flex;
-  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  height: 100vh;
   width: 100%;
+  overflow: hidden; /* prevents body scroll */
 }
 
 /* ---------- MAIN SIDEBAR ---------- */
@@ -29,6 +40,11 @@
   flex-direction: column;
   padding: 20px;
   border-right: 1px solid var(--border-color);
+
+  /* ADD THESE */
+  position: sticky;
+  top: 0;
+  height: 100vh;
 }
 
 .sidebar h3,
