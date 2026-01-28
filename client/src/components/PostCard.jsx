@@ -1,18 +1,18 @@
 import CommentList from "./CommentList";
 import "./PostCard.css";
 
-export default function PostCard({ post }) {
+export default function PostCard({ post, pseudonym }) {
   return (
     <div className="post-card">
       <div className="post-header">
-        <strong>{post.pseudonym ?? "Anonymous"}</strong>
+        <strong>{pseudonym}</strong>
       </div>
 
       <p>{post.body}</p>
 
       <div className="post-actions">
-        <button>▲ {post.stats?.up ?? 0}</button>
-        <button>▼ {post.stats?.down ?? 0}</button>
+        <button>▲ Upvote </button>
+        <button>▼ Downvote</button>
         <button>💬 Comment</button>
       </div>
 
