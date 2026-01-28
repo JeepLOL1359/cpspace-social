@@ -55,21 +55,20 @@ function App() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   const handleResendEmail = async () => {
-    if (!auth.currentUser) return;
+    if (!auth.currentUser || countdown > 0) return;
 
-    await sendEmailVerification(auth.currentUser);
-    setCountdown(60);
+    try {
+      await sendEmailVerification(auth.currentUser);
 
-    const timer = setInterval(() => {
-      setCountdown((c) => {
-        if (c <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return c - 1;
-      });
-    }, 1000);
+      const until = Date.now() + 60_000; // 60 seconds
+      localStorage.setItem("verifyCooldownUntil", until.toString());
+
+      setCountdown(60);
+    } catch (err) {
+      console.error(err);
+    }
   };
+
 
   const handleRefresh = async () => {
     await auth.currentUser.reload();
@@ -128,6 +127,35 @@ function App() {
 
     return unsub;
   }, [auth]);
+
+  useEffect(() => {
+    const storedUntil = localStorage.getItem("verifyCooldownUntil");
+
+    if (storedUntil) {
+      const remaining = Math.floor(
+        (Number(storedUntil) - Date.now()) / 1000
+      );
+      if (remaining > 0) {
+        setCountdown(remaining);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (countdown <= 0) return;
+
+    const timer = setInterval(() => {
+      setCountdown((c) => {
+        if (c <= 1) {
+          localStorage.removeItem("verifyCooldownUntil");
+          return 0;
+        }
+        return c - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [countdown]);
 
   if (loading || !appReady) return null;
   if (!user) return <AuthGate />;
