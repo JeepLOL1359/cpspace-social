@@ -1,5 +1,17 @@
 import admin from "firebase-admin";
-import serviceAccount from "../firebase/serviceAccountKey.json" assert { type: "json" };
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const serviceAccount = JSON.parse(
+  fs.readFileSync(
+    path.join(__dirname, "../firebase/serviceAccountKey.json"),
+    "utf8"
+  )
+);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -950,85 +962,206 @@ console.log("Conversation seeded");
   }
 console.log("Messages seeded");
 
+await db
+  .collection("users")
+  .doc("user00001")
+  .collection("chatbotSessions")
+  .add({
+    title: "Feeling Overwhelmed",
+    createdAt: FieldValue.serverTimestamp(),
+    messages: [
+      {
+        role: "bot",
+        text: "Hello Brian. I’m here to listen. What’s been weighing on you lately?",
+        timestamp: new Date(),
+      },
+      {
+        role: "user",
+        text: "I feel like everything is piling up and I can’t keep up.",
+        timestamp: new Date(),
+      },
+      {
+        role: "bot",
+        text: "That sounds exhausting. It’s okay to take things one step at a time.",
+        timestamp: new Date(),
+      },
+    ],
+  });
 
+/* User 00002 chatbot session */
+await db
+  .collection("users")
+  .doc("user00002")
+  .collection("chatbotSessions")
+  .add({
+    title: "Late Night Thoughts",
+    createdAt: FieldValue.serverTimestamp(),
+    messages: [
+      {
+        role: "bot",
+        text: "Hi Kevin. You seem thoughtful tonight. Want to share what’s on your mind?",
+        timestamp: new Date(),
+      },
+      {
+        role: "user",
+        text: "I’m worried about my future after graduation.",
+        timestamp: new Date(),
+      },
+      {
+        role: "bot",
+        text: "That’s a very common worry. You’re not alone in feeling this way.",
+        timestamp: new Date(),
+      },
+    ],
+  });
 
+  console.log("Chatbot seeded");
 
-/* Chatbot Conversation, 2 entries */
-  const chatbotConvoRef1 = await db
-    .collection("users")
-    .doc("user00001")
-    .collection("chatbotConversations")
-    .doc("bot_user00001_001")
-    .set({
-      participants: ["user00001", "bot"],
-      nextSeq: 4,
-      lastMessageAt: FieldValue.serverTimestamp(),
-      mood: "unpleasant",
-      moderationStatus: "Visible",
-      title: "Feeling Overwhelmed"
-    });
+  const copingStrategies = [
+    {
+      id: "cs_001",
+      title: "Relax & Release: A Calm Flow to Unwind Your Body and Mind",
+      author: "Aria Lin",
+      tags: ["Relaxation", "Stress Relief"],
+      description:
+        "This calming yoga flow is designed to help you gently release physical tension and mental stress accumulated throughout the day. By combining slow stretches with mindful breathing, the practice encourages relaxation and grounding, allowing your body and mind to unwind naturally.",
+      instructions:
+        "Find a quiet space and sit or lie down comfortably. Begin by taking five slow, deep breaths. Gently stretch your neck, shoulders, and spine while breathing deeply. Move slowly between stretches, focusing on areas that feel tense. End by lying still for two minutes, allowing your body to fully relax.",
+      videoUrl: null,
+      audioUrl: null,
+    },
 
-    
-  const chatbotConvoRef2 = await db
-    .collection("users")
-    .doc("user00002")
-    .collection("chatbotConversations")
-    .doc("bot_user00002_001")
-    .set({
-      participants: ["user00002", "bot"],
-      nextSeq: 4,
-      lastMessageAt: FieldValue.serverTimestamp(),
-      mood: "unpleasant",
-      moderationStatus: "Visible",
-      title: "Late Night Thoughts"
-    });
-console.log("Chatbot conversation seeded");
+    {
+      id: "cs_002",
+      title: "Quiet Moments Flow: A Soft Stretch Journey for Deep Relaxation",
+      author: "Mira Solace",
+      tags: ["Relaxation", "Mindfulness"],
+      description:
+        "Quiet Moments Flow is a gentle stretching routine aimed at calming the nervous system. It encourages slow, intentional movement to help you reconnect with your breath and cultivate inner stillness, making it ideal before sleep or during moments of overwhelm.",
+      instructions:
+        "Start in a seated position with your back straight. Slowly roll your shoulders and gently tilt your head side to side. Stretch your arms overhead while inhaling, then lower them while exhaling. Continue for 10–15 minutes, moving at your own pace.",
+      videoUrl: null,
+      audioUrl: null,
+    },
 
+    {
+      id: "cs_003",
+      title: "Pause & Ponder: A Guided Self-Reflection Practice",
+      author: "Amelia Tan",
+      tags: ["Reflection", "Emotional Awareness"],
+      description:
+        "Pause & Ponder helps you slow down and reflect on your thoughts and emotions without judgment. This practice is designed to improve emotional awareness and promote self-understanding through gentle introspection.",
+      instructions:
+        "Sit comfortably with a notebook nearby. Close your eyes and take three deep breaths. Ask yourself how you are feeling in this moment. Write down any thoughts or emotions that arise without filtering them. Spend 5–10 minutes reflecting before gently closing the session.",
+      videoUrl: null,
+      audioUrl: null,
+    },
 
-/* Chatbot Conversation, 2 entries */
-  const chatbot1Msgs = [
-    { seq: 1, s: "bot", b: "Hello Brian. I’m here to listen. What’s been weighing on you lately?" },
-    { seq: 2, s: "user00001", b: "I feel like everything is piling up and I can’t keep up." },
-    { seq: 3, s: "bot", b: "That sounds exhausting. It’s okay to take things one step at a time." }
+    {
+      id: "cs_004",
+      title: "Grounding Breath: Reconnect with the Present Moment",
+      author: "Daniel Wong",
+      tags: ["Breathing", "Anxiety Relief"],
+      description:
+        "Grounding Breath is a simple breathing exercise designed to reduce anxiety and bring your attention back to the present moment. It is especially helpful during moments of panic or heightened stress.",
+      instructions:
+        "Place one hand on your chest and the other on your abdomen. Inhale slowly through your nose for four seconds, feeling your abdomen rise. Hold for two seconds, then exhale through your mouth for six seconds. Repeat for 5–7 minutes.",
+      videoUrl: null,
+      audioUrl: null,
+    },
+
+    {
+      id: "cs_005",
+      title: "Body Scan Meditation for Emotional Release",
+      author: "Sofia Karim",
+      tags: ["Meditation", "Relaxation"],
+      description:
+        "This body scan meditation guides your attention through different parts of the body to help you identify and release stored tension. It promotes relaxation and enhances mind–body awareness.",
+      instructions:
+        "Lie down in a comfortable position. Close your eyes and take a few deep breaths. Slowly move your attention from your toes upward, noticing sensations in each body part. If you feel tension, imagine it softening with each exhale. Continue until you reach your head.",
+      videoUrl: null,
+      audioUrl: null,
+    },
+
+    {
+      id: "cs_006",
+      title: "Emotion Journaling: Writing Through Your Feelings",
+      author: "Rachel Lim",
+      tags: ["Journaling", "Emotional Processing"],
+      description:
+        "Emotion journaling provides a safe space to express and process your feelings through writing. It helps clarify emotions, reduce mental clutter, and improve emotional regulation.",
+      instructions:
+        "Set aside 10–15 minutes in a quiet space. Write freely about how you are feeling without worrying about grammar or structure. Focus on honesty rather than perfection. When finished, take a moment to read what you wrote and acknowledge your emotions.",
+      videoUrl: null,
+      audioUrl: null,
+    },
+
+    {
+      id: "cs_007",
+      title: "Gentle Morning Stretch to Start Your Day Calmly",
+      author: "Leo Hart",
+      tags: ["Stretching", "Energy Balance"],
+      description:
+        "This gentle morning stretch routine is designed to wake up the body while maintaining a sense of calm. It helps improve circulation and prepares you mentally for the day ahead.",
+      instructions:
+        "Stand or sit comfortably. Stretch your arms overhead and gently twist your torso side to side. Roll your shoulders and stretch your legs if standing. Breathe deeply throughout the routine for about 5–10 minutes.",
+      videoUrl: null,
+      audioUrl: null,
+    },
+
+    {
+      id: "cs_008",
+      title: "Progressive Muscle Relaxation for Stress Reduction",
+      author: "Nina Alvarez",
+      tags: ["Stress Relief", "Relaxation"],
+      description:
+        "Progressive Muscle Relaxation involves tensing and releasing muscle groups to reduce stress and physical tension. It is effective for managing anxiety and improving sleep quality.",
+      instructions:
+        "Sit or lie down comfortably. Starting from your feet, tense the muscles for five seconds, then release. Move upward through your legs, abdomen, arms, shoulders, and face. Notice the contrast between tension and relaxation.",
+      videoUrl: null,
+      audioUrl: null,
+    },
+
+    {
+      id: "cs_009",
+      title: "Mindful Walking: Moving with Awareness",
+      author: "Jason Khoo",
+      tags: ["Mindfulness", "Movement"],
+      description:
+        "Mindful walking combines gentle movement with focused awareness, making it a great practice for those who find seated meditation challenging. It encourages presence and mental clarity.",
+      instructions:
+        "Walk slowly in a quiet area. Focus on the sensation of your feet touching the ground. Pay attention to your breathing and surroundings without judgment. Continue for 10–20 minutes.",
+      videoUrl: null,
+      audioUrl: null,
+    },
+
+    {
+      id: "cs_010",
+      title: "Evening Wind-Down Routine for Better Sleep",
+      author: "Hannah Lee",
+      tags: ["Sleep", "Relaxation"],
+      description:
+        "This evening wind-down routine helps signal to your body that it is time to rest. By combining light stretching, breathing, and reflection, it prepares you for a more restful sleep.",
+      instructions:
+        "Dim the lights and sit or lie down comfortably. Perform gentle stretches and take slow breaths. Reflect on one positive moment from your day. End the routine by lying still for a few minutes before going to bed.",
+      videoUrl: null,
+      audioUrl: null,
+    },
   ];
 
-  for (const m of chatbot1Msgs) {
-    await db
-      .collection("users")
-      .doc("user00001")
-      .collection("chatbotConversations")
-      .doc("bot_user00001_001")
-      .collection("messages")
-      .add({
-        senderId: m.s,
-        body: m.b,
-        seq: m.seq,
-        createdAt: FieldValue.serverTimestamp()
-      });
+  const copingRef = db.collection("copingStrategies");
+
+  for (const strategy of copingStrategies) {
+    const { id, ...data } = strategy;
+
+    await copingRef.doc(id).set({
+      ...data,
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
   }
 
-  const chatbot2Msgs = [
-    { seq: 1, s: "bot", b: "Hi Kevin. You seem thoughtful tonight. Want to share what’s on your mind?" },
-    { seq: 2, s: "user00002", b: "I’m worried about my future after graduation." },
-    { seq: 3, s: "bot", b: "That’s a very common worry. You’re not alone in feeling this way." }
-  ];
-
-  for (const m of chatbot2Msgs) {
-    await db
-      .collection("users")
-      .doc("user00002")
-      .collection("chatbotConversations")
-      .doc("bot_user00002_001")
-      .collection("messages")
-      .add({
-        senderId: m.s,
-        body: m.b,
-        seq: m.seq,
-        createdAt: FieldValue.serverTimestamp()
-      });
-  }
-  console.log("Chatbot conversation messages seeded");
-
+  console.log("Coping strategies seeded");
 }
 
 main()

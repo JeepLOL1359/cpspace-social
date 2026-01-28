@@ -1,5 +1,17 @@
 import admin from "firebase-admin";
-import serviceAccount from "../firebase/serviceAccountKey.json" assert { type: "json" };
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const serviceAccount = JSON.parse(
+  fs.readFileSync(
+    path.join(__dirname, "../firebase/serviceAccountKey.json"),
+    "utf8"
+  )
+);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -51,9 +63,12 @@ async function wipe() {
     // assessments
     await deleteSubcollection(user.ref, "assessments");
 
+    // bookmarks (Coping Hub)
+    await deleteSubcollection(user.ref, "bookmarks");
+
     // chatbot conversations → messages → convo docs
     const chatbotSnap = await user.ref
-      .collection("chatbotConversations")
+      .collection("chatbotSessions")
       .get();
 
     for (const convo of chatbotSnap.docs) {
@@ -83,6 +98,14 @@ async function wipe() {
     await convo.ref.delete();
   }
   console.log("✅ Conversations & messages wiped");
+
+  /* ---- COPING STRATEGIES ---- */
+  const copingSnap = await db.collection("copingStrategies").get();
+  for (const strategy of copingSnap.docs) {
+    await strategy.ref.delete();
+  }
+  console.log("✅ Coping strategies wiped");
+
 
   /* ---- DEFAULT FEELINGS ---- */
   const defaultFeelingsRef = db.collection("defaultFeelings").doc("default");
