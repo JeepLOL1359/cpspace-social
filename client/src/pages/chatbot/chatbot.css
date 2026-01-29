@@ -132,7 +132,7 @@
 .chat-input {
   display: flex;
   gap: 12px;
-  padding: 16px;
+  padding: 16px 16px 24px 16px;
   border-top: 1px solid var(--border-color);
   background: var(--bg-card);
 }
@@ -169,7 +169,7 @@
   width: 260px;
   background: var(--bg-card);
   border-left: 1px solid var(--border-color);
-  padding: 20px;
+  padding-left: 20px;
   display: flex;
   flex-direction: column;
 }

@@ -41,7 +41,7 @@
   padding: 20px;
   border-right: 1px solid var(--border-color);
 
-  /* ADD THESE */
+  
   position: sticky;
   top: 0;
   height: 100vh;

@@ -98,7 +98,7 @@ export default function MainLayout() {
         <button
           onClick={() => signOut(auth)}
           style={{
-            marginTop: "auto",
+            marginTop: "155px",
             padding: "0.75rem",
             background: "#ef4444",
             color: "white",
