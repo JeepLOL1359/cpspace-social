@@ -1,14 +1,13 @@
-// src/pages/diaries/DiaryEmotionModal.jsx
+// src/pages/diaries/EventEmotionModal.jsx
 import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 
-export default function DiaryEmotionModal({
-  mode = "emotion",
+export default function EventEmotionModal({
+  title,
   initialCategory,
   initialFeelings = [],
-  diaryText,
-  setDiaryText,
+  initialNote = "",
   onClose,
   onSave,
 }) {
@@ -23,6 +22,8 @@ export default function DiaryEmotionModal({
   );
 
   const [selected, setSelected] = useState(initialFeelings);
+  const [note, setNote] = useState(initialNote);
+
   const [feelings, setFeelings] = useState({ pos: [], neu: [], neg: [] });
 
   useEffect(() => {
@@ -46,8 +47,12 @@ export default function DiaryEmotionModal({
   return (
     <div className="modal-backdrop">
       <div className="modal">
-        <h3>Select Today’s Emotion</h3>
+        <h3>Event Emotion</h3>
+        <div style={{ fontSize: "14px", color: "var(--text-muted)" }}>
+          {title}
+        </div>
 
+        {/* CATEGORY */}
         <div className="emotion-categories">
           {["pos", "neu", "neg"].map((c) => (
             <button
@@ -55,11 +60,16 @@ export default function DiaryEmotionModal({
               className={category === c ? "active" : ""}
               onClick={() => setCategory(c)}
             >
-              {c === "pos" ? "Pleasant" : c === "neu" ? "Neutral" : "Unpleasant"}
+              {c === "pos"
+                ? "Pleasant"
+                : c === "neu"
+                ? "Neutral"
+                : "Unpleasant"}
             </button>
           ))}
         </div>
 
+        {/* FEELINGS */}
         {category && (
           <div className="feelings">
             {feelings[category]?.map((f) => (
@@ -74,25 +84,21 @@ export default function DiaryEmotionModal({
           </div>
         )}
 
-        {mode === "reflection" && (
-          <textarea
-            className="diary-textarea"
-            placeholder="Write your diary..."
-            value={diaryText}
-            onChange={(e) => setDiaryText(e.target.value)}
-            maxLength={4000}
-            style={{ marginTop: "16px" }}
-          />
-        )}
+        {/* OPTIONAL NOTE */}
+        <textarea
+          className="diary-textarea"
+          placeholder="Optional note (e.g. before / after)"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          maxLength={500}
+          style={{ minHeight: "100px" }}
+        />
 
+        {/* ACTIONS */}
         <div className="modal-actions">
           <button onClick={onClose}>Cancel</button>
           <button
-            disabled={
-              !category ||
-              selected.length === 0 ||
-              (mode === "reflection" && !diaryText.trim())
-            }
+            disabled={!category || selected.length === 0}
             onClick={() =>
               onSave({
                 category:
@@ -102,10 +108,11 @@ export default function DiaryEmotionModal({
                     ? "neutral"
                     : "unpleasant",
                 feelings: selected,
+                note: note.trim(),
               })
             }
           >
-            {mode === "reflection" ? "Save Diary" : "Record"}
+            Save
           </button>
         </div>
       </div>

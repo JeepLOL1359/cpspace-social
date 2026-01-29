@@ -1,3 +1,4 @@
+/* src/pages/diaries/diary.css */
 /* ---------- DIARY LAYOUT ---------- */
 .diary-layout {
   display: flex;
@@ -297,4 +298,44 @@
 
 .emotion-action:hover {
   opacity: 1;
+}
+
+/* ---------- EVENT LIST ---------- */
+.event-item {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+.event-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.event-emotion {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.event-timeline {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.timeline-entry {
+  margin-bottom: 10px;
+}
+
+.timeline-time {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.timeline-note {
+  font-size: 13px;
+  margin-top: 2px;
+  color: var(--text-main);
 }

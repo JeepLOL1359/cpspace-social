@@ -1,0 +1,58 @@
+// src/pages/diaries/EventItem.jsx
+
+function formatTime(ts) {
+  if (!ts) return "";
+  const date = ts.toDate ? ts.toDate() : new Date(ts);
+  return date.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+export default function EventItem({
+  eventId,
+  title,
+  currentEmotion,
+  emotionHistory,
+  isExpanded,
+  onToggle,
+}) {
+  return (
+    <div className="event-item">
+      <div
+        className="event-header"
+        onClick={() => onToggle(eventId)}
+      >
+        <div className="event-title">{title}</div>
+
+        <div className="event-emotion">
+          <span className="event-feelings">
+            {currentEmotion.feelings.join(", ")}
+          </span>
+        </div>
+      </div>
+
+      {isExpanded && (
+        <div className="event-timeline">
+          {emotionHistory.map((e, idx) => (
+            <div key={idx} className="timeline-entry">
+              <div className="timeline-time">
+                {formatTime(e.changedAt)}
+              </div>
+
+              <div className="timeline-emotion">
+                <strong>{e.category}</strong>
+                {" — "}
+                {e.feelings.join(", ")}
+              </div>
+
+              {e.note && (
+                <div className="timeline-note">{e.note}</div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

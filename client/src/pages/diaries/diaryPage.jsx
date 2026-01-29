@@ -1,4 +1,4 @@
-// src/pages/Diary/DiaryPage.jsx
+// src/pages/diaries/diaryPage.jsx
 import { useEffect, useState } from "react";
 import { getAuth } from "firebase/auth";
 import {
@@ -11,10 +11,14 @@ import {
   getDocs,
   deleteDoc,
   updateDoc,
+  orderBy,
+  arrayUnion,
 } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import DiaryEmotionModal from "./DiaryEmotionModal";
+import EventEmotionModal from "./EventEmotionModal";
 import "./diary.css";
+import EventItem from "./EventItem";
 
 function getTodayRange() {
   const start = new Date();
@@ -33,6 +37,17 @@ function formatTime(ts) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function getLocalDateParts(date = new Date()) {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1; // 1–12
+  const day = date.getDate();
+
+  const dateKey =
+    `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+  return { dateKey, year, month, day };
 }
 
 export default function DiaryPage() {
@@ -56,6 +71,20 @@ export default function DiaryPage() {
   // For update and delete functions 
   const [editingEmotion, setEditingEmotion] = useState(null);
   const [editingReflection, setEditingReflection] = useState(null);
+
+  const { dateKey } = getLocalDateParts();
+
+  const [events, setEvents] = useState([]);
+  const [expandedEventId, setExpandedEventId] = useState(null);
+
+  const [showEventTitleInput, setShowEventTitleInput] = useState(false);
+  const [eventTitle, setEventTitle] = useState("");
+  const [showEventEmotionModal, setShowEventEmotionModal] = useState(false);
+
+  const q = query(
+    collection(db, "users", user.uid, "diaryDays", dateKey, "events"),
+    orderBy("createdAt", "asc")
+  );
 
   const filteredEmotionDiaries =
     activeCategory === "all"
@@ -100,6 +129,7 @@ export default function DiaryPage() {
           feelings,
           body: "",
           createdAt: serverTimestamp(),
+          ...getLocalDateParts(),
         }
       );
     }
@@ -134,6 +164,7 @@ export default function DiaryPage() {
           feelings,
           body: diaryText,
           createdAt: serverTimestamp(),
+          ...getLocalDateParts(),
         }
       );
     }
@@ -144,25 +175,129 @@ export default function DiaryPage() {
     loadTodayDiary();
   }
 
+  async function createEvent({ title, category, feelings, note }) {
+    if (!user) return;
+
+    const { dateKey } = getLocalDateParts();
+
+    await addDoc(
+      collection(db, "users", user.uid, "diaryDays", dateKey, "events"),
+      {
+        title,
+        createdAt: serverTimestamp(),
+
+        currentEmotion: {
+          category,
+          feelings,
+          changedAt: serverTimestamp(),
+        },
+
+        emotionHistory: [
+          {
+            category,
+            feelings,
+            changedAt: new Date(),
+            note: note || "",
+          },
+        ],
+      }
+    );
+
+    loadTodayEvents();
+  }
+
+  async function updateEventEmotion(eventId, { category, feelings, note }) {
+    if (!user) return;
+
+    const { dateKey } = getLocalDateParts();
+
+    const ref = doc(
+      db,
+      "users",
+      user.uid,
+      "diaryDays",
+      dateKey,
+      "events",
+      eventId
+    );
+
+    await updateDoc(ref, {
+      currentEmotion: {
+        category,
+        feelings,
+        changedAt: serverTimestamp(),
+      },
+      emotionHistory: arrayUnion({
+        category,
+        feelings,
+        changedAt: new Date(),
+        note: note || "",
+      }),
+    });
+
+    loadTodayEvents();
+  }
+
+  async function handleDeleteEvent(eventId) {
+    if (!user) return;
+
+    const ok = window.confirm("Delete this event?");
+    if (!ok) return;
+
+    const { dateKey } = getLocalDateParts();
+
+    await deleteDoc(
+      doc(
+        db,
+        "users",
+        user.uid,
+        "diaryDays",
+        dateKey,
+        "events",
+        eventId
+      )
+    );
+
+    loadTodayEvents();
+  }
+
+  function toggleEvent(id) {
+    setExpandedEventId(prev => (prev === id ? null : id));
+  }
+
   async function loadTodayDiary() {
     if (!user) return;
 
     setLoading(true);
 
-    const { start, end } = getTodayRange();
-
+    const { dateKey } = getLocalDateParts();
     const q = query(
       collection(db, "users", user.uid, "diaries"),
-      where("createdAt", ">=", start),
-      where("createdAt", "<=", end)
+      where("dateKey", "==", dateKey)
     );
 
     const snap = await getDocs(q);
 
+    let docs = snap.docs;
+
+    // fallback for legacy docs (no dateKey)
+    if (docs.length === 0) {
+      const { start, end } = getTodayRange();
+
+      const legacyQ = query(
+        collection(db, "users", user.uid, "diaries"),
+        where("createdAt", ">=", start),
+        where("createdAt", "<=", end)
+      );
+
+      const legacySnap = await getDocs(legacyQ);
+      docs = legacySnap.docs;
+    }
+
     const emotions = [];
     const reflections = [];
 
-    snap.forEach((docSnap) => {
+    docs.forEach((docSnap) => {
       const data = { id: docSnap.id, ...docSnap.data() };
 
       if (data.type === "emotion") {
@@ -180,6 +315,26 @@ export default function DiaryPage() {
     setReflectionDiaries(reflections);
 
     setLoading(false);
+  }
+
+  async function loadTodayEvents() {
+    if (!user) return;
+
+    const { dateKey } = getLocalDateParts();
+
+    const q = query(
+      collection(db, "users", user.uid, "diaryDays", dateKey, "events"),
+      orderBy("createdAt", "asc")
+    );
+
+    const snap = await getDocs(q);
+
+    const list = snap.docs.map(d => ({
+      id: d.id,
+      ...d.data(),
+    }));
+
+    setEvents(list);
   }
 
   // Delete handler for emotion logs
@@ -212,6 +367,7 @@ export default function DiaryPage() {
 
   useEffect(() => {
     loadTodayDiary();
+    loadTodayEvents();
   }, [user]);
 
   return (
@@ -350,7 +506,94 @@ export default function DiaryPage() {
       {/* RIGHT PANEL */}
       <aside className="diary-side">
         <h3>Today’s Event List</h3>
-        <button disabled>Record an event +</button>
+        <button
+          onClick={() => {
+            setShowEventTitleInput(true);
+            setEventTitle("");
+          }}
+        >
+          Record an event +
+        </button>
+
+        {showEventTitleInput && (
+          <div style={{ marginTop: "12px", width: "100%" }}>
+            <input
+              type="text"
+              placeholder="What is the event?"
+              value={eventTitle}
+              onChange={(e) => setEventTitle(e.target.value)}
+              maxLength={100}
+              style={{
+                width: "100%",
+                padding: "10px 14px",
+                borderRadius: "999px",
+                border: "1px solid var(--border-color)",
+                fontSize: "14px",
+                outline: "none",
+              }}
+            />
+
+            <div style={{ marginTop: "8px", display: "flex", gap: "8px" }}>
+              <button
+                disabled={!eventTitle.trim()}
+                onClick={() => {
+                  setShowEventEmotionModal(true);
+                }}
+              >
+                Continue
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowEventTitleInput(false);
+                  setEventTitle("");
+                }}
+                style={{ background: "transparent", color: "var(--text-muted)" }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {showEventEmotionModal && (
+          <EventEmotionModal
+            title={eventTitle}
+            onClose={() => {
+              setShowEventEmotionModal(false);
+              setShowEventTitleInput(false);
+              setEventTitle("");
+            }}
+            onSave={(data) => {
+              createEvent({
+                title: eventTitle,
+                ...data,
+              });
+
+              setShowEventEmotionModal(false);
+              setShowEventTitleInput(false);
+              setEventTitle("");
+            }}
+          />
+        )}
+
+        {events.length === 0 ? (
+          <div className="diary-placeholder">
+            No events recorded today.
+          </div>
+        ) : (
+          events.map(event => (
+            <EventItem
+              key={event.id}
+              eventId={event.id}
+              title={event.title}
+              currentEmotion={event.currentEmotion}
+              emotionHistory={event.emotionHistory}
+              isExpanded={expandedEventId === event.id}
+              onToggle={toggleEvent}
+            />
+          ))
+        )}
       </aside>
 
       {showEmotionModal && (
