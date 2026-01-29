@@ -40,8 +40,6 @@
   flex-direction: column;
   padding: 20px;
   border-right: 1px solid var(--border-color);
-
-  
   position: sticky;
   top: 0;
   height: 100vh;
@@ -86,7 +84,7 @@
 
 /* ---------- SIDEBAR USER ---------- */
 .sidebar-user {
-  margin-top: auto;
+  margin-top: 20px;
   display: flex;
   align-items: center;
   gap: 10px;

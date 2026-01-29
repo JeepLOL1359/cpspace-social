@@ -105,6 +105,7 @@ export default function MainLayout() {
             border: "none",
             borderRadius: "8px",
             cursor: "pointer",
+            textAlign: "center",
           }}
         >
           Log out
