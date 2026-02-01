@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { usePosts } from "../../hooks/usePosts";
-import PostCard from "../../components/PostCard";
+import { usePosts } from "./hooks/usePosts";
+import PostCard from "./components/PostCard";
 import "./socialSpace.css";
-import { usePublicPseudonyms } from "../../hooks/usePublicPseudonyms";
+import { usePublicPseudonyms } from "./hooks/usePublicPseudonyms";
 
 export default function SocialSpace() {
   const { posts, loadInitial, loadMore, loading } = usePosts();

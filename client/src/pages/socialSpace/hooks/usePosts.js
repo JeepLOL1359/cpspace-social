@@ -8,7 +8,7 @@ import {
   getDocs
 } from "firebase/firestore";
 import { useState } from "react";
-import { db } from "../firebaseConfig";
+import { db } from "../../../firebaseConfig";
 
 const PAGE_SIZE = 5;
 
