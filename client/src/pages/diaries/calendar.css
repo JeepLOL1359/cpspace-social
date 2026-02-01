@@ -1,0 +1,84 @@
+/* ---------- CALENDAR PAGE ---------- */
+.calendar-page {
+  padding: 32px;
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.calendar-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* ---------- MONTH VIEW ---------- */
+.month-nav {
+  display: flex;
+  justify-content: space-between;
+  margin: 12px 0;
+}
+
+.week-labels,
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.week-label {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.day-cell {
+  text-align: center;
+  padding: 10px 0;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.day-cell:hover {
+  background: var(--accent-soft);
+}
+
+.day-cell.muted {
+  opacity: 0.4;
+}
+
+/* ---------- YEAR VIEW ---------- */
+.year-view {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.year-cell {
+  padding: 20px;
+  text-align: center;
+  border-radius: 12px;
+  cursor: pointer;
+  background: var(--bg-card);
+}
+
+.year-cell.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.year-cell:hover {
+  background: var(--accent-soft);
+}
+
+/* ---------- EMOTION BADGE ---------- */
+.emotion-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+}

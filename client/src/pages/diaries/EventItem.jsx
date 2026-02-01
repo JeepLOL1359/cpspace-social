@@ -16,6 +16,8 @@ export default function EventItem({
   emotionHistory,
   isExpanded,
   onToggle,
+  onEdit,
+  onDelete,
 }) {
   return (
     <div className="event-item">
@@ -33,25 +35,46 @@ export default function EventItem({
       </div>
 
       {isExpanded && (
-        <div className="event-timeline">
-          {emotionHistory.map((e, idx) => (
-            <div key={idx} className="timeline-entry">
-              <div className="timeline-time">
-                {formatTime(e.changedAt)}
-              </div>
+        <>
+          <div className="event-actions">
+            <span
+              className="event-action"
+              title="Edit emotion"
+              onClick={() => onEdit(eventId)}
+            >
+              ✏️
+            </span>
+            <span
+              className="event-action"
+              title="Delete event"
+              onClick={() => onDelete(eventId)}
+            >
+              🗑
+            </span>
+          </div>
 
-              <div className="timeline-emotion">
-                <strong>{e.category}</strong>
-                {" — "}
-                {e.feelings.join(", ")}
-              </div>
+          <div className="event-timeline">
+            {emotionHistory.map((e, idx) => (
+              <div key={idx} className="timeline-entry">
+                <div className="timeline-time">
+                  {new Date(e.changedAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </div>
 
-              {e.note && (
-                <div className="timeline-note">{e.note}</div>
-              )}
-            </div>
-          ))}
-        </div>
+                <div className="timeline-emotion">
+                  <strong>{e.category}</strong> —{" "}
+                  {e.feelings.join(", ")}
+                </div>
+
+                {e.note && (
+                  <div className="timeline-note">{e.note}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

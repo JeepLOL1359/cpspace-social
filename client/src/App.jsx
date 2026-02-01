@@ -42,6 +42,7 @@ import EditStrategy from "./pages/hub/adminHub/editStrategy";
 
 // Diary
 import DiaryPage from "./pages/diaries/diaryPage";
+import CalendarPage from "./pages/diaries/CalendarPage";
 
 // Social Space
 import SocialSpace from "./pages/socialSpace/SocialSpace";
@@ -210,6 +211,8 @@ function App() {
 
           {/* DIARY */}
           <Route path="diary" element={<DiaryPage />} />
+          {/* CALENDAR */}
+          <Route path="calendar" element={<CalendarPage />} />
 
           {/* SOCIAL SPACE */}
           <Route path="social-space" element={<SocialSpace />} />

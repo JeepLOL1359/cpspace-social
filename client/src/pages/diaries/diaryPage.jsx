@@ -1,37 +1,23 @@
 // src/pages/diaries/diaryPage.jsx
-import { useEffect, useState } from "react";
+import "./diary.css";
+
 import { getAuth } from "firebase/auth";
-import {
-  collection,
-  addDoc,
-  serverTimestamp,
-  query,
-  where,
-  doc,
-  getDocs,
-  deleteDoc,
-  updateDoc,
-  orderBy,
-  arrayUnion,
-} from "firebase/firestore";
-import { db } from "../../firebaseConfig";
+
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+
+import { getMonthLabel, getWeekDates } from "./utils/dateUtils";
+
+import EventItem from "./EventItem";
 import DiaryEmotionModal from "./DiaryEmotionModal";
 import EventEmotionModal from "./EventEmotionModal";
-import "./diary.css";
-import EventItem from "./EventItem";
 
-function getTodayRange() {
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-
-  const end = new Date();
-  end.setHours(23, 59, 59, 999);
-
-  return { start, end };
-}
+import { useEvents } from "./hooks/useEvents";
+import { useEmotionLogs } from "./hooks/useEmotionLogs";
+import { useReflections } from "./hooks/useReflections";
 
 function formatTime(ts) {
-  if (!ts) return "";
+  if (!ts || !ts.toDate) return "";
   const date = ts.toDate();
   return date.toLocaleTimeString([], {
     hour: "2-digit",
@@ -39,52 +25,94 @@ function formatTime(ts) {
   });
 }
 
-function getLocalDateParts(date = new Date()) {
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1; // 1–12
-  const day = date.getDate();
+function WeekStrip({ activeDate, onSelectDate }) {
+  const weekDates = getWeekDates(activeDate);
 
-  const dateKey =
-    `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  return (
+    <div className="week-strip">
+      {weekDates.map((date) => {
+        const isActive =
+          date.toDateString() === activeDate.toDateString();
 
-  return { dateKey, year, month, day };
+        return (
+          <div
+            key={date.toISOString()}
+            className={`week-day ${isActive ? "active" : ""}`}
+            onClick={() => onSelectDate(date)}
+          >
+            <div className="week-day-label">
+              {date.toLocaleDateString("en-US", {
+                weekday: "short",
+              })}
+            </div>
+            <div className="week-day-number">
+              {date.getDate()}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function DiaryPage() {
+
+  // basic inits
   const auth = getAuth();
   const user = auth.currentUser;
+  const location = useLocation();
+  const navigate = useNavigate();
 
+  // general inits
+  const loading = false;
   const [showEmotionModal, setShowEmotionModal] = useState(false);
-  const [todayEntry, setTodayEntry] = useState(null);
-  const [diaryText, setDiaryText] = useState("");
-
-  // added for emotion logging and reflection distinction (v3)
-  const [emotionDiaries, setEmotionDiaries] = useState([]);
-  const [reflectionDiaries, setReflectionDiaries] = useState([]);
-  const [loading, setLoading] = useState(true);
-
   const [activeCategory, setActiveCategory] = useState("all");
   // "all" | "pleasant" | "neutral" | "unpleasant"
+  const [activeDate, setActiveDate] = useState(
+    location.state?.activeDate
+      ? new Date(location.state.activeDate)
+      : new Date()
+  );
 
-  const [isReflectionMode, setIsReflectionMode] = useState(false);
-
-  // For update and delete functions 
+  // emotion log inits
+  const [emotionDiaries, setEmotionDiaries] = useState([]);
   const [editingEmotion, setEditingEmotion] = useState(null);
+
+  // diary inits
+  const [reflectionDiaries, setReflectionDiaries] = useState([]);
   const [editingReflection, setEditingReflection] = useState(null);
+  const [isReflectionMode, setIsReflectionMode] = useState(false);
+  const [diaryText, setDiaryText] = useState("");
 
-  const { dateKey } = getLocalDateParts();
-
+  // event inits
   const [events, setEvents] = useState([]);
   const [expandedEventId, setExpandedEventId] = useState(null);
-
   const [showEventTitleInput, setShowEventTitleInput] = useState(false);
   const [eventTitle, setEventTitle] = useState("");
   const [showEventEmotionModal, setShowEventEmotionModal] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [showEditEventModal, setShowEditEventModal] = useState(false);
+  
+  const {
+    loadEvents,
+    createEvent,
+    updateEventEmotion,
+    deleteEvent,
+  } = useEvents(user, activeDate);
 
-  const q = query(
-    collection(db, "users", user.uid, "diaryDays", dateKey, "events"),
-    orderBy("createdAt", "asc")
-  );
+  const {
+    loadEmotionLogs,
+    createEmotion,
+    updateEmotion,
+    deleteEmotion,
+  } = useEmotionLogs(user, activeDate);
+
+  const {
+    loadReflections,
+    createReflection,
+    updateReflection,
+    deleteReflection,
+  } = useReflections(user, activeDate);
 
   const filteredEmotionDiaries =
     activeCategory === "all"
@@ -93,6 +121,11 @@ export default function DiaryPage() {
           (d) => d.category === activeCategory
         );
 
+  function toggleEvent(id) {
+    setExpandedEventId(prev => (prev === id ? null : id));
+  }
+
+  // edit function
   function handleEditEmotion(entry) {
     setEditingEmotion(entry);
     setIsReflectionMode(false);      // ensure emotion mode
@@ -106,37 +139,30 @@ export default function DiaryPage() {
     setShowEmotionModal(true);
   }
 
+  function handleEditEvent(eventId) {
+    const event = events.find(e => e.id === eventId);
+    if (!event) return;
+
+    setEditingEvent(event);
+    setShowEditEventModal(true);
+  }
+
+  // save function
   async function saveEmotionDiary({ category, feelings }) {
     if (!user) return;
 
     // EDIT MODE
     if (editingEmotion) {
-      await updateDoc(
-        doc(db, "users", user.uid, "diaries", editingEmotion.id),
-        {
-          category,
-          feelings,
-        }
-      );
+      await updateEmotion(editingEmotion.id, { category, feelings });
     } 
     // CREATE MODE
     else {
-      await addDoc(
-        collection(db, "users", user.uid, "diaries"),
-        {
-          type: "emotion",
-          category,
-          feelings,
-          body: "",
-          createdAt: serverTimestamp(),
-          ...getLocalDateParts(),
-        }
-      );
+      await createEmotion({ category, feelings });  
     }
 
     setEditingEmotion(null);
     setShowEmotionModal(false);
-    loadTodayDiary();
+    reloadEmotionLogs();
   }
 
   async function saveReflectionDiary({ category, feelings }) {
@@ -145,236 +171,86 @@ export default function DiaryPage() {
 
     // EDIT MODE
     if (editingReflection) {
-      await updateDoc(
-        doc(db, "users", user.uid, "diaries", editingReflection.id),
-        {
-          category,
-          feelings,
-          body: diaryText,
-        }
-      );
+      await updateReflection(editingReflection.id, {
+        category,
+        feelings,
+        body: diaryText,
+      });
     }
     // CREATE MODE
     else {
-      await addDoc(
-        collection(db, "users", user.uid, "diaries"),
-        {
-          type: "reflection",
-          category,
-          feelings,
-          body: diaryText,
-          createdAt: serverTimestamp(),
-          ...getLocalDateParts(),
-        }
-      );
+      await createReflection({
+        category,
+        feelings,
+        body: diaryText,
+      });
     }
 
     setEditingReflection(null);
     setDiaryText("");
     setShowEmotionModal(false);
-    loadTodayDiary();
+    reloadReflections();
   }
 
-  async function createEvent({ title, category, feelings, note }) {
-    if (!user) return;
-
-    const { dateKey } = getLocalDateParts();
-
-    await addDoc(
-      collection(db, "users", user.uid, "diaryDays", dateKey, "events"),
-      {
-        title,
-        createdAt: serverTimestamp(),
-
-        currentEmotion: {
-          category,
-          feelings,
-          changedAt: serverTimestamp(),
-        },
-
-        emotionHistory: [
-          {
-            category,
-            feelings,
-            changedAt: new Date(),
-            note: note || "",
-          },
-        ],
-      }
-    );
-
-    loadTodayEvents();
-  }
-
-  async function updateEventEmotion(eventId, { category, feelings, note }) {
-    if (!user) return;
-
-    const { dateKey } = getLocalDateParts();
-
-    const ref = doc(
-      db,
-      "users",
-      user.uid,
-      "diaryDays",
-      dateKey,
-      "events",
-      eventId
-    );
-
-    await updateDoc(ref, {
-      currentEmotion: {
-        category,
-        feelings,
-        changedAt: serverTimestamp(),
-      },
-      emotionHistory: arrayUnion({
-        category,
-        feelings,
-        changedAt: new Date(),
-        note: note || "",
-      }),
-    });
-
-    loadTodayEvents();
-  }
-
-  async function handleDeleteEvent(eventId) {
-    if (!user) return;
-
-    const ok = window.confirm("Delete this event?");
-    if (!ok) return;
-
-    const { dateKey } = getLocalDateParts();
-
-    await deleteDoc(
-      doc(
-        db,
-        "users",
-        user.uid,
-        "diaryDays",
-        dateKey,
-        "events",
-        eventId
-      )
-    );
-
-    loadTodayEvents();
-  }
-
-  function toggleEvent(id) {
-    setExpandedEventId(prev => (prev === id ? null : id));
-  }
-
-  async function loadTodayDiary() {
-    if (!user) return;
-
-    setLoading(true);
-
-    const { dateKey } = getLocalDateParts();
-    const q = query(
-      collection(db, "users", user.uid, "diaries"),
-      where("dateKey", "==", dateKey)
-    );
-
-    const snap = await getDocs(q);
-
-    let docs = snap.docs;
-
-    // fallback for legacy docs (no dateKey)
-    if (docs.length === 0) {
-      const { start, end } = getTodayRange();
-
-      const legacyQ = query(
-        collection(db, "users", user.uid, "diaries"),
-        where("createdAt", ">=", start),
-        where("createdAt", "<=", end)
-      );
-
-      const legacySnap = await getDocs(legacyQ);
-      docs = legacySnap.docs;
-    }
-
-    const emotions = [];
-    const reflections = [];
-
-    docs.forEach((docSnap) => {
-      const data = { id: docSnap.id, ...docSnap.data() };
-
-      if (data.type === "emotion") {
-        emotions.push(data);
-      } else if (data.type === "reflection") {
-        reflections.push(data);
-      }
-    });
-
-    // optional: sort by time (oldest → newest)
-    emotions.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds);
-    reflections.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds);
-
-    setEmotionDiaries(emotions);
-    setReflectionDiaries(reflections);
-
-    setLoading(false);
-  }
-
-  async function loadTodayEvents() {
-    if (!user) return;
-
-    const { dateKey } = getLocalDateParts();
-
-    const q = query(
-      collection(db, "users", user.uid, "diaryDays", dateKey, "events"),
-      orderBy("createdAt", "asc")
-    );
-
-    const snap = await getDocs(q);
-
-    const list = snap.docs.map(d => ({
-      id: d.id,
-      ...d.data(),
-    }));
-
-    setEvents(list);
-  }
-
-  // Delete handler for emotion logs
+  // delete function
   async function handleDeleteEmotion(entryId) {
     if (!user) return;
-
-    const ok = window.confirm("Delete this emotion log?");
-    if (!ok) return;
-
-    await deleteDoc(
-      doc(db, "users", user.uid, "diaries", entryId)
-    );
-
-    loadTodayDiary();
+    await deleteEmotion(entryId);
+    reloadEmotionLogs();
   }
 
-  // Delete handler for reflection diaries
   async function handleDeleteReflection(entryId) {
     if (!user) return;
+    await deleteReflection(entryId);
+    reloadReflections();
+  }
 
-    const ok = window.confirm("Delete this diary entry?");
-    if (!ok) return;
+  // reloading (relaod)
+  async function reloadEmotionLogs() {
+    const list = await loadEmotionLogs();
+    list.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds);
+    setEmotionDiaries(list);
+  }
 
-    await deleteDoc(
-      doc(db, "users", user.uid, "diaries", entryId)
-    );
+  async function reloadReflections() {
+    const list = await loadReflections();
+    list.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds);
+    setReflectionDiaries(list);
+  }
 
-    loadTodayDiary();
+  async function reloadEvents() {
+    const data = await loadEvents();
+    setEvents(data);
   }
 
   useEffect(() => {
-    loadTodayDiary();
-    loadTodayEvents();
-  }, [user]);
+    if (!user) return;
+
+    reloadEmotionLogs();
+    reloadReflections();
+    reloadEvents();
+  }, [user, activeDate]);
+
+  useEffect(() => {
+    if (location.state?.activeDate) {
+      setActiveDate(new Date(location.state.activeDate));
+    }
+  }, [location.state]);
 
   return (
     <div className="diary-layout">
       {/* CENTER */}
       <main className="diary-main">
         <div className="diary-actions">
+          <button
+            onClick={() =>
+              navigate("/calendar", {
+                state: { activeDate },
+              })
+            }
+          >
+            &lt; {getMonthLabel(activeDate)}
+          </button>
           <button onClick={() => setShowEmotionModal(true)}>
             Today’s Emotion +
           </button>
@@ -387,6 +263,14 @@ export default function DiaryPage() {
             Diary +
           </button>
         </div>
+
+        <WeekStrip
+          activeDate={activeDate}
+          onSelectDate={(date) => {
+            // confirm discard logic comes later
+            setActiveDate(date);
+          }}
+        />
 
         {/* EMOTION CATEGORY FILTER BAR */}
         <div className="emotion-filter-bar">
@@ -570,9 +454,30 @@ export default function DiaryPage() {
                 ...data,
               });
 
+              reloadEvents();
+
               setShowEventEmotionModal(false);
               setShowEventTitleInput(false);
               setEventTitle("");
+            }}
+          />
+        )}
+
+        {showEditEventModal && editingEvent && (
+          <EventEmotionModal
+            title={editingEvent.title}
+            initialCategory={editingEvent.currentEmotion.category}
+            initialFeelings={editingEvent.currentEmotion.feelings}
+            onClose={() => {
+              setShowEditEventModal(false);
+              setEditingEvent(null);
+            }}
+            onSave={(data) => {
+              updateEventEmotion(editingEvent.id, data);
+              reloadEvents();
+
+              setShowEditEventModal(false);
+              setEditingEvent(null);
             }}
           />
         )}
@@ -582,18 +487,24 @@ export default function DiaryPage() {
             No events recorded today.
           </div>
         ) : (
-          events.map(event => (
-            <EventItem
-              key={event.id}
-              eventId={event.id}
-              title={event.title}
-              currentEmotion={event.currentEmotion}
-              emotionHistory={event.emotionHistory}
-              isExpanded={expandedEventId === event.id}
-              onToggle={toggleEvent}
-            />
-          ))
-        )}
+              events.map(event => (
+                <EventItem
+                  key={event.id}
+                  eventId={event.id}
+                  title={event.title}
+                  currentEmotion={event.currentEmotion}
+                  emotionHistory={event.emotionHistory}
+                  isExpanded={expandedEventId === event.id}
+                  onToggle={toggleEvent}
+                  onEdit={handleEditEvent}
+                  onDelete={async (id) => {
+                    await deleteEvent(id);
+                    reloadEvents();
+                  }}
+                />
+              ))
+            )
+        }
       </aside>
 
       {showEmotionModal && (
