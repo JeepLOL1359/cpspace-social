@@ -1,5 +1,6 @@
 // src/pages/diaries/diaryPage.jsx
 import "./diary.css";
+import "../mainLayout.css";
 
 import { getAuth } from "firebase/auth";
 
@@ -25,32 +26,46 @@ function formatTime(ts) {
   });
 }
 
-function WeekStrip({ activeDate, onSelectDate }) {
+function WeekStrip({ activeDate, onSelectDate, onPrevWeek, onNextWeek }) {
   const weekDates = getWeekDates(activeDate);
 
   return (
-    <div className="week-strip">
-      {weekDates.map((date) => {
-        const isActive =
-          date.toDateString() === activeDate.toDateString();
+    <div className="week-strip-wrapper">
+      <button
+        className="week-nav-btn"
+        onClick={onPrevWeek}
+        aria-label="Previous week"
+      >
+        ‹
+      </button>
 
-        return (
-          <div
-            key={date.toISOString()}
-            className={`week-day ${isActive ? "active" : ""}`}
-            onClick={() => onSelectDate(date)}
-          >
-            <div className="week-day-label">
-              {date.toLocaleDateString("en-US", {
-                weekday: "short",
-              })}
+      <div className="week-strip">
+        {weekDates.map((date) => {
+          const isActive =
+            date.toDateString() === activeDate.toDateString();
+
+          return (
+            <div
+              key={date.toISOString()}
+              className={`week-day ${isActive ? "active" : ""}`}
+              onClick={() => onSelectDate(date)}
+            >
+              <div className="week-day-label">
+                {date.toLocaleDateString("en-US", { weekday: "short" })}
+              </div>
+              <div className="week-day-number">{date.getDate()}</div>
             </div>
-            <div className="week-day-number">
-              {date.getDate()}
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
+
+      <button
+        className="week-nav-btn"
+        onClick={onNextWeek}
+        aria-label="Next week"
+      >
+        ›
+      </button>
     </div>
   );
 }
@@ -123,6 +138,18 @@ export default function DiaryPage() {
 
   function toggleEvent(id) {
     setExpandedEventId(prev => (prev === id ? null : id));
+  }
+
+  function goPrevWeek() {
+    const d = new Date(activeDate);
+    d.setDate(d.getDate() - 7);
+    setActiveDate(d);
+  }
+
+  function goNextWeek() {
+    const d = new Date(activeDate);
+    d.setDate(d.getDate() + 7);
+    setActiveDate(d);
   }
 
   // edit function
@@ -241,57 +268,54 @@ export default function DiaryPage() {
     <div className="diary-layout">
       {/* CENTER */}
       <main className="diary-main">
-        <div className="diary-actions">
-          <button
-            onClick={() =>
-              navigate("/calendar", {
-                state: { activeDate },
-              })
-            }
-          >
-            &lt; {getMonthLabel(activeDate)}
-          </button>
-          <button onClick={() => setShowEmotionModal(true)}>
-            Today’s Emotion +
-          </button>
-          <button
-            onClick={() => {
-              setIsReflectionMode(true);
-              setShowEmotionModal(true);
-            }}
-          >
-            Diary +
-          </button>
-        </div>
-
-        <WeekStrip
-          activeDate={activeDate}
-          onSelectDate={(date) => {
-            // confirm discard logic comes later
-            setActiveDate(date);
-          }}
-        />
-
-        {/* EMOTION CATEGORY FILTER BAR */}
-        <div className="emotion-filter-bar">
-          {["pleasant", "neutral", "unpleasant"].map((cat) => (
+        <div className="diary-top-center">
+          <div className="diary-actions">
             <button
-              key={cat}
-              className={
-                activeCategory === cat
-                  ? "filter-btn active"
-                  : "filter-btn"
-              }
               onClick={() =>
-                setActiveCategory(
-                  activeCategory === cat ? "all" : cat
-                )
+                navigate("/calendar", {
+                  state: { activeDate },
+                })
               }
             >
-              {cat.charAt(0).toUpperCase() + cat.slice(1)}
+              &lt; {getMonthLabel(activeDate)}
             </button>
-          ))}
-        </div>  
+            <button onClick={() => setShowEmotionModal(true)}>
+              Today’s Emotion +
+            </button>
+            <button
+              onClick={() => {
+                setIsReflectionMode(true);
+                setShowEmotionModal(true);
+              }}
+            >
+              Diary +
+            </button>
+          </div>
+
+          <WeekStrip
+            activeDate={activeDate}
+            onSelectDate={setActiveDate}
+            onPrevWeek={goPrevWeek}
+            onNextWeek={goNextWeek}
+          />
+
+          {/* EMOTION CATEGORY FILTER BAR */}
+          <div className="emotion-segment">
+            {["pleasant", "neutral", "unpleasant"].map((cat) => (
+              <button
+                key={cat}
+                className={`emotion-segment-btn ${
+                  activeCategory === cat ? "active" : ""
+                }`}
+                onClick={() =>
+                  setActiveCategory(activeCategory === cat ? "all" : cat)
+                }
+              >
+                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div> 
 
         {loading ? (
           <div className="diary-placeholder">
@@ -353,7 +377,11 @@ export default function DiaryPage() {
               ) : (
 
                 reflectionDiaries.map((entry) => (
-                  <div key={entry.id} style={{ marginBottom: "24px" }}>
+                  <div key={entry.id} className="diary-card">
+                    <div className="diary-time-title">
+                      {formatTime(entry.createdAt)}
+                    </div>
+
                     <div className="diary-meta">
                       <span className="diary-emotion">{entry.category}</span>
                       {entry.feelings.map((f) => (

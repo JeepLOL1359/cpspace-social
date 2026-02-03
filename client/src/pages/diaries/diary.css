@@ -20,6 +20,13 @@
   gap: 24px;
 }
 
+.diary-top-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* THIS is the missing piece */
+  gap: 24px;
+}
+
 /* ---------- TOP ACTION BUTTONS ---------- */
 .diary-actions {
   display: flex;
@@ -60,7 +67,7 @@
   border: 1px solid var(--border-color);
   font-size: 15px;
   line-height: 1.6;
-  background: #fff;
+  background: var(--bg-card);
   color: var(--text-main);
   outline: none;
 }
@@ -86,7 +93,7 @@
 }
 
 .diary-side h3 {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--text-main);
 }
@@ -226,6 +233,7 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  margin-bottom: 8px;
 }
 
 .diary-emotion {
@@ -244,24 +252,45 @@
   white-space: pre-wrap;
 }
 
-/* ---------- EMOTION FILTER BAR ---------- */
-.emotion-filter-bar {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
+.diary-card {
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 20px 22px;
+  background: var(--bg-card);
+  margin-bottom: 14px;
 }
 
-.filter-btn {
-  padding: 8px 18px;
+.diary-time-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 12px;
+}
+
+
+/* ---------- EMOTION SEGMENT BAR ---------- */
+.emotion-segment {
+  display: flex;
+  background: var(--border-color);
   border-radius: 999px;
-  border: 1px solid var(--border-color);
+  padding: 6px;
+  gap: 6px;
+}
+
+.emotion-segment-btn {
+  flex: 1;
   background: transparent;
-  font-size: 13px;
+  color: var(--text-main);
+  border: none;
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease;
 }
 
-.filter-btn.active {
+.emotion-segment-btn.active {
   background: var(--accent-soft);
   color: var(--accent);
   border-color: var(--accent);
@@ -275,7 +304,7 @@
   padding: 6px 14px;
   border-radius: 999px;
   background: var(--accent-soft);
-  color: var(--text-main);
+  color: var(--text-inverse);
   font-size: 13px;
   margin: 4px 6px 4px 0;
 }
@@ -386,4 +415,32 @@
 
 .week-day-number {
   font-size: 16px;
+}
+
+.week-strip-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.week-nav-btn {
+  border: none;
+  background: var(--accent-soft);
+  color: var(--accent);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.week-nav-btn:hover {
+  background: var(--accent);
+  color: white;
+}
+
+[data-theme="dark"] .diary-main,
+[data-theme="dark"] .diary-side,
+[data-theme="dark"] .settings-panel {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }

@@ -66,42 +66,44 @@ export default function CalendarPage() {
 
   return (
     <div className="calendar-page">
-      {/* HEADER */}
-      <div className="calendar-header">
-        <button
-          className="calendar-back"
-          onClick={() => navigate(-1)}
-        >
-          ← Back
-        </button>
+      <div className="calendar-card">
+        {/* HEADER */}
+        <div className="calendar-header">
+          <button
+            className="calendar-back"
+            onClick={() => navigate(-1)}
+          >
+            ← Back
+          </button>
 
-        <h2
-          className="calendar-title"
-          onClick={() =>
-            setViewMode(viewMode === "month" ? "year" : "month")
-          }
-          style={{ cursor: "pointer" }}
-        >
-          {getMonthLabel(activeDate)} {activeDate.getFullYear()}
-        </h2>
+          <h2
+            className="calendar-title"
+            onClick={() =>
+              setViewMode(viewMode === "month" ? "year" : "month")
+            }
+            style={{ cursor: "pointer" }}
+          >
+            {getMonthLabel(activeDate)} {activeDate.getFullYear()}
+          </h2>
+        </div>
+
+        {/* BODY */}
+        {viewMode === "month" && (
+          <MonthView
+            activeDate={activeDate}
+            onPrev={() => changeMonth(-1)}
+            onNext={() => changeMonth(1)}
+            onSelectDay={selectDay}
+          />
+        )}
+
+        {viewMode === "year" && (
+          <YearView
+            activeDate={activeDate}
+            onSelectYear={selectYear}
+          />
+        )}
       </div>
-
-      {/* BODY */}
-      {viewMode === "month" && (
-        <MonthView
-          activeDate={activeDate}
-          onPrev={() => changeMonth(-1)}
-          onNext={() => changeMonth(1)}
-          onSelectDay={selectDay}
-        />
-      )}
-
-      {viewMode === "year" && (
-        <YearView
-          activeDate={activeDate}
-          onSelectYear={selectYear}
-        />
-      )}
     </div>
   );
 }
@@ -113,6 +115,8 @@ export default function CalendarPage() {
 function MonthView({ activeDate, onPrev, onNext, onSelectDay }) {
   const days = getMonthGrid(activeDate);
   const currentMonth = activeDate.getMonth();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   return (
     <div className="month-view">
@@ -134,12 +138,17 @@ function MonthView({ activeDate, onPrev, onNext, onSelectDay }) {
           const isCurrentMonth =
             date.getMonth() === currentMonth;
 
+          const cellDate = new Date(date);
+          cellDate.setHours(0, 0, 0, 0);
+
+          const isToday = cellDate.getTime() === today.getTime();
           return (
             <div
               key={idx}
-              className={`day-cell ${
-                isCurrentMonth ? "" : "muted"
-              }`}
+              className={`day-cell
+                ${isCurrentMonth ? "" : "muted"}
+                ${isToday ? "active" : ""}
+              `}
               onClick={() => onSelectDay(date)}
             >
               {date.getDate()}

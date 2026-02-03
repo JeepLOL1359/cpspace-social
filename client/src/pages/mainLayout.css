@@ -48,7 +48,7 @@
 .sidebar h3,
 .sidebar .logo {
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 20px;
   color: var(--text-main);
 }
@@ -78,7 +78,7 @@
 
 .sidebar button.active {
   background: var(--accent-soft);
-  color: #000000;
+  color: var(--text-main);
   font-weight: 500;
 }
 
@@ -129,8 +129,32 @@
 }
 
 /* ACTIVE MAIN ITEM */
-.main-link.active {
+.sidebar .main-link.active {
   background: var(--accent-soft);
-  color: #000000; /* black text */
+  color: var(--text-inverse);
   font-weight: 500;
+}
+
+.sidebar .main-link:hover {
+  color: var(--accent);
+}
+
+/* ===== Base (light) ===== */
+:root {
+  --bg-main: #f8fafc;
+  --bg-card: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-inverse: #0f172a; 
+  --border-color: #e5e7eb;
+}
+
+/* ===== Dark mode ===== */
+[data-theme="dark"] {
+  --bg-main: #0b0f14;
+  --bg-card: #111827;
+  --text-main: #0f172a;
+  --text-muted: #9ca3af;
+  --text-inverse: #0f172a;
+  --border-color: #1f2933;
 }

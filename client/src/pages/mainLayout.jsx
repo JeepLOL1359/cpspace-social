@@ -19,7 +19,7 @@ export default function MainLayout() {
   const [userData, setUserData] = useState(null);
   const [ready, setReady] = useState(false);
   const isAdmin = userData?.roles?.includes("admin");
-
+  
   useEffect(() => {
     let unsubUser = null;
 

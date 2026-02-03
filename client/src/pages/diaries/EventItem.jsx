@@ -1,9 +1,13 @@
 // src/pages/diaries/EventItem.jsx
 
-function formatTime(ts) {
+function formatDateTime(ts) {
   if (!ts) return "";
+
   const date = ts.toDate ? ts.toDate() : new Date(ts);
-  return date.toLocaleTimeString([], {
+
+  return date.toLocaleString([], {
+    day: "2-digit",
+    month: "short",
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -57,10 +61,7 @@ export default function EventItem({
             {emotionHistory.map((e, idx) => (
               <div key={idx} className="timeline-entry">
                 <div className="timeline-time">
-                  {new Date(e.changedAt).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {formatDateTime(e.changedAt)}
                 </div>
 
                 <div className="timeline-emotion">
