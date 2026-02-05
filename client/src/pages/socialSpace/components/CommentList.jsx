@@ -1,15 +1,20 @@
-// components/CommentList.jsx
 import { useComments } from "../hooks/useComments";
 import CommentItem from "./CommentItem";
 import { usePublicPseudonyms } from "../hooks/usePublicPseudonyms";
 
-export default function CommentList({ postId }) {
+export default function CommentList({ postId, expanded }) {
   const comments = useComments(postId);
   const pseudonymMap = usePublicPseudonyms();
 
+  const visibleComments = expanded
+    ? comments
+    : comments.slice(0, 2); // latest 1–2
+
+  if (visibleComments.length === 0) return null;
+
   return (
     <div className="comment-list">
-      {comments.map(c => (
+      {visibleComments.map(c => (
         <CommentItem
           key={c.id}
           comment={c}

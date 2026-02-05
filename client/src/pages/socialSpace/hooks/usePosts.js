@@ -1,3 +1,5 @@
+// hooks/usePosts.js
+
 import {
   collection,
   query,
@@ -22,7 +24,7 @@ export function usePosts() {
 
     const q = query(
       collection(db, "posts"),
-      where("moderationStatus", "==", "Visible"),
+      where("moderationStatus", "in", ["Visible", "Flagged"]),
       orderBy("createdAt", "desc"),
       limit(PAGE_SIZE)
     );
@@ -39,7 +41,7 @@ export function usePosts() {
 
     const q = query(
       collection(db, "posts"),
-      where("moderationStatus", "==", "Visible"),
+      where("moderationStatus", "in", ["Visible", "Flagged"]),
       orderBy("createdAt", "desc"),
       startAfter(lastDoc),
       limit(PAGE_SIZE)

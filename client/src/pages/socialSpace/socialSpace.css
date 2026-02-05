@@ -160,3 +160,27 @@
   font-size: 14px;
   color: #d1d5db;
 }
+
+.floating-create-btn {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+
+  background: var(--accent);
+  color: white;
+  font-size: 32px;
+  line-height: 1;
+
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.floating-create-btn:hover {
+  transform: translateY(-2px);
+}
+

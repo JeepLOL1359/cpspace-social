@@ -3,11 +3,18 @@ import { usePosts } from "./hooks/usePosts";
 import PostCard from "./components/PostCard";
 import "./socialSpace.css";
 import { usePublicPseudonyms } from "./hooks/usePublicPseudonyms";
+import CreatePostModal from "./components/CreatePostModal";
 
 export default function SocialSpace() {
   const { posts, loadInitial, loadMore, loading } = usePosts();
   const [query, setQuery] = useState("");
   const pseudonymMap = usePublicPseudonyms();
+
+  const [showCreatePost, setShowCreatePost] = useState(false);
+
+  function refreshFeed() {
+    loadInitial();
+  }
 
   useEffect(() => {
     loadInitial();
@@ -47,6 +54,7 @@ export default function SocialSpace() {
                 key={p.id}
                 post={p}
                 pseudonym={pseudonymMap[p.authorId] || "Anonymous"}
+                onPostUpdated={refreshFeed}
               />
             ))}
           </div>
@@ -78,6 +86,23 @@ export default function SocialSpace() {
           </div>
         </aside>
       </div>
+
+      <button
+        className="floating-create-btn"
+        onClick={() => setShowCreatePost(true)}
+      >
+        +
+      </button>
+
+      {showCreatePost && (
+        <CreatePostModal
+          onClose={() => {
+            setShowCreatePost(false);
+            loadInitial();
+          }}
+        />
+      )}
+
     </div>
   );
 }
