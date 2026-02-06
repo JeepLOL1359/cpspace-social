@@ -1,4 +1,4 @@
-// hooks/usePosts.js
+// socialSpace/hooks/usePosts.js
 
 import {
   collection,

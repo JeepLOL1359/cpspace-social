@@ -1,3 +1,5 @@
+// socialSpace/components/CommentList.jsx
+
 import { useComments } from "../hooks/useComments";
 import CommentItem from "./CommentItem";
 import "./Comment.css";

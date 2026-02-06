@@ -1,4 +1,4 @@
-// hooks/usePublicPseudonyms.js
+// socialSpace/hooks/usePublicPseudonyms.js
 
 import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";

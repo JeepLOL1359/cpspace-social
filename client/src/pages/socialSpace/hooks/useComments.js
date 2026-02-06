@@ -1,4 +1,4 @@
-// hooks/useComments.js
+// socialSpace/hooks/useComments.js
 
 import { useEffect, useState } from "react";
 import { collection, onSnapshot, query, where, orderBy } from "firebase/firestore";

@@ -1,3 +1,5 @@
+// socialSpace/components/CommentItem.jsx
+
 import { useState } from "react";
 import { getAuth } from "firebase/auth";
 import { doc, updateDoc, serverTimestamp } from "firebase/firestore";

@@ -1,8 +1,16 @@
-/* components/PostCard.jsx */
+// socialSpace/components/PostCard.jsx
 
 import { useEffect, useState } from "react";
 import { getAuth } from "firebase/auth";
-import { doc, updateDoc, serverTimestamp, getDoc } from "firebase/firestore";
+import {
+  doc,
+  updateDoc,
+  serverTimestamp,
+  getDoc,
+  runTransaction,
+  collection,
+  setDoc
+} from "firebase/firestore";
 import { db } from "../../../firebaseConfig";
 
 import CommentList from "./CommentList";
@@ -19,8 +27,110 @@ export default function PostCard({ post, pseudonym, onPostUpdated }) {
   const [editing, setEditing] = useState(false);
   const [body, setBody] = useState(post.body);
 
-  // const [emotionCategory, setEmotionCategory] = useState(post.emotionCategory);
-  // const [feelings, setFeelings] = useState(post.feelings || []);
+  // VOTE STATE
+  const [myVote, setMyVote] = useState(null); // 1 | -1 | 0 | null
+
+  async function applyVote(nextValue) {
+    if (!auth.currentUser) return;
+
+    const postRef = doc(db, "posts", post.id);
+    const voteRef = doc(
+      db,
+      "posts",
+      post.id,
+      "votes",
+      auth.currentUser.uid
+    );
+
+    await runTransaction(db, async (tx) => {
+      const postSnap = await tx.get(postRef);
+      if (!postSnap.exists()) return;
+
+      const postData = postSnap.data();
+      const stats = postData.stats || { up: 0, down: 0 };
+
+      let prevValue = null;
+
+      const voteSnap = await tx.get(voteRef);
+      if (voteSnap.exists()) {
+        prevValue = voteSnap.data().value;
+      }
+
+      // ---------- STAT ADJUSTMENT ----------
+      let up = stats.up;
+      let down = stats.down;
+
+      // remove previous vote
+      if (prevValue === 1) up -= 1;
+      if (prevValue === -1) down -= 1;
+
+      // apply new vote
+      if (nextValue === 1) up += 1;
+      if (nextValue === -1) down += 1;
+
+      // ---------- WRITE ----------
+      tx.update(postRef, {
+        "stats.up": up,
+        "stats.down": down,
+        updatedAt: serverTimestamp()
+      });
+
+      if (voteSnap.exists()) {
+        tx.update(voteRef, {
+          value: nextValue,
+          updatedAt: serverTimestamp()
+        });
+      } else {
+        tx.set(voteRef, {
+          value: nextValue,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+      }
+    });
+
+    setMyVote(nextValue);
+  }
+
+  function handleUpvote() {
+    if (myVote === 1) {
+      applyVote(0);   // cancel
+    } else {
+      applyVote(1);
+    }
+  }
+
+  function handleDownvote() {
+    if (myVote === -1) {
+      applyVote(0);   // cancel
+    } else {
+      applyVote(-1);
+    }
+  }
+
+  useEffect(() => {
+    if (!auth.currentUser) return;
+
+    async function loadMyVote() {
+      const voteRef = doc(
+        db,
+        "posts",
+        post.id,
+        "votes",
+        auth.currentUser.uid
+      );
+
+      const snap = await getDoc(voteRef);
+
+      if (snap.exists()) {
+        setMyVote(snap.data().value); // 1 | -1 | 0
+      } else {
+        setMyVote(null);
+      }
+    }
+
+    loadMyVote();
+  }, [post.id]);
 
   // map stored category → internal key
   function toKey(cat) {
@@ -136,10 +246,26 @@ export default function PostCard({ post, pseudonym, onPostUpdated }) {
       )}
 
       <div className="post-actions">
-        <button>▲</button>
-        <button>▼</button>
+        <button
+          onClick={handleUpvote}
+          style={{ color: myVote === 1 ? "var(--accent)" : undefined }}
+        >
+          ▲ Upvote
+        </button>
 
-        <button onClick={() => setShowAllComments(v => !v)}>
+        <button
+          onClick={handleDownvote}
+          style={{ color: myVote === -1 ? "var(--accent)" : undefined }}
+        >
+          ▼ Downvote
+        </button>
+
+        <button
+          onClick={() => setShowAllComments(v => !v)}
+          style={{
+            color: showAllComments ? "var(--accent)" : undefined
+          }}
+        >
           💬 Comment
         </button>
       </div>

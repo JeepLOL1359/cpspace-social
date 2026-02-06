@@ -1,3 +1,5 @@
+// socialSpace/components/CreatePostModal.jsx
+
 import { useEffect, useState } from "react";
 import { doc, getDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { getAuth } from "firebase/auth";

@@ -1,3 +1,4 @@
+  // socialSpace/SocialSpace.jsx
 import { useEffect, useState } from "react";
 import { usePosts } from "./hooks/usePosts";
 import PostCard from "./components/PostCard";
