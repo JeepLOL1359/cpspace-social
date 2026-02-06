@@ -2,6 +2,7 @@ import { useState } from "react";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { db } from "../../../firebaseConfig";
+import "./Comment.css";
 
 export default function CommentInput({ postId }) {
   const [text, setText] = useState("");
@@ -29,7 +30,9 @@ export default function CommentInput({ postId }) {
         value={text}
         onChange={e => setText(e.target.value)}
       />
-      <button onClick={submit}>Send</button>
+      <button onClick={submit} disabled={!text.trim()}>
+        Send
+      </button>
     </div>
   );
 }

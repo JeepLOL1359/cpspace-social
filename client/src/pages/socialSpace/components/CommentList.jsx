@@ -1,5 +1,6 @@
 import { useComments } from "../hooks/useComments";
 import CommentItem from "./CommentItem";
+import "./Comment.css";
 import { usePublicPseudonyms } from "../hooks/usePublicPseudonyms";
 
 export default function CommentList({ postId, expanded }) {

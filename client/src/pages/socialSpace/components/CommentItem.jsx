@@ -2,6 +2,7 @@ import { useState } from "react";
 import { getAuth } from "firebase/auth";
 import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../../../firebaseConfig";
+import "./Comment.css";
 
 export default function CommentItem({ comment, pseudonym }) {
   const auth = getAuth();
