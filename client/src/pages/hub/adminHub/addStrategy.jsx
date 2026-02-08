@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { addStrategy } from "../../../services/copingStrategyService";
+import { addStrategy } from "../../../services/adminHubService";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../../../firebaseConfig";
 import "./addStrategy.css";

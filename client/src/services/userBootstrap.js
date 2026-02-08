@@ -1,12 +1,5 @@
 import { db } from "../firebaseConfig";
-import {
-  doc,
-  setDoc,
-  getDoc,
-  collection,
-  addDoc,
-  serverTimestamp
-} from "firebase/firestore";
+import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 
 /**
  * Generate random numeric discriminator (Discord-style)
@@ -51,69 +44,48 @@ function generatePseudonym() {
   return `${adj}${noun}${suffix}`;
 }
 
-/* ---------- bootstrap ---------- */
-
 export async function bootstrapUser(firebaseUid) {
   const userRef = doc(db, "users", firebaseUid);
   const snap = await getDoc(userRef);
 
-  if (snap.exists()) return;
+  if (!snap.exists()) {
+    const pseudonym = generatePseudonym();
+    const publicUid = generatePublicUid();
+    const discriminator = generateDiscriminator();
 
-  /* generate identity */
-  const pseudonym = generatePseudonym();
-  const discriminator = generateDiscriminator();
-  const publicUID = generatePublicUid();
+    await setDoc(userRef, {
+      firebaseID: firebaseUid,
+      publicUID: publicUid,
+      createdAt: serverTimestamp(),
 
-  /* 1️⃣ private user document (authoritative) */
-  const usernamePayload = {
-    value: pseudonym,
-    discriminator,
-    lastChangedAt: serverTimestamp()
-  };
-
-  await setDoc(userRef, {
-    firebaseID: firebaseUid,
-    createdAt: serverTimestamp(),
-
-    username: usernamePayload,
-
-    activeStatus: "active",
-    roles: ["user"],
-
-    preferences: {
-      theme: "light",
-      colorPalette: "default",
-      chatbotTone: "default",
-      autoPersonalisation: true,
-      revealToFamiliarity: true,
-      notifyOnConsent: true,
-      enableDMRequests: true,
-      contentFilters: true,
-      language: "en",
-      feelings: {
-        added: { pos: [], neu: [], neg: [] },
-        removed: { pos: [], neu: [], neg: [] }
-      }
-    },
-
-    blockedUsers: []
-  });
-
-  /* 2️⃣ public profile subcollection (read-optimized) */
-  const publicProfileRef = collection(userRef, "publicProfile");
-
-  try {
-    await addDoc(publicProfileRef, {
-      publicUID,
       pseudonym,
-      username: {
-        value: usernamePayload.value,
-        discriminator: usernamePayload.discriminator
-      },
-      createdAt: serverTimestamp()
-    });
-  } catch (e) {
-    console.error("❌ publicProfile write failed", e);
-  }
 
+      username: {
+        value: pseudonym,
+        discriminator,
+        lastChangedAt: serverTimestamp()
+      },
+
+      activeStatus: "active",
+      roles: ["user"],
+
+      preferences: {
+        theme: "light",
+        colorPalette: "default",
+        chatbotTone: "default",
+        autoPersonalisation: true,
+        revealToFamiliarity: true,
+        notifyOnConsent: true,
+        enableDMRequests: true,
+        contentFilters: true,
+        language: "en",
+        feelings: {
+          added: { pos: [], neu: [], neg: [] },
+          removed: { pos: [], neu: [], neg: [] }
+        }
+      },
+
+      blockedUsers: []
+    });
+  }
 }

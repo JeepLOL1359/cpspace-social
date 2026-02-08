@@ -20,6 +20,83 @@ admin.initializeApp({
 const db = admin.firestore();
 const { FieldValue } = admin.firestore;
 
+const TAGS = [
+  "BREATHING",
+  "RELAXATION",
+  "JOURNALING",
+  "SELF_REFLECTION",
+  "GROUNDING",
+  "DISTRACTION",
+  "SLEEP",
+  "AFFIRMATION",
+  "MOTIVATION",
+  "PHYSICAL",
+  "THERAPY",
+  "GRATITUDE",
+];
+
+const TAG_MIN_SEVERITY = {
+  BREATHING: "NONE",
+  RELAXATION: "MILD",
+  SLEEP: "NONE",
+  GRATITUDE: "NONE",
+  AFFIRMATION: "NONE",
+
+  MOTIVATION: "MILD",
+  PHYSICAL: "MILD",
+
+  JOURNALING: "MODERATE",
+  SELF_REFLECTION: "MODERATE",
+  GROUNDING: "MODERATE",
+
+  THERAPY: "SEVERE",
+};
+
+const SEVERITY_ORDER = [
+  "NONE",
+  "MILD",
+  "MODERATE",
+  "MODERATELY SEVERE",
+  "SEVERE",
+];
+
+function deriveMinSeverity(tags = []) {
+  let highest = "NONE";
+
+  for (const tag of tags) {
+    const tagSeverity = TAG_MIN_SEVERITY[tag];
+    if (
+      tagSeverity &&
+      SEVERITY_ORDER.indexOf(tagSeverity) >
+        SEVERITY_ORDER.indexOf(highest)
+    ) {
+      highest = tagSeverity;
+    }
+  }
+
+  return highest;
+}
+
+function makeStrategy({
+  id,
+  title,
+  author,
+  tags,
+  description,
+}) {
+  return {
+    id,
+    title,
+    author,
+    tags,
+    minSeverity: deriveMinSeverity(tags), // ✅ IMPORTANT
+    description,
+    instructions: "Follow the steps mindfully at your own pace.",
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+  };
+}
+
 /* node scripts/seed.js */
 
 async function main() {

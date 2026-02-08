@@ -26,11 +26,26 @@
   font-weight: 600;
 }
 
+.admin-search {
+  padding: 8px 12px;
+  margin-bottom: 24px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-main);
+  min-width: 240px;
+}
+
+.admin-search::placeholder {
+  color: var(--text-muted);
+}
+
 /* =========================
    TABLE
 ========================= */
 .strategy-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0 10px; /* row gap */
 }
@@ -98,4 +113,9 @@
 
 .delete-btn:hover {
   background: #dc2626;
+}
+
+.admin-strategy-page .pagination {
+  display: flex;
+  justify-content: center;
 }

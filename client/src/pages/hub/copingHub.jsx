@@ -2,10 +2,10 @@
 // User-facing, read-only Coping Strategy Hub
 
 import "./copingHub.css";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
-import { useEffect, useState } from "react";
-import { getAllStrategies } from "../../services/copingStrategyService";
+import { useEffect, useState, useRef } from "react";
+import { getAllStrategies } from "../../services/adminHubService";
 
 import { getAuth } from "firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
@@ -23,31 +23,81 @@ import { db } from "../../firebaseConfig";
 
 import bookmarkIcon from "../../assets/bookmark.png";
 
+import { getUserDiaries } from "../../services/diaryService";
+import { getRecommendedStrategies } from "../../services/hubRecommendationService";
+
+import { TAG_LABELS } from "../../domain/tagLabels";
+
 export default function CopingHub() {
   const [inputValue, setInputValue] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [strategies, setStrategies] = useState([]);
+  const [recommended, setRecommended] = useState([]);
   const [loading, setLoading] = useState(true);
   const [bookmarkedIds, setBookmarkedIds] = useState([]);
 
   const [user, setUser] = useState(null);
+  const location = useLocation();
 
-    useEffect(() => {
+  const ITEMS_PER_PAGE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+  const scrollTopRef = useRef(null);
+
+  function handleTagClick(tag) {
+    setInputValue(tag);
+    setSearchQuery(tag);
+  }
+
+  function handleSearchClick(value) {
+    setInputValue(value);
+    setSearchQuery(value);
+  }
+
+  useEffect(() => {
     async function fetchStrategies() {
-        try {
+      try {
         const data = await getAllStrategies();
         setStrategies(data);
-        } catch (error) {
+      } catch (error) {
         console.error("Failed to load strategies:", error);
-        } finally {
+      } finally {
         setLoading(false);
-        }
+      }
     }
 
     fetchStrategies();
-    }, []);
-  
-    const filteredStrategies = strategies.filter((strategy) => {
+  }, []);
+
+  useEffect(() => {
+    async function loadRecommendations() {
+      if (!strategies.length) return;
+
+      const diaries = await getUserDiaries(user.uid);
+      const statsMap = {};
+
+      const recs = getRecommendedStrategies({
+        strategies,
+        diaries,
+        statsMap,
+        limit: 4,
+      });
+
+      setRecommended(recs);
+    }
+
+    if (user) loadRecommendations();
+  }, [user, strategies]);
+
+  useEffect(() => {
+    if (location.state?.fromAssessment) {
+      console.log(
+        "Entered Coping Hub from Assessment:",
+        location.state.severity
+      );
+    }
+  }, []);
+
+  const filteredStrategies = strategies.filter((strategy) => {
     const q = searchQuery.toLowerCase();
     if (!q) return true;
 
@@ -57,72 +107,91 @@ export default function CopingHub() {
     const tags = Array.isArray(strategy.tags) ? strategy.tags : [];
 
     return (
-        title.includes(q) ||
-        author.includes(q) ||
-        description.includes(q) ||
-        tags.some(tag => tag.toLowerCase().includes(q))
+      title.includes(q) ||
+      author.includes(q) ||
+      description.includes(q) ||
+      tags.some(tag => tag.toLowerCase().includes(q))
     );
+  });
+
+  const totalPages = Math.ceil(
+    filteredStrategies.length / ITEMS_PER_PAGE
+  );
+
+  const paginatedStrategies = filteredStrategies.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const auth = getAuth();
+
+  const toggleBookmark = async (strategyId) => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const bookmarkRef = doc(
+      db,
+      "users",
+      user.uid,
+      "bookmarks",
+      strategyId
+    );
+
+    try {
+      const snap = await getDoc(bookmarkRef);
+
+      if (snap.exists()) {
+        await deleteDoc(bookmarkRef);
+        setBookmarkedIds((prev) =>
+          prev.filter((id) => id !== strategyId)
+        );
+      } else {
+        await setDoc(bookmarkRef, {
+          strategyId,
+          createdAt: serverTimestamp(),
+        });
+        setBookmarkedIds((prev) => [...prev, strategyId]);
+      }
+    } catch (err) {
+      console.error("Toggle bookmark failed:", err);
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
     });
 
-    const auth = getAuth();
+    return () => unsubscribe();
+  }, []);
 
-    const toggleBookmark = async (strategyId) => {
-      const user = auth.currentUser;
-      if (!user) return;
+  useEffect(() => {
+    if (!user) return;
 
-      const bookmarkRef = doc(
-        db,
-        "users",
-        user.uid,
-        "bookmarks",
-        strategyId
-      );
-
+    async function loadBookmarks() {
       try {
-        const snap = await getDoc(bookmarkRef);
+        const snap = await getDocs(
+          collection(db, "users", user.uid, "bookmarks")
+        );
 
-        if (snap.exists()) {
-          await deleteDoc(bookmarkRef);
-          setBookmarkedIds((prev) =>
-            prev.filter((id) => id !== strategyId)
-          );
-        } else {
-          await setDoc(bookmarkRef, {
-            strategyId,
-            createdAt: serverTimestamp(),
-          });
-          setBookmarkedIds((prev) => [...prev, strategyId]);
-        }
+        setBookmarkedIds(snap.docs.map((doc) => doc.id));
       } catch (err) {
-        console.error("Toggle bookmark failed:", err);
+        console.error("Failed to load bookmarks:", err);
       }
-    };
+    }
 
-    useEffect(() => {
-      const unsubscribe = onAuthStateChanged(auth, (u) => {
-        setUser(u);
-      });
+    loadBookmarks();
+  }, [user]);
+  
+  useEffect(() => {
+    const container = document.querySelector(".content");
+    if (!container) return;
 
-      return () => unsubscribe();
-    }, []);
-
-    useEffect(() => {
-      if (!user) return;
-
-      async function loadBookmarks() {
-        try {
-          const snap = await getDocs(
-            collection(db, "users", user.uid, "bookmarks")
-          );
-
-          setBookmarkedIds(snap.docs.map((doc) => doc.id));
-        } catch (err) {
-          console.error("Failed to load bookmarks:", err);
-        }
-      }
-
-      loadBookmarks();
-    }, [user]);
+    container.scrollTo({
+      top: 0,
+      behavior: "auto",
+    });
+  }, [currentPage]);
 
   return (
     <div className="copinghub-page">
@@ -168,38 +237,54 @@ export default function CopingHub() {
         <aside className="copinghub-left">
           <h3>Recommended Strategy for You</h3>
 
-          <div className="strategy-card">
-            <a href="#">A Yoga A Day, Keep Your Day Amazed</a>
-            <p className="author">Author: Kim Gery</p>
-            <span className="tag">Relaxation</span>
-            <p className="desc">
-              Unwind your mind and body with this calming yoga flow
-              designed for all levels. Follow a series of slow,
-              mindful movements that release tension...
-            </p>
-          </div>
+          {recommended.length === 0 ? (
+            <p>No recommendations available yet.</p>
+          ) : (
+            recommended.map((s) => (
+              <div key={s.id} className="strategy-card">
+                <Link to={`/coping-hub/${s.id}`}>
+                  {s.title}
+                </Link>
 
-          <div className="strategy-card">
-            <a href="#">Pause & Ponder: A Gentle Flow for Self-Reflection</a>
-            <p className="author">Author: Amelia Tan</p>
-            <span className="tag">Relaxation</span>
-            <p className="desc">
-              Move through a slow, introspective sequence designed
-              to help you reconnect with yourself...
-            </p>
-          </div>
+                <p className="author">
+                  Author:{" "}
+                  <span
+                    className="author-clickable"
+                    onClick={() => handleSearchClick(s.author)}
+                  >
+                    {s.author}
+                  </span>
+                </p>
+
+                {s.tags?.map(tag => (
+                  <span
+                    key={tag}
+                    className="hub-tag"
+                    onClick={() => handleTagClick(tag)}
+                  >
+                    {TAG_LABELS[tag] || tag}
+                  </span>
+                ))}
+
+                <p className="desc">
+                  {s.description}
+                </p>
+              </div>
+            ))
+          )}
         </aside>
 
         {/* RIGHT COLUMN */}
         <main className="copinghub-right">
+          <div ref={scrollTopRef} />
         <h3>Search result: {searchQuery || "All"}</h3>
 
         {loading ? (
             <p>Loading strategies...</p>
-        ) : filteredStrategies.length === 0 ? (
+        ) : paginatedStrategies.length === 0 ? (
             <p>No strategies found.</p>
         ) : (
-            filteredStrategies.map((strategy) => (
+            paginatedStrategies.map((strategy) => (
             <div key={strategy.id} className="result-card">
                 <h4>
                 <Link
@@ -210,10 +295,25 @@ export default function CopingHub() {
                 </Link>
                 </h4>
 
-                <p className="author">Author: {strategy.author}</p>
-                <span className="tag">
-                {Array.isArray(strategy.tags) ? strategy.tags.join(", ") : ""}
-                </span>
+                <p className="author">
+                  Author:{" "}
+                  <span
+                    className="author-clickable"
+                    onClick={() => handleSearchClick(strategy.author)}
+                  >
+                    {strategy.author}
+                  </span>
+                </p>
+                {Array.isArray(strategy.tags) &&
+                  strategy.tags.map(tag => (
+                    <span
+                      key={tag}
+                      className="hub-tag"
+                      onClick={() => handleTagClick(tag)}
+                    >
+                      {TAG_LABELS[tag] || tag}
+                    </span>
+                  ))}
                 <p className="desc">
                 {strategy.description}
                 </p>
@@ -231,6 +331,50 @@ export default function CopingHub() {
                 </button>
             </div>
             ))
+        )}
+
+        {totalPages > 1 && (
+          <div className="pagination">
+            {/* PREV */}
+            <button
+              className="page-nav"
+              disabled={currentPage === 1}
+              onClick={(e) => {
+                e.currentTarget.blur();
+                setCurrentPage(p => p - 1);
+              }}
+            >
+              ‹
+            </button>
+
+            {/* PAGE NUMBERS (GROUPED) */}
+            <div className="page-numbers">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  className={`page-number ${page === currentPage ? "active" : ""}`}
+                  onClick={(e) => {
+                    e.currentTarget.blur();   // 🔑 key line
+                    setCurrentPage(page);
+                  }}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
+
+            {/* NEXT */}
+            <button
+              className="page-nav"
+              disabled={currentPage === totalPages}
+              onClick={(e) => {
+                e.currentTarget.blur();
+                setCurrentPage(p => p + 1);
+              }}
+            >
+              ›
+            </button>
+          </div>
         )}
         </main>
       </div>

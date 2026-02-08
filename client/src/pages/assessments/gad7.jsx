@@ -92,7 +92,6 @@ export default function GAD7() {
   };
 
   return (
-    <div className="content">
     <div className="assessment-panel">
       <h2 className="form-title">GAD-7 Assessment Form</h2>
 
@@ -145,7 +144,6 @@ export default function GAD7() {
           Proceed
         </button>
       </div>
-    </div>
     </div>
   );
 }

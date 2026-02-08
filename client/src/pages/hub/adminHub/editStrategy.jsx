@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   getStrategyById,
   updateStrategy,
-} from "../../../services/copingStrategyService";
+} from "../../../services/adminHubService";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../../../firebaseConfig";
 import "./EditStrategy.css";

@@ -75,7 +75,6 @@ async function wipe() {
       .get();
 
     for (const convo of chatbotSnap.docs) {
-      await deleteSubcollection(convo.ref, "messages");
       await convo.ref.delete();
     }
   }

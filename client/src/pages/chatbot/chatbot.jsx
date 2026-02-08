@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { onSnapshot } from "firebase/firestore";
 import {
   collection,
+  onSnapshot,
   doc,
+  getDoc,
   getDocs,
   addDoc,
   updateDoc,
@@ -12,6 +13,8 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import "./chatbot.css";
+import { getTodaysEmotion } from "../../services/diaryService";
+import { recommendCopingStrategies } from "../../services/copingStrategyService";
 
 export default function Chatbot() {
   const auth = getAuth();
@@ -31,14 +34,29 @@ export default function Chatbot() {
   const [submittingFeedback, setSubmittingFeedback] = useState(false);
   const [displayName, setDisplayName] = useState("");
 
-  const detectedEmotion = "depressed";
   const menuRef = useRef(null);
   const sendingRef = useRef(false);
 
+  const [chatRiskLevel, setChatRiskLevel] = useState("LOW");
+  const [strategyCache, setStrategyCache] = useState({});
+
   const [chatbotTone, setChatbotTone] = useState("casual");
 
-  const generateGreeting = () =>
-    `Greetings, ${displayName}! It seems like you are feeling ${detectedEmotion} today. You can share with me what’s on your mind — I’m here to support you.`;
+  const generateGreeting = async () => {
+    const diary = await getTodaysEmotion(user.uid);
+
+    if (!diary) {
+      return `Hey ${displayName}! How are you feeling today?`;
+    }
+
+    if (diary.category === "pleasant" || diary.category === "neutral") {
+      return `Hey ${displayName}! Hope your day is going okay.`;
+    }
+
+    const feeling = diary.feelings?.[0]?.toLowerCase() || "a bit off";
+
+    return `Hey ${displayName}, I noticed you’re feeling ${feeling} today. Do you want to talk about what happened?`;
+  };
 
   /* =====================
      AUTH + LOAD SESSIONS
@@ -65,7 +83,14 @@ export default function Chatbot() {
         if (snap.exists()) {
           const data = snap.data();
 
-          setChatbotTone(data.preferences?.chatbotTone || "casual");
+          const allowedTones = ["casual", "friendly", "professional"];
+
+          const toneFromDB = data.preferences?.chatbotTone;
+
+          setChatbotTone(
+            allowedTones.includes(toneFromDB) ? toneFromDB : "casual"
+          );
+
           setDisplayName(data.profileDisplayName || "there");
         }
       });
@@ -84,23 +109,6 @@ export default function Chatbot() {
         if (!sendingRef.current) {
           setSessions(loaded);
         }
-
-        const typingMessage = {
-          role: "bot",
-          text: "...",
-          timestamp: Date.now(),
-          typing: true,
-        };
-
-        const messagesWithTyping = [...messagesAfterUser, typingMessage];
-
-        setSessions((prev) =>
-          prev.map((s) =>
-            s.id === session.id
-              ? { ...s, messages: messagesWithTyping }
-              : s
-          )
-        );
 
         // 🔒 keep current session if it exists
         setActiveSessionId((prev) => {
@@ -135,6 +143,31 @@ export default function Chatbot() {
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    async function hydrateStrategies() {
+      const ids = new Set();
+
+      sessions.forEach(s =>
+        s.messages.forEach(m => {
+          if (m.strategyId) ids.add(m.strategyId);
+        })
+      );
+
+      const missing = [...ids].filter(id => !strategyCache[id]);
+      if (missing.length === 0) return;
+
+      const fetched = {};
+      for (const id of missing) {
+        const snap = await getDoc(doc(db, "copingStrategies", id));
+        if (snap.exists()) fetched[id] = snap.data();
+      }
+
+      setStrategyCache(prev => ({ ...prev, ...fetched }));
+    }
+
+    hydrateStrategies();
+  }, [sessions]);
+
   const activeSession = sessions.find((s) => s.id === activeSessionId);
 
   /* =====================
@@ -155,7 +188,7 @@ export default function Chatbot() {
     });
 
     const data = await res.json();
-    return data.reply;
+    return data;
   };
 
   const generateAITitle = async (message) => {
@@ -233,7 +266,38 @@ export default function Chatbot() {
     }
 
     try {
-      const aiReply = await getAIReply(userText, messagesAfterUser);
+      const aiResponse = await getAIReply(userText, messagesAfterUser);
+      const risk = aiResponse.riskLevel || "LOW";
+      setChatRiskLevel(risk);
+
+      const aiReply = aiResponse.reply;
+
+      let suggestedStrategy = null;
+      let diary = null;
+
+      try {
+        diary = await getTodaysEmotion(user.uid);
+
+        if (risk === "HIGH" || risk === "CRITICAL") {
+          suggestedStrategy = null;
+        } else {
+          if (diary?.feelings?.length) {
+            const strategies = await recommendCopingStrategies(diary.feelings);
+            suggestedStrategy =
+              strategies[Math.floor(Math.random() * strategies.length)] || null;
+          }
+
+          if (risk === "LOW" && diary?.category === "neutral") {
+            suggestedStrategy = null;
+          }
+        }
+
+        if (risk === "LOW" && diary?.category === "neutral") {
+          suggestedStrategy = null;
+        }
+      } catch (err) {
+        console.error("Strategy recommendation failed:", err);
+      }
 
       const finalMessages = [
         ...messagesAfterUser,
@@ -241,7 +305,9 @@ export default function Chatbot() {
           role: "bot",
           text: aiReply,
           timestamp: Date.now(),
-        },
+          riskLevel: risk,
+          strategyId: suggestedStrategy?.id || null
+        }
       ];
 
       setSessions((prev) =>
@@ -267,19 +333,22 @@ export default function Chatbot() {
   const startNewChat = async () => {
     if (!user) return;
 
+    const greeting = await generateGreeting(); // ✅ REQUIRED
+
     const ref = collection(db, "users", user.uid, "chatbotSessions");
 
     const docRef = await addDoc(ref, {
       title: "New Chat",
       createdAt: serverTimestamp(),
-      messages: [{
-        role: "bot",
-        text: generateGreeting(),
-        timestamp: Date.now(),
-      }],
+      messages: [
+        {
+          role: "bot",
+          text: greeting,
+          timestamp: Date.now(),
+        },
+      ],
     });
 
-    // 🔥 onSnapshot will add it to sessions automatically
     setActiveSessionId(docRef.id);
   };
 
@@ -304,15 +373,16 @@ export default function Chatbot() {
   const handleResetChat = async () => {
     if (!user || !activeSessionId) return;
 
+    const greeting = await generateGreeting(); // ✅ REQUIRED
+
     const resetMessages = [
       {
         role: "bot",
-        text: generateGreeting(),
+        text: greeting,
         timestamp: Date.now(),
       },
     ];
 
-    // Update UI immediately
     setSessions((prev) =>
       prev.map((s) =>
         s.id === activeSessionId
@@ -321,7 +391,6 @@ export default function Chatbot() {
       )
     );
 
-    // Persist to Firestore
     await updateDoc(
       doc(db, "users", user.uid, "chatbotSessions", activeSessionId),
       { messages: resetMessages }
@@ -395,11 +464,30 @@ export default function Chatbot() {
         </div>
 
         <div className="chat-messages">
-          {activeSession?.messages.map((msg, i) => (
-            <div key={i} className={`message ${msg.role}`}>
-              <p>{msg.text}</p>
-            </div>
-          ))}
+          {activeSession?.messages.map((msg, i) => {
+            const strategy = msg.strategyId
+              ? strategyCache[msg.strategyId]
+              : null;
+
+            return (
+              <div key={i} className={`message ${msg.role}`}>
+                <p>{msg.text}</p>
+
+                {msg.role === "bot" && strategy && (
+                  <div className="strategy-suggestion">
+                    <strong>You might find this helpful:</strong>
+                    <br />
+                    <a
+                      href={`/coping-hub/${msg.strategyId}`}
+                      className="strategy-link"
+                    >
+                      {strategy.title}
+                    </a>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         <div className="chat-input">

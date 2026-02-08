@@ -6,7 +6,6 @@ export default function AssessmentSelect() {
   const navigate = useNavigate();
 
   return (
-    <div className="content">
     <div className="assessment-panel">
       <h2>Mental Health Assessments</h2>
 
@@ -43,7 +42,6 @@ export default function AssessmentSelect() {
           Return
         </button>
       </div>
-    </div>
     </div>
   );
 }

@@ -66,7 +66,6 @@ export default function AssessmentHistory() {
   }
 
   return (
-    <div className="content">
     <div className="assessment-panel history">
       <h2>Assessment History</h2>
 
@@ -116,7 +115,6 @@ export default function AssessmentHistory() {
           ))}
         </div>
       )}
-    </div>
     </div>
   );
 }

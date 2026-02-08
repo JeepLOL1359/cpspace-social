@@ -4,12 +4,15 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { Link } from "react-router-dom";
 import { deleteDoc, doc } from "firebase/firestore";
-import { getAllStrategies } from "../../services/copingStrategyService";
+import { getAllStrategies } from "../../services/adminHubService";
 import "./bookmark.css";
 
 export default function Bookmark() {
   const [bookmarks, setBookmarks] = useState([]);
   const auth = getAuth();
+
+  const ITEMS_PER_PAGE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
 
   const deleteBookmark = async (strategyId) => {
     const user = auth.currentUser;
@@ -54,6 +57,24 @@ export default function Bookmark() {
     fetchBookmarks();
   }, []);
 
+  useEffect(() => {
+    const container = document.querySelector(".content");
+    if (!container) return;
+
+    container.scrollTo({ top: 0, behavior: "auto" });
+  }, [currentPage]);
+
+  const totalPages = Math.ceil(bookmarks.length / ITEMS_PER_PAGE);
+
+  const paginatedBookmarks = bookmarks.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [bookmarks.length]);
+
   return (
     <div className="bookmark-page">
       <h2>Bookmarked Strategies</h2>
@@ -61,8 +82,8 @@ export default function Bookmark() {
   {bookmarks.length === 0 ? (
     <p>No bookmarks yet.</p>
   ) : (
-    bookmarks.map((strategy) => (
-      <div key={strategy.id} className="result-card">
+    paginatedBookmarks.map((strategy) => (
+      <div key={strategy.id} className="bookmark-card">
         <h4>
           <Link
             to={`/coping-hub/${strategy.id}`}
@@ -74,7 +95,7 @@ export default function Bookmark() {
 
         <p className="author">Author: {strategy.author}</p>
 
-        <span className="tag">
+        <span className="hub-tag">
           {Array.isArray(strategy.tags)
             ? strategy.tags.join(", ")
             : ""}
@@ -94,6 +115,51 @@ export default function Bookmark() {
         </button>
       </div>
     ))
+  )}
+  {totalPages > 1 && (
+    <div className="pagination">
+      {/* PREV */}
+      <button
+        className="page-nav"
+        disabled={currentPage === 1}
+        onClick={(e) => {
+          e.currentTarget.blur();
+          setCurrentPage((p) => p - 1);
+        }}
+      >
+        ‹
+      </button>
+
+      {/* PAGE NUMBERS */}
+      <div className="page-numbers">
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          <button
+            key={page}
+            className={`page-number ${
+              page === currentPage ? "active" : ""
+            }`}
+            onClick={(e) => {
+              e.currentTarget.blur();
+              setCurrentPage(page);
+            }}
+          >
+            {page}
+          </button>
+        ))}
+      </div>
+
+      {/* NEXT */}
+      <button
+        className="page-nav"
+        disabled={currentPage === totalPages}
+        onClick={(e) => {
+          e.currentTarget.blur();
+          setCurrentPage((p) => p + 1);
+        }}
+      >
+        ›
+      </button>
+    </div>
   )}
     </div>
   );

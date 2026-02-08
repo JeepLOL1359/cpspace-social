@@ -323,3 +323,20 @@
 .star:active {
   transform: scale(0.95);
 }
+
+.strategy-link {
+  color: var(--accent) !important;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.strategy-link:hover {
+  opacity: 0.85;
+}
+
+.strategy-suggestion {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-card));
+  border-radius: 8px;
+}

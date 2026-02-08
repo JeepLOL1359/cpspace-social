@@ -12,6 +12,18 @@
   margin: 24px 0;
 }
 
+/* ---------- STRATEGY LINKS ---------- */
+.report-card a {
+  color: var(--text-main);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.report-card a:hover {
+  text-decoration: none;
+  opacity: 0.85;
+}
+
 .report-row {
   display: flex;
   justify-content: space-between;

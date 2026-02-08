@@ -78,6 +78,7 @@
   display: grid;
   grid-template-columns: 320px 1fr;
   flex: 1;
+  min-height: 0;
 }
 
 /* =========================
@@ -113,16 +114,47 @@
   color: var(--text-muted);
 }
 
-.tag {
+/* Clickable author name */
+.author-clickable {
+  color: var(--accent);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Hover effect */
+.author-clickable:hover {
+  text-decoration: underline;
+}
+
+.hub-tag {
+  display: inline-block;
   font-size: 13px;
   color: var(--accent);
+  cursor: pointer;
+  user-select: none;
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.hub-tag:hover {
+  text-decoration: underline;
 }
 
 .desc {
   font-size: 14px;
-  margin-top: 6px;
   color: var(--text-main);
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+
+  overflow: hidden;
+
+  line-height: 1.5;
 }
+
 
 /* =========================
    STRATEGY TITLE LINKS
@@ -148,19 +180,27 @@
 ========================= */
 .copinghub-right {
   padding: 16px;
-  overflow-y: auto;
   background: var(--bg-main);
+  display: flex;
+  flex-direction: column;
 }
 
 .result-card {
   position: relative;
-  padding: 12px 0;
+  padding-top: 12px;
+  padding-bottom: 0px;
+  min-height: 160px;
   border-bottom: 1px solid var(--border-color);
 }
 
 .result-card h4 {
-  font-weight: 700;
-  color: var(--accent-soft);
+  margin-top: 5px;
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  line-clamp: 1;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
 }
 
 .result-card h4:hover {
@@ -168,9 +208,23 @@
   text-decoration: underline;
 }
 
+/* ==== FINAL CLAMP FIX ==== */
+.result-card .desc {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+
+  overflow: hidden !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.5;
+}
+
 .bookmark {
   position: absolute;
-  top: 12px;
+  top: 22px;
   right: 0;
 
   background: transparent;
@@ -186,3 +240,62 @@
   color: #facc15;
 }
 
+.pagination {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+
+  margin: 24px auto 24px;
+
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* group numbers */
+.page-numbers {
+  display: inline-flex;
+  gap: 6px;
+}
+
+/* buttons reset */
+.pagination button {
+  background: none;
+  color: var(--text-main);
+  border: none;
+  padding: 4px 6px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* active page */
+.page-number.active {
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+/* arrows */
+.page-nav {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: 4px;
+  padding: 4px 8px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-nav:hover:not(:disabled) {
+  background: var(--bg-main);
+}
+
+.page-nav:disabled {
+  background: #f5f5f5;
+}
+
+.pagination button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}

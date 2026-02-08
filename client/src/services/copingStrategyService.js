@@ -1,66 +1,48 @@
-import {
-  collection,
-  getDocs,
-  getDoc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc
-} from "firebase/firestore";
-
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
-// =====================
-// READ (ALL)
-// =====================
-export async function getAllStrategies() {
-  const snapshot = await getDocs(collection(db, "copingStrategies"));
-  return snapshot.docs.map(d => ({
-    id: d.id,
-    ...d.data()
+import { EMOTION_GROUPS } from "../domain/emotionMap";
+
+const CATEGORY_TO_TAGS = {
+  pleasant: [],
+  neutral: [],
+  unpleasant: [
+    "AFFIRMATION",
+    "SELF_REFLECTION",
+    "RELAXATION",
+    "GROUNDING",
+    "BREATHING",
+  ],
+};
+
+export async function recommendCopingStrategies(feelings = []) {
+  if (!Array.isArray(feelings) || feelings.length === 0) {
+    return [];
+  }
+
+  const tagSet = new Set();
+
+  feelings.forEach(feeling => {
+    const key = feeling.toLowerCase().trim();
+    const category = EMOTION_GROUPS[key];
+
+    if (!category) return;
+
+    CATEGORY_TO_TAGS[category]?.forEach(tag => tagSet.add(tag));
+  });
+
+  const tags = Array.from(tagSet);
+  if (tags.length === 0) return [];
+
+  const q = query(
+    collection(db, "copingStrategies"),
+    where("tags", "array-contains-any", tags)
+  );
+
+  const snap = await getDocs(q);
+
+  return snap.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
   }));
-}
-
-// =====================
-// READ (ONE)
-// =====================
-export async function getStrategyById(id) {
-  const ref = doc(db, "copingStrategies", id);
-  const snap = await getDoc(ref);
-
-  if (!snap.exists()) return null;
-
-  return {
-    id: snap.id,
-    ...snap.data()
-  };
-}
-
-// =====================
-// CREATE
-// =====================
-export async function addStrategy(data) {
-  await addDoc(collection(db, "copingStrategies"), {
-    ...data,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  });
-}
-
-// =====================
-// UPDATE
-// =====================
-export async function updateStrategy(id, data) {
-  const ref = doc(db, "copingStrategies", id);
-  await updateDoc(ref, {
-    ...data,
-    updatedAt: new Date()
-  });
-}
-
-// =====================
-// DELETE
-// =====================
-export async function deleteStrategy(id) {
-  await deleteDoc(doc(db, "copingStrategies", id));
 }
