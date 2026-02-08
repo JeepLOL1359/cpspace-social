@@ -11,8 +11,8 @@ import { useEffect, useState } from "react";
 import { db } from "../../../firebaseConfig";
 import { useRecentEmotion } from "./useRecentEmotion";
 
-const PAGE_SIZE = 20;
-const FETCH_SIZE = 100;
+const PAGE_SIZE = 5;
+const FETCH_SIZE = 5;
 
 /* ---------- HOT SCORE ---------- */
 
@@ -55,6 +55,8 @@ export function usePosts(mode = "newest") {
   const [hasMore, setHasMore] = useState(true);
 
   const userEmotion = useRecentEmotion();
+  console.log("[usePosts] mode:", mode);
+  console.log("[usePosts] userEmotion:", userEmotion);
 
   /* ---------- INITIAL LOAD ---------- */
   const loadInitial = async () => {
@@ -79,23 +81,45 @@ export function usePosts(mode = "newest") {
     }
 
     if (mode === "relevant") {
+      console.log("[Relevant] entering relevant mode");
+
       if (userEmotion) {
+        console.log("[Relevant] userEmotion:", userEmotion);
+
         let relevant = data.filter(
           p => p.emotionCategory === userEmotion
+        );
+
+        console.log(
+          "[Relevant] matched posts:",
+          relevant.length,
+          relevant.map(p => p.emotionCategory)
         );
 
         if (relevant.length < FETCH_SIZE) {
           const rest = data.filter(
             p => p.emotionCategory !== userEmotion
           );
+            console.log(
+              "[Relevant] relaxing with rest:",
+              rest.length
+            );
+
           relevant = [...relevant, ...rest].slice(0, FETCH_SIZE);
         }
 
         data = relevant
           .map(p => ({ ...p, _score: computeHotScore(p) }))
           .sort((a, b) => b._score - a._score);
+
+        console.log(
+          "[Relevant] final ranked emotions:",
+          data.map(p => p.emotionCategory)
+        );
       } else {
         // fallback to hot
+        console.log("[Relevant] no userEmotion → fallback hot");
+
         data = data
           .map(p => ({ ...p, _score: computeHotScore(p) }))
           .sort((a, b) => b._score - a._score);
@@ -109,6 +133,11 @@ export function usePosts(mode = "newest") {
     setPage(1);
     setHasMore(data.length > PAGE_SIZE);
     setLoading(false);
+
+    console.log(
+      "[usePosts] visible posts emotions:",
+      data.slice(0, PAGE_SIZE).map(p => p.emotionCategory)
+    )
   };
 
   /* ---------- LOAD MORE (IN-MEMORY) ---------- */

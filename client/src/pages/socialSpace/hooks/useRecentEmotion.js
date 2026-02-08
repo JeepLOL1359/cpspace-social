@@ -1,9 +1,16 @@
 import { useEffect, useState } from "react";
-import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  limit,
+  getDocs
+} from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { db } from "../../../firebaseConfig";
 
-const CACHE_TTL = 6 * 60 * 60 * 1000; // 6 hours
+const CACHE_TTL = 1 * 60 * 60 * 1000; // 1 hours
 
 function getCacheKey(uid) {
   return `recentEmotion:${uid}`;
@@ -48,19 +55,12 @@ export function useRecentEmotion() {
   const auth = getAuth();
   const [emotion, setEmotion] = useState(null);
 
-  useEffect(() => {
-    if (!auth.currentUser) return;
+useEffect(() => {
+  const unsub = auth.onAuthStateChanged(user => {
+    if (!user) return;
 
-    const uid = auth.currentUser.uid;
+    const uid = user.uid;
 
-    // ---------- 1. Try cache ----------
-    const cached = readCache(uid);
-    if (cached !== null) {
-      setEmotion(cached);
-      return;
-    }
-
-    // ---------- 2. Fallback to Firestore ----------
     async function load() {
       const q = query(
         collection(db, "users", uid, "diaries"),
@@ -74,12 +74,16 @@ export function useRecentEmotion() {
         ? null
         : snap.docs[0].data().category;
 
+      console.log("[useRecentEmotion] fetched emotion:", latestEmotion);
+
       setEmotion(latestEmotion);
-      writeCache(uid, latestEmotion);
     }
 
     load();
-  }, [auth.currentUser]);
+  });
+
+  return () => unsub();
+}, []);
 
   return emotion;
 }
