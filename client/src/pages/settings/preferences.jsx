@@ -3,6 +3,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import "./preferences.css";
+import { collection, query, where, getDocs, limit, orderBy } from "firebase/firestore";
 
 const COLOR_MAP = {
   blue: { accent: "#60a5fa", soft: "#dbeafe" },
@@ -19,9 +20,25 @@ const DEFAULT_PREFS = {
   autoPersonalisation: false,
 };
 
+const AUTO_PERSONALISE_API = "http://localhost:5001/auto-personalize";
+
+async function fetchRecentDiaries(userId) {
+  const q = query(
+    collection(db, "users", userId, "diaries"),
+    where("type", "==", "emotion"),
+    orderBy("createdAt", "desc"),
+    limit(14)
+  );
+
+  const snap = await getDocs(q);
+  return snap.docs.map(d => d.data());
+}
+
 export default function Preferences() {
   const [prefs, setPrefs] = useState(null);
   const auth = getAuth();
+  const [showAutoConfirm, setShowAutoConfirm] = useState(false);
+  const [autoLoading, setAutoLoading] = useState(false);
 
   /* === APPLY UI EFFECTS (your old logic) === */
   const applyTheme = (mode) => {
@@ -70,6 +87,45 @@ export default function Preferences() {
       { merge: true }
     );
   };
+
+  async function applyAutoPersonalisation(cluster) {
+    let newPrefs = {
+      autoPersonalisation: true, // ✅ KEEP IT ON
+    };
+
+    switch (cluster) {
+      case 0:
+        Object.assign(newPrefs, {
+          themeMode: "dark",
+          colorPalette: "blue",
+          chatbotTone: "friendly",
+        });
+        break;
+
+      case 1:
+        Object.assign(newPrefs, {
+          themeMode: "light",
+          colorPalette: "green",
+          chatbotTone: "casual",
+        });
+        break;
+
+      case 2:
+        Object.assign(newPrefs, {
+          themeMode: "light",
+          colorPalette: "yellow",
+          chatbotTone: "professional",
+        });
+        break;
+
+      default:
+        return;
+    }
+
+    applyTheme(newPrefs.themeMode);
+    applyColor(newPrefs.colorPalette);
+    await savePrefs(newPrefs);
+  }
 
   if (!prefs) return <p>Loading preferences...</p>;
 
@@ -140,7 +196,10 @@ export default function Preferences() {
         <div className="yes-no">
           <button
             className={prefs.autoPersonalisation ? "active" : ""}
-            onClick={() => savePrefs({ autoPersonalisation: true })}
+            onClick={() => {
+              if (prefs.autoPersonalisation || showAutoConfirm) return;
+              setShowAutoConfirm(true);
+            }}
           >
             YES
           </button>
@@ -150,8 +209,77 @@ export default function Preferences() {
           >
             NO
           </button>
+        </div> 
+      </div>
+      {showAutoConfirm && (
+      <div className="pref-modal-overlay">
+        <div className="pref-modal-dialog">
+          <h3>Enable Auto Personalisation?</h3>
+
+          <p>
+            Auto Personalisation will analyse your recent emotional patterns
+            and automatically adjust theme, colors, and chatbot tone.
+          </p>
+
+          <div className="pref-modal-actions">
+            <button
+              className="pref-confirm"
+              onClick={async () => {
+                const user = auth.currentUser;
+                if (!user) return;
+
+                setAutoLoading(true);
+
+                await savePrefs({ autoPersonalisation: true });
+
+                const diaries = await fetchRecentDiaries(user.uid);
+                console.log("Auto-personalisation diaries:", diaries);
+
+                if (!diaries.length) {
+                  alert("Please record at least one emotion diary before using Auto Personalisation.");
+                  await savePrefs({ autoPersonalisation: false });
+                  setAutoLoading(false);
+                  setShowAutoConfirm(false);
+                  return;
+                }
+
+                const res = await fetch(AUTO_PERSONALISE_API, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ diaries })
+                });
+
+                if (!res.ok) {
+                  alert("Auto personalisation service is unavailable.");
+                  await savePrefs({ autoPersonalisation: false });
+                  setAutoLoading(false);
+                  setShowAutoConfirm(false);
+                  return;
+                }
+
+                const result = await res.json();
+                await applyAutoPersonalisation(result.cluster);
+
+                setAutoLoading(false);
+                setShowAutoConfirm(false);
+              }}
+            >
+              Confirm
+            </button>
+
+            <button
+              className="pref-cancel"
+              onClick={async () => {
+                setShowAutoConfirm(false);
+                await savePrefs({ autoPersonalisation: false });
+              }}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
+    )}
     </div>
   );
 }

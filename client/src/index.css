@@ -63,4 +63,5 @@ code {
 [data-theme="dark"] .help-panel,
 [data-theme="dark"] .about-panel {
   border: 2px solid #1f2937;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
 }
