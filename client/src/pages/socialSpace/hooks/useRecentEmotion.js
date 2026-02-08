@@ -1,3 +1,5 @@
+// socialSpace/hooks/useRecentEmotion.js
+
 import { useEffect, useState } from "react";
 import {
   collection,
@@ -73,8 +75,6 @@ useEffect(() => {
       const latestEmotion = snap.empty
         ? null
         : snap.docs[0].data().category;
-
-      console.log("[useRecentEmotion] fetched emotion:", latestEmotion);
 
       setEmotion(latestEmotion);
     }

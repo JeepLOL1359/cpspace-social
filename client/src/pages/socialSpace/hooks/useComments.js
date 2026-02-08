@@ -20,7 +20,7 @@ export function useComments(postId) {
       setComments(
         snap.docs.map(d => ({
           id: d.id,
-          postId,            // 🔥 THIS FIXES EVERYTHING
+          postId,
           ...d.data()
         }))
       );

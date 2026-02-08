@@ -11,8 +11,8 @@ import { useEffect, useState } from "react";
 import { db } from "../../../firebaseConfig";
 import { useRecentEmotion } from "./useRecentEmotion";
 
-const PAGE_SIZE = 5;
-const FETCH_SIZE = 5;
+const PAGE_SIZE = 20;
+const FETCH_SIZE = 100;
 
 /* ---------- HOT SCORE ---------- */
 

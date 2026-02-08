@@ -3,7 +3,7 @@
 /* ===== Social Space Container ===== */
 .social-space {
   flex: 1;
-  min-width: 0; /* prevents flex overflow bugs */
+  min-width: 360px; /* prevents flex overflow bugs */
 }
 
 /* ===== Search Bar ===== */
@@ -93,9 +93,50 @@
   border-radius: 999px;
 }
 
+.trending {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Each item */
 .trending > div {
-  padding: 10px 0;
+  padding-top: 4px;
+  padding-bottom: 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  font-size: 14px;
+  color: #d1d5db;
+
+  cursor: pointer;
+  user-select: none;
+
+  transition:
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.trending-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+/* Hover — subtle, calm */
+.trending > div:hover {
+  color: var(--accent);
+  transform: translateX(2px);
+}
+
+/* Active (click feedback) */
+.trending > div:active {
+  transform: translateX(0);
+  opacity: 0.8;
+}
+
+/* Last item — no divider */
+.trending > div:last-child {
+  border-bottom: none;
 }
 
 .social-space-page {
@@ -190,17 +231,6 @@
   color: white;
 
   margin-bottom: 24px;
-}
-
-.trending {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.trending div {
-  font-size: 14px;
-  color: #d1d5db;
 }
 
 .floating-create-btn {
