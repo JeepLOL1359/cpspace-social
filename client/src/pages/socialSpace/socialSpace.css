@@ -122,14 +122,54 @@
   color: #e5e7eb;
 }
 
+/* ===============================
+   TOPBAR MODE BUTTONS
+=============================== */
 .topbar-center button {
   margin: 0 6px;
   padding: 6px 14px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  border: none;
-  color: #9ca3af;
-  cursor: not-allowed;
+
+  background: transparent;
+  border: 1px solid var(--border-color);
+
+  font-size: 13px;
+  font-weight: 500;
+
+  color: var(--text-muted);
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease,
+    border-color 0.15s ease;
+}
+
+/* HOVER — feels clickable */
+.topbar-center button:hover {
+  background: rgba(99, 102, 241, 0.08); /* accent soft */
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+/* ACTIVE MODE (important) */
+.topbar-center button.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* ACTIVE HOVER (no jump) */
+.topbar-center button.active:hover {
+  transform: none;
+  background: var(--accent);
+}
+
+/* CLICK FEEDBACK */
+.topbar-center button:active {
+  transform: translateY(0);
 }
 
 .social-space__side h3 {
@@ -186,3 +226,23 @@
   transform: translateY(-2px);
 }
 
+.end-of-feed {
+  margin: 32px auto 24px;
+  padding: 20px 16px;
+  max-width: 420px;
+  text-align: center;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 16px;
+}
+
+.end-of-feed__icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.end-of-feed__text {
+  font-size: 14px;
+  font-weight: 500;
+  padding-bottom: 48px;
+}

@@ -17,7 +17,12 @@ import CommentList from "./CommentList";
 import CommentInput from "./CommentInput";
 import "./PostCard.css";
 
-export default function PostCard({ post, pseudonym, onPostUpdated }) {
+export default function PostCard({
+  post,
+  pseudonym,
+  onPostUpdated,
+  loadMore
+}) {
   const auth = getAuth();
   const isOwner = auth.currentUser?.uid === post.authorId;
 
@@ -98,6 +103,7 @@ export default function PostCard({ post, pseudonym, onPostUpdated }) {
     } else {
       applyVote(1);
     }
+    if (loadMore) loadMore();
   }
 
   function handleDownvote() {
@@ -106,6 +112,7 @@ export default function PostCard({ post, pseudonym, onPostUpdated }) {
     } else {
       applyVote(-1);
     }
+    if (loadMore) loadMore();
   }
 
   useEffect(() => {
@@ -261,7 +268,10 @@ export default function PostCard({ post, pseudonym, onPostUpdated }) {
         </button>
 
         <button
-          onClick={() => setShowAllComments(v => !v)}
+          onClick={() => {
+            setShowAllComments(v => !v);
+            if (loadMore) loadMore();
+          }}
           style={{
             color: showAllComments ? "var(--accent)" : undefined
           }}

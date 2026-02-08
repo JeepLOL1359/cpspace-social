@@ -556,7 +556,7 @@ console.log("Assessments seeded");
 
 
 
-  /*Posts Entires, 12 entries*/
+  /*Posts Entires, 82 entries*/
   const postRef1 = await db.collection("posts").add({
     authorId: "user00001",
     body: "Some days just feel heavier than others.",
@@ -565,7 +565,7 @@ console.log("Assessments seeded");
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp(),
     moderationStatus: "Visible",
-    stats: { up: 3, down: 0 }
+    stats: { up: 5, down: 0 }
   });
 
   const postRef2 = await db.collection("posts").add({
@@ -609,7 +609,7 @@ console.log("Assessments seeded");
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp(),
     moderationStatus: "Visible",
-    stats: { up: 1, down: 5 }
+    stats: { up: 5, down: 0 }
   });
 
   const postRef6 = await db.collection("posts").add({
@@ -631,7 +631,7 @@ console.log("Assessments seeded");
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp(),
     moderationStatus: "Flagged",
-    stats: { up: 1, down: 1 }
+    stats: { up: 5, down: 0 }
   });
 
   const postRef8 = await db.collection("posts").add({
@@ -653,7 +653,7 @@ console.log("Assessments seeded");
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp(),
     moderationStatus: "Visible",
-    stats: { up: 2, down: 4 } 
+    stats: { up: 5, down: 0 } 
   });
 
   const postRef10 = await db.collection("posts").add({
@@ -675,7 +675,7 @@ console.log("Assessments seeded");
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp(),
     moderationStatus: "Flagged",
-    stats: { up: 3, down: 2 } 
+    stats: { up: 5, down: 0 } 
   });
 
   const postRef12 = await db.collection("posts").add({
@@ -688,6 +688,777 @@ console.log("Assessments seeded");
     moderationStatus: "Visible",
     stats: { up: 5, down: 0 } 
   }); 
+
+  const postRef13 = await db.collection("posts").add({
+    authorId: "user00002",
+    body: "Finally pushed my first open-source contribution today. It was just a documentation fix, but seeing my name on the repo feels amazing!",
+    emotionCategory: "pleasant",
+    feelings: ["Proud", "Amazed"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef14 = await db.collection("posts").add({
+    authorId: "user00005",
+    body: "The library is absolutely packed today. I've been walking around for 20 minutes and still can't find a seat with a power outlet.",
+    emotionCategory: "unpleasant",
+    feelings: ["Annoyed", "Drained"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef15 = await db.collection("posts").add({
+    authorId: "user00001",
+    body: "Just finished a long coding session. Sitting on the balcony now, listening to the rain. Doing absolutely nothing for a while.",
+    emotionCategory: "neutral",
+    feelings: ["Peaceful", "Calm"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 4, down: 0 }
+  });
+
+  const postRef16 = await db.collection("posts").add({
+    authorId: "user00006",
+    body: "My laptop screen just went black in the middle of a build. I haven't backed up my recent changes to GitHub. I'm actually shaking right now.",
+    emotionCategory: "unpleasant",
+    feelings: ["Afraid", "Anxious"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef17 = await db.collection("posts").add({
+    authorId: "user00003",
+    body: "Passed the technical interview! I honestly thought I messed up the live coding part, but the recruiter just called with an offer.",
+    emotionCategory: "pleasant",
+    feelings: ["Relieved", "Excited"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef18 = await db.collection("posts").add({
+    authorId: "user00004",
+    body: "The sunset over the twin towers tonight was breathtaking. Reminds me why I love living in this city despite the heat.",
+    emotionCategory: "pleasant",
+    feelings: ["Amazed", "Grateful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef19 = await db.collection("posts").add({
+    authorId: "user00002",
+    body: "Just another Tuesday. Coffee is decent, the code is compiling, and I'm just cruising through my tasks.",
+    emotionCategory: "neutral",
+    feelings: ["Indifferent", "Content"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 2, down: 1 }
+  });
+
+  const postRef20 = await db.collection("posts").add({
+    authorId: "user00001",
+    body: "I forgot to save my progress before my VM crashed. Three hours of debugging down the drain. I want to throw my monitor out the window.",
+    emotionCategory: "unpleasant",
+    feelings: ["Angry", "Annoyed"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef21 = await db.collection("posts").add({
+    authorId: "user00005",
+    body: "Finally submitted my thesis proposal. I feel like a massive weight has been lifted off my shoulders. Time to sleep for 12 hours.",
+    emotionCategory: "pleasant",
+    feelings: ["Relieved", "Hopeful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 4, down: 0 }
+  });
+
+  const postRef22 = await db.collection("posts").add({
+    authorId: "user00006",
+    body: "Sitting in the canteen alone again. It's weird how you can be surrounded by hundreds of people and still feel completely invisible.",
+    emotionCategory: "unpleasant",
+    feelings: ["Lonely", "Hopeless"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef23 = await db.collection("posts").add({
+    authorId: "user00003",
+    body: "Found a bug in a library I've been using for months. Turns out it wasn't my logic that was flawed after all. What a massive weight off my mind!",
+    emotionCategory: "pleasant",
+    feelings: ["Relieved", "Joyful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef24 = await db.collection("posts").add({
+    authorId: "user00001",
+    body: "Watching the Grab drivers navigate the flash flood outside. Just another chaotic evening in the city while I'm safe indoors.",
+    emotionCategory: "neutral",
+    feelings: ["Calm", "Indifferent"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 3, down: 1 }
+  });
+
+  const postRef25 = await db.collection("posts").add({
+    authorId: "user00004",
+    body: "Group project members are MIA again. Deadline is in 48 hours and I'm the only one committing code. This happens every single semester.",
+    emotionCategory: "unpleasant",
+    feelings: ["Angry", "Drained"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 4, down: 1 }
+  });
+
+  const postRef26 = await db.collection("posts").add({
+    authorId: "user00002",
+    body: "The prompt for the hackathon just dropped and the ideas are already flowing. I can't wait to start building this weekend!",
+    emotionCategory: "pleasant",
+    feelings: ["Excited", "Hopeful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 2, down: 0 }
+  });
+
+  const postRef27 = await db.collection("posts").add({
+    authorId: "user00006",
+    body: "I’ve been staring at this LeetCode 'Hard' problem for two hours. I feel like I’ve learned nothing in the last three years of my degree.",
+    emotionCategory: "unpleasant",
+    feelings: ["Anxious", "Guilty"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 1, down: 5 }
+  });
+
+  const postRef28 = await db.collection("posts").add({
+    authorId: "user00005",
+    body: "Finally hit my 100-day streak on LeetCode. It’s a small win, but it makes the job hunt feel a little less daunting.",
+    emotionCategory: "pleasant",
+    feelings: ["Proud", "Hopeful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef29 = await db.collection("posts").add({
+    authorId: "user00003",
+    body: "Checking the LRT schedule and realizing I just missed the train by 10 seconds. Now I'm just standing here staring at the tracks.",
+    emotionCategory: "neutral",
+    feelings: ["Indifferent", "Calm"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 1, down: 1 }
+  });
+
+  const postRef30 = await db.collection("posts").add({
+    authorId: "user00002",
+    body: "Spent all morning refactoring a legacy module only to realize I've introduced three new race conditions. My head is spinning.",
+    emotionCategory: "unpleasant",
+    feelings: ["Drained", "Annoyed"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 2, down: 2 }
+  });
+
+  const postRef31 = await db.collection("posts").add({
+    authorId: "user00004",
+    body: "Got an unexpected 'A' for my OS assignment. I was so sure I'd messed up the process synchronization part!",
+    emotionCategory: "pleasant",
+    feelings: ["Amazed", "Relieved"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 4, down: 0 }
+  });
+
+  const postRef32 = await db.collection("posts").add({
+    authorId: "user00001",
+    body: "Looking at the rain outside the TARUMT library. It’s peaceful, but the cold is starting to make me feel a bit isolated.",
+    emotionCategory: "unpleasant",
+    feelings: ["Lonely", "Anxious"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 3, down: 1 }
+  });
+
+  const postRef33 = await db.collection("posts").add({
+    authorId: "user00006",
+    body: "Just finished a 4-hour lecture. Walking to the bus stop now. My mind is completely blank, just vibing with the evening breeze.",
+    emotionCategory: "neutral",
+    feelings: ["Content", "Calm"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 2, down: 0 }
+  });
+
+  const postRef34 = await db.collection("posts").add({
+    authorId: "user00003",
+    body: "I finally got my Flutter environment set up without any CocoaPods errors! I've been fighting this for two days straight.",
+    emotionCategory: "pleasant",
+    feelings: ["Relieved", "Excited"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef35 = await db.collection("posts").add({
+    authorId: "user00001",
+    body: "Tried a new Spicy Pan Mee place near campus. It was way too hot and now I'm just sitting here regretting my life choices.",
+    emotionCategory: "unpleasant",
+    feelings: ["Disgusted", "Annoyed"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 4, down: 1 }
+  });
+
+  const postRef36 = await db.collection("posts").add({
+    authorId: "user00005",
+    body: "Applied to 20 internships today. The radio silence from recruiters is starting to get to me. Is my portfolio even good enough?",
+    emotionCategory: "unpleasant",
+    feelings: ["Anxious", "Lonely"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 3, down: 2 }
+  });
+
+  const postRef37 = await db.collection("posts").add({
+    authorId: "user00002",
+    body: "The project demo went perfectly. The lecturer actually smiled and said our UI/UX was 'impressive'. I'm on cloud nine!",
+    emotionCategory: "pleasant",
+    feelings: ["Proud", "Joyful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef38 = await db.collection("posts").add({
+    authorId: "user00004",
+    body: "Finally figured out how to use Docker volumes correctly. No more losing my database data every time I restart the container!",
+    emotionCategory: "pleasant",
+    feelings: ["Proud", "Relieved"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef39 = await db.collection("posts").add({
+    authorId: "user00006",
+    body: "Standing in line for the campus shuttle. It's late again, but the weather is actually quite nice today, so I don't really mind.",
+    emotionCategory: "neutral",
+    feelings: ["Peaceful", "Indifferent"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 2, down: 1 }
+  });
+
+  const postRef40 = await db.collection("posts").add({
+    authorId: "user00001",
+    body: "I’ve been stuck on this recursion problem for five hours. I feel like my logic is just circling the drain at this point.",
+    emotionCategory: "unpleasant",
+    feelings: ["Drained", "Annoyed"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 1, down: 3 }
+  });
+
+  const postRef41 = await db.collection("posts").add({
+    authorId: "user00003",
+    body: "Someone stole my umbrella from the library entrance. Now I have to walk back to the hostel in the pouring rain. People can be so selfish.",
+    emotionCategory: "unpleasant",
+    feelings: ["Angry", "Disgusted"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 4, down: 0 }
+  });
+
+  // 42 ++ all are pleasant (40 are pleasant)
+  const postRef42 = await db.collection("posts").add({
+    authorId: "user00002",
+    body: "Just saw the preview for the upcoming tech symposium at TARUMT. Some really cool speakers are coming. Definitely feeling inspired.",
+    emotionCategory: "pleasant",
+    feelings: ["Excited", "Hopeful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 3, down: 0 }
+  });
+
+  const postRef43 = await db.collection("posts").add({
+    authorId: "user00001",
+    body: "Finally understood how to implement the Observer pattern in my project. It’s like a lightbulb just went off in my head!",
+    emotionCategory: "pleasant",
+    feelings: ["Proud", "Amazed"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef44 = await db.collection("posts").add({
+    authorId: "user00002",
+    body: "Found a hidden gem of a cafe near the Wangsa Maju LRT. The quiet atmosphere and good coffee are exactly what I needed to focus.",
+    emotionCategory: "pleasant",
+    feelings: ["Grateful", "Relieved"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 4, down: 0 }
+  });
+
+  const postRef45 = await db.collection("posts").add({
+    authorId: "user00003",
+    body: "Just got the confirmation that our team made it to the finals of the inter-varsity hackathon! Let's go!",
+    emotionCategory: "pleasant",
+    feelings: ["Excited", "Joyful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef46 = await db.collection("posts").add({
+    authorId: "user00004",
+    body: "The new documentation I wrote for the club's repo actually helped a junior fix their first bug. Seeing them succeed feels great.",
+    emotionCategory: "pleasant",
+    feelings: ["Proud", "Hopeful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 3, down: 0 }
+  });
+
+  const postRef47 = await db.collection("posts").add({
+    authorId: "user00005",
+    body: "Managed to optimize a query that was taking 10 seconds down to 200ms. I feel like a wizard right now.",
+    emotionCategory: "pleasant",
+    feelings: ["Amazed", "Proud"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 1 }
+  });
+
+  const postRef48 = await db.collection("posts").add({
+    authorId: "user00006",
+    body: "The rain stopped just in time for my walk home. The air is so fresh and the sky looks incredible.",
+    emotionCategory: "pleasant",
+    feelings: ["Grateful", "Joyful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 2, down: 0 }
+  });
+
+  const postRef49 = await db.collection("posts").add({
+    authorId: "user00001",
+    body: "The feedback from my supervisor on my FYP draft was surprisingly positive. I was so worried, but now I feel I can actually finish this.",
+    emotionCategory: "pleasant",
+    feelings: ["Relieved", "Hopeful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 4, down: 0 }
+  });
+
+  const postRef50 = await db.collection("posts").add({
+    authorId: "user00002",
+    body: "My mechanical keyboard finally arrived! The typing experience is a whole new level of satisfaction.",
+    emotionCategory: "pleasant",
+    feelings: ["Excited", "Joyful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 3, down: 0 }
+  });
+
+  const postRef51 = await db.collection("posts").add({
+    authorId: "user00003",
+    body: "A total stranger helped me find my lost student ID at the block C entrance. There's still so much kindness in the world.",
+    emotionCategory: "pleasant",
+    feelings: ["Grateful", "Amazed"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef52 = await db.collection("posts").add({
+    authorId: "user00004",
+    body: "Starting a new personal project using the latest tech stack. The potential of what I can build is making me really look forward to the weekend.",
+    emotionCategory: "pleasant",
+    feelings: ["Hopeful", "Excited"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 4, down: 1 }
+  });
+
+  const postRef53 = await db.collection("posts").add({
+    authorId: "user00005",
+    body: "Finally hit 100% test coverage on my latest module. No more anxiety about edge cases breaking the production build!",
+    emotionCategory: "pleasant",
+    feelings: ["Relieved", "Proud"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef54 = await db.collection("posts").add({
+    authorId: "user00001",
+    body: "Watching the sunrise from the rooftop after an all-night hackathon. We actually built something functional from scratch!",
+    emotionCategory: "pleasant",
+    feelings: ["Amazed", "Joyful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 4, down: 1 }
+  });
+
+  const postRef55 = await db.collection("posts").add({
+    authorId: "user00006",
+    body: "A junior student reached out to thank me for my explanation on Data Structures. It feels great to know I made their learning easier.",
+    emotionCategory: "pleasant",
+    feelings: ["Grateful", "Proud"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef56 = await db.collection("posts").add({
+    authorId: "user00002",
+    body: "The new framework update fixed that annoying bug that's been bothering me for weeks. It’s a good day to be a developer.",
+    emotionCategory: "pleasant",
+    feelings: ["Relieved", "Hopeful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 3, down: 0 }
+  });
+
+  const postRef57 = await db.collection("posts").add({
+    authorId: "user00003",
+    body: "Just saw a stray cat on campus and it actually let me pet it. Best 5 minutes of my entire week.",
+    emotionCategory: "pleasant",
+    feelings: ["Joyful", "Grateful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef58 = await db.collection("posts").add({
+    authorId: "user00004",
+    body: "Finally secured an interview with that top tech firm in Mid Valley. This is the opportunity I've been waiting for.",
+    emotionCategory: "pleasant",
+    feelings: ["Excited", "Hopeful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 4, down: 0 }
+  });
+
+  const postRef59 = await db.collection("posts").add({
+    authorId: "user00001",
+    body: "I actually won the lucky draw at the CS society event. New noise-canceling headphones, here I come!",
+    emotionCategory: "pleasant",
+    feelings: ["Amazed", "Excited"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef60 = await db.collection("posts").add({
+    authorId: "user00005",
+    body: "That satisfying feeling when your code runs on the first try after a major refactor. Absolute bliss.",
+    emotionCategory: "pleasant",
+    feelings: ["Proud", "Relieved"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 4, down: 1 }
+  });
+
+  const postRef61 = await db.collection("posts").add({
+    authorId: "user00002",
+    body: "The group discussion today was actually productive. Everyone contributed and we're way ahead of the project timeline.",
+    emotionCategory: "pleasant",
+    feelings: ["Grateful", "Hopeful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 3, down: 0 }
+  });
+
+  const postRef62 = await db.collection("posts").add({
+    authorId: "user00006",
+    body: "The library air conditioning is finally fixed. Studying for finals just became 100% more bearable.",
+    emotionCategory: "pleasant",
+    feelings: ["Relieved", "Joyful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 2, down: 0 }
+  });
+
+  const postRef63 = await db.collection("posts").add({
+    authorId: "user00003",
+    body: "Finally submitted the final version of my mobile app to the Play Store. Seeing that 'Review in progress' status is the best feeling ever.",
+    emotionCategory: "pleasant",
+    feelings: ["Proud", "Relieved"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef64 = await db.collection("posts").add({
+    authorId: "user00001",
+    body: "The sunset over the TARUMT sports complex was absolutely stunning today. Really makes you appreciate the little things.",
+    emotionCategory: "pleasant",
+    feelings: ["Grateful", "Amazed"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 4, down: 0 }
+  });
+
+  const postRef65 = await db.collection("posts").add({
+    authorId: "user00006",
+    body: "Got a surprise high distinction for my Discrete Math paper! I was so sure I flunked the logic section.",
+    emotionCategory: "pleasant",
+    feelings: ["Amazed", "Joyful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef66 = await db.collection("posts").add({
+    authorId: "user00002",
+    body: "Just secured a ticket for the tech conference in Mid Valley. Can't wait to meet some industry experts!",
+    emotionCategory: "pleasant",
+    feelings: ["Excited", "Hopeful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 3, down: 0 }
+  });
+
+  const postRef67 = await db.collection("posts").add({
+    authorId: "user00004",
+    body: "My mentor gave me a shoutout during the stand-up meeting for the way I handled the API integration. Feeling validated.",
+    emotionCategory: "pleasant",
+    feelings: ["Proud", "Grateful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef68 = await db.collection("posts").add({
+    authorId: "user00005",
+    body: "Managed to finish all my assignments for the week by Thursday night. Three-day weekend, here I come!",
+    emotionCategory: "pleasant",
+    feelings: ["Relieved", "Joyful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 4, down: 1 }
+  });
+
+  const postRef69 = await db.collection("posts").add({
+    authorId: "user00001",
+    body: "Just had an amazing deep-dive conversation about AI ethics with some friends. It's so refreshing to share ideas like this.",
+    emotionCategory: "pleasant",
+    feelings: ["Excited", "Grateful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 3, down: 0 }
+  });
+
+  const postRef70 = await db.collection("posts").add({
+    authorId: "user00003",
+    body: "The gym was empty this morning. Had a perfect workout session and now I'm feeling super energized for my 10 AM class.",
+    emotionCategory: "pleasant",
+    feelings: ["Proud", "Hopeful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 2, down: 0 }
+  });
+
+  const postRef71 = await db.collection("posts").add({
+    authorId: "user00002",
+    body: "Found a really helpful open-source library that solves exactly the problem I was having. Massive shoutout to the contributors!",
+    emotionCategory: "pleasant",
+    feelings: ["Relieved", "Amazed"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 4, down: 0 }
+  });
+
+  const postRef72 = await db.collection("posts").add({
+    authorId: "user00006",
+    body: "Successfully cooked a meal for my housemates tonight and they actually liked it! It’s nice to take a break from coding.",
+    emotionCategory: "pleasant",
+    feelings: ["Joyful", "Proud"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef73 = await db.collection("posts").add({
+    authorId: "user00004",
+    body: "Just saw the results for the Google Cloud Certification. I passed! All those late nights in the library finally paid off.",
+    emotionCategory: "pleasant",
+    feelings: ["Proud", "Relieved"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef74 = await db.collection("posts").add({
+    authorId: "user00002",
+    body: "The campus orientation for the new intake was so lively today. Seeing all the fresh faces makes me so hopeful for the new semester.",
+    emotionCategory: "pleasant",
+    feelings: ["Hopeful", "Joyful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 3, down: 0 }
+  });
+
+  const postRef75 = await db.collection("posts").add({
+    authorId: "user00001",
+    body: "I finally automated my morning routine with a Python script and a Raspberry Pi. It's a small thing, but it feels like magic.",
+    emotionCategory: "pleasant",
+    feelings: ["Amazed", "Proud"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 4, down: 1 }
+  });
+
+  const postRef76 = await db.collection("posts").add({
+    authorId: "user00005",
+    body: "Got picked for a fully-funded internship program in Singapore! I can't wait to see what the international tech scene is like.",
+    emotionCategory: "pleasant",
+    feelings: ["Excited", "Grateful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef77 = await db.collection("posts").add({
+    authorId: "user00003",
+    body: "Managed to finish my entire FYP documentation today. I can finally enjoy a stress-free weekend without any looming deadlines.",
+    emotionCategory: "pleasant",
+    feelings: ["Relieved", "Joyful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 4, down: 0 }
+  });
+
+  const postRef78 = await db.collection("posts").add({
+    authorId: "user00006",
+    body: "Shared some of my old notes with a first-year student today and they were so thankful. It's nice to give back to the community.",
+    emotionCategory: "pleasant",
+    feelings: ["Grateful", "Proud"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 3, down: 0 }
+  });
+
+  const postRef79 = await db.collection("posts").add({
+    authorId: "user00001",
+    body: "The project I've been working on just hit 500 stars on GitHub! I never expected this much support from the dev community.",
+    emotionCategory: "pleasant",
+    feelings: ["Amazed", "Hopeful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
+
+  const postRef80 = await db.collection("posts").add({
+    authorId: "user00004",
+    body: "Finally bought that ergonomic chair I've been eyeing. My back is already thanking me. No more coding-induced posture pain!",
+    emotionCategory: "pleasant",
+    feelings: ["Joyful", "Relieved"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 2, down: 0 }
+  });
+
+  const postRef81 = await db.collection("posts").add({
+    authorId: "user00002",
+    body: "Had a great brainstorming session with the team at the canteen. We've finally nailed down the system architecture for our project.",
+    emotionCategory: "pleasant",
+    feelings: ["Excited", "Proud"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 4, down: 0 }
+  });
+
+  const postRef82 = await db.collection("posts").add({
+    authorId: "user00003",
+    body: "Found an old hard drive with some of my very first HTML/CSS projects. It’s amazing to see how far I've come since then.",
+    emotionCategory: "pleasant",
+    feelings: ["Amazed", "Grateful"],
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    moderationStatus: "Visible",
+    stats: { up: 5, down: 0 }
+  });
 console.log("Posts seeded");
 
 
