@@ -1752,7 +1752,8 @@ console.log("Comment seeded");
     },
     nextSeq: 9,
     lastMessageAt: FieldValue.serverTimestamp(),
-    moderationStatus: "Visible"
+    moderationStatus: "Visible",
+    familiarityLevel: 2
   });
 
   const convoRef2 = await db.collection("conversations").doc("user00001_user00006").set({
@@ -1763,7 +1764,8 @@ console.log("Comment seeded");
     },
     nextSeq: 7,
     lastMessageAt: FieldValue.serverTimestamp(),
-    moderationStatus: "Visible"
+    moderationStatus: "Visible",
+    familiarityLevel: 1
   });
 
   const convoRef3 = await db.collection("conversations").doc("user00002_user00004").set({
@@ -1774,7 +1776,8 @@ console.log("Comment seeded");
     },
     nextSeq: 8,
     lastMessageAt: FieldValue.serverTimestamp(),
-    moderationStatus: "Flagged"
+    moderationStatus: "Flagged",
+    familiarityLevel: 2
   });
 
   const convoRef4 = await db.collection("conversations").doc("user00003_user00004").set({
@@ -1785,7 +1788,8 @@ console.log("Comment seeded");
     },
     nextSeq: 8,
     lastMessageAt: FieldValue.serverTimestamp(),
-    moderationStatus: "Hidden"
+    moderationStatus: "Hidden",
+    familiarityLevel: 2
   });
 console.log("Conversation seeded");
 

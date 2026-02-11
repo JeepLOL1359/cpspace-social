@@ -47,6 +47,9 @@ import CalendarPage from "./pages/diaries/CalendarPage";
 // Social Space
 import SocialSpace from "./pages/socialSpace/SocialSpace";
 
+// DM Chat
+import DMPage from "./pages/DMconvo/DMPage";
+
 function App() {
   const auth = getAuth();
   const [user, setUser] = useState(null);
@@ -216,6 +219,9 @@ function App() {
 
           {/* SOCIAL SPACE */}
           <Route path="social-space" element={<SocialSpace />} />
+
+          {/* DIRECT MESSAGE */}
+          <Route path="chats" element={<DMPage />} />
 
           {/* CHATBOT */}
           <Route path="chatbot" element={<Chatbot />} />

@@ -1,0 +1,107 @@
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  serverTimestamp,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore";
+import { db } from "../../../firebaseConfig";
+import { generateConversationId } from "./conversationId";
+
+/* ------------------ GET RELATIONSHIP ------------------ */
+export async function getRelationship(uidA, uidB) {
+  const conversationId = generateConversationId(uidA, uidB);
+  const ref = doc(db, "conversations", conversationId);
+  const snap = await getDoc(ref);
+
+  if (!snap.exists()) {
+    return { exists: false, status: "none" };
+  }
+
+  return { exists: true, id: snap.id, ...snap.data() };
+}
+
+/* ------------------ REQUEST ------------------ */
+export async function requestRelationship(currentUid, targetUid) {
+  const conversationId = generateConversationId(currentUid, targetUid);
+  const ref = doc(db, "conversations", conversationId);
+  const snap = await getDoc(ref);
+
+  if (!snap.exists()) {
+    await setDoc(ref, {
+      participants: [currentUid, targetUid],
+      relationshipStatus: "pending",
+      consent: {
+        [currentUid]: true,
+        [targetUid]: false,
+      },
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+  } else {
+    await updateDoc(ref, {
+      relationshipStatus: "pending",
+      [`consent.${currentUid}`]: true,
+      [`consent.${targetUid}`]: false,
+      updatedAt: serverTimestamp(),
+    });
+  }
+}
+
+/* ------------------ ACCEPT ------------------ */
+export async function acceptRelationship(currentUid, targetUid) {
+  const conversationId = generateConversationId(currentUid, targetUid);
+  const ref = doc(db, "conversations", conversationId);
+
+  await updateDoc(ref, {
+    relationshipStatus: "consented",
+    [`consent.${currentUid}`]: true,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+/* ------------------ REVOKE ------------------ */
+export async function revokeRelationship(currentUid, targetUid) {
+  const conversationId = generateConversationId(currentUid, targetUid);
+  const ref = doc(db, "conversations", conversationId);
+
+  await updateDoc(ref, {
+    relationshipStatus: "revoked",
+    [`consent.${currentUid}`]: false,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+/* ------------------ BLOCK ------------------ */
+export async function blockUser(currentUid, targetUid) {
+  const conversationId = generateConversationId(currentUid, targetUid);
+  const convoRef = doc(db, "conversations", conversationId);
+  const userRef = doc(db, "users", currentUid);
+
+  await updateDoc(convoRef, {
+    relationshipStatus: "blocked",
+    updatedAt: serverTimestamp(),
+  });
+
+  await updateDoc(userRef, {
+    blockedUsers: arrayUnion(targetUid),
+  });
+}
+
+/* ------------------ UNBLOCK ------------------ */
+export async function unblockUser(currentUid, targetUid) {
+  const conversationId = generateConversationId(currentUid, targetUid);
+  const convoRef = doc(db, "conversations", conversationId);
+  const userRef = doc(db, "users", currentUid);
+
+  await updateDoc(userRef, {
+    blockedUsers: arrayRemove(targetUid),
+  });
+
+  await updateDoc(convoRef, {
+    relationshipStatus: "revoked",
+    updatedAt: serverTimestamp(),
+  });
+}

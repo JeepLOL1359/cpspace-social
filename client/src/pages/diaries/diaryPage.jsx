@@ -12,7 +12,6 @@ import { computeDailyScores } from "./utils/emotionAggregation";
 import { build7DayTrend } from "./utils/trendBuilder";
 import { saveWindowToCache, loadWindowFromCache, } from "./utils/diaryCache";
 
-
 import EmotionTrendChart from "./components/EmotionTrendChart";
 
 import EventItem from "./EventItem";
