@@ -42,15 +42,15 @@ export default function AuthGate({ onAuth }) {
       if (mode === "signup") {
         cred = await createUserWithEmailAndPassword(auth, email, password);
 
-        // 🔐 Create user document (idempotent)
+        // Create user document (idempotent)
         await bootstrapUser(cred.user.uid);
 
-        // 📧 Send verification email ONCE
+        // Send verification email ONCE
         await sendEmailVerification(cred.user);
       } else {
         cred = await signInWithEmailAndPassword(auth, email, password);
 
-        // 🔐 Ensure user exists (safe even if already created)
+        // Ensure user exists (safe even if already created)
         await bootstrapUser(cred.user.uid);
       }
 

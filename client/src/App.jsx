@@ -46,6 +46,7 @@ import CalendarPage from "./pages/diaries/CalendarPage";
 
 // Social Space
 import SocialSpace from "./pages/socialSpace/SocialSpace";
+import UserProfilePage from "./pages/socialSpace/UserProfilePage";
 
 // DM Chat
 import DMPage from "./pages/DMconvo/DMPage";
@@ -219,6 +220,7 @@ function App() {
 
           {/* SOCIAL SPACE */}
           <Route path="social-space" element={<SocialSpace />} />
+          <Route path="/user/:uid" element={<UserProfilePage />} />
 
           {/* DIRECT MESSAGE */}
           <Route path="chats" element={<DMPage />} />

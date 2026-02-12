@@ -1,6 +1,7 @@
 // socialSpace/components/PostCard.jsx
 
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getAuth } from "firebase/auth";
 import {
   doc,
@@ -24,6 +25,7 @@ export default function PostCard({
   loadMore
 }) {
   const auth = getAuth();
+  const navigate = useNavigate();
   const isOwner = auth.currentUser?.uid === post.authorId;
 
   const [showAllComments, setShowAllComments] = useState(false);
@@ -195,7 +197,14 @@ export default function PostCard({
   return (
     <div className="post-card">
       <div className="post-header">
-        <strong>{pseudonym}</strong>
+        <strong
+          onClick={() =>
+            navigate(`/user/${post.authorId}`)
+          }
+          style={{ cursor: "pointer" }}
+        >
+          {pseudonym}
+        </strong>
         {post.isEdited && <span className="edited-label"> · edited</span>}
       </div>
 

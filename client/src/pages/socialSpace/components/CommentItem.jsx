@@ -1,6 +1,7 @@
 // socialSpace/components/CommentItem.jsx
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getAuth } from "firebase/auth";
 import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../../../firebaseConfig";
@@ -8,6 +9,7 @@ import "./Comment.css";
 
 export default function CommentItem({ comment, pseudonym }) {
   const auth = getAuth();
+  const navigate = useNavigate();
   const isOwner = auth.currentUser?.uid === comment.authorId;
 
   const [editing, setEditing] = useState(false);
@@ -41,7 +43,12 @@ export default function CommentItem({ comment, pseudonym }) {
 
   return (
     <div className="comment">
-      <span className="comment-author">
+      <span className="comment-author"
+        onClick={() =>
+          navigate(`/user/${comment.authorId}`)
+        }
+        style={{ cursor: "pointer" }}
+      >
         {pseudonym}
         {comment.isEdited && " · edited"}
       </span>

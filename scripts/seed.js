@@ -126,7 +126,6 @@ async function main() {
         removed: { pos: [], neu: [], neg: [] }
       } // default is empty
     },
-    blockedUsers: [] // default is empty
   });
 
   await db.collection("users").doc("user00002").set({
@@ -154,7 +153,6 @@ async function main() {
         removed: { pos: [], neu: [], neg: [] }
       }
     },
-    blockedUsers: []
   });
 
   await db.collection("users").doc("user00003").set({
@@ -182,7 +180,6 @@ async function main() {
         removed: { pos: [], neu: [], neg: [] }
       }
     },
-    blockedUsers: []
   });
 
   await db.collection("users").doc("user00004").set({
@@ -210,7 +207,6 @@ async function main() {
         removed: { pos: [], neu: [], neg: [] }
       }
     },
-    blockedUsers: ["user00003"]
   });
 
   await db.collection("users").doc("user00005").set({
@@ -238,7 +234,6 @@ async function main() {
         removed: { pos: [], neu: [], neg: [] }
       }
     },
-    blockedUsers: []
   });
 
   await db.collection("users").doc("user00006").set({
@@ -266,7 +261,6 @@ async function main() {
         removed: { pos: [], neu: [], neg: [] }
       }
     },
-    blockedUsers: ["user00003", "user00004", "user00005"]
   });
 console.log("Users seeded");
 

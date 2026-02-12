@@ -4,11 +4,9 @@ import {
   setDoc,
   updateDoc,
   serverTimestamp,
-  arrayUnion,
-  arrayRemove,
 } from "firebase/firestore";
 import { db } from "../../../firebaseConfig";
-import { generateConversationId } from "./conversationId";
+import { generateConversationId } from "../utils/conversationId";
 
 /* ------------------ GET RELATIONSHIP ------------------ */
 export async function getRelationship(uidA, uidB) {
@@ -70,6 +68,7 @@ export async function revokeRelationship(currentUid, targetUid) {
   await updateDoc(ref, {
     relationshipStatus: "revoked",
     [`consent.${currentUid}`]: false,
+    [`consent.${targetUid}`]: false,
     updatedAt: serverTimestamp(),
   });
 }
@@ -78,27 +77,20 @@ export async function revokeRelationship(currentUid, targetUid) {
 export async function blockUser(currentUid, targetUid) {
   const conversationId = generateConversationId(currentUid, targetUid);
   const convoRef = doc(db, "conversations", conversationId);
-  const userRef = doc(db, "users", currentUid);
 
   await updateDoc(convoRef, {
     relationshipStatus: "blocked",
+    [`consent.${currentUid}`]: false,
+    [`consent.${targetUid}`]: false,
     updatedAt: serverTimestamp(),
   });
 
-  await updateDoc(userRef, {
-    blockedUsers: arrayUnion(targetUid),
-  });
 }
 
 /* ------------------ UNBLOCK ------------------ */
 export async function unblockUser(currentUid, targetUid) {
   const conversationId = generateConversationId(currentUid, targetUid);
   const convoRef = doc(db, "conversations", conversationId);
-  const userRef = doc(db, "users", currentUid);
-
-  await updateDoc(userRef, {
-    blockedUsers: arrayRemove(targetUid),
-  });
 
   await updateDoc(convoRef, {
     relationshipStatus: "revoked",

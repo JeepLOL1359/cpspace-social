@@ -1,5 +1,3 @@
-// socialSpace/hooks/useGlobalSearch.js
-
 import { useEffect, useState } from "react";
 import {
   collection,
@@ -9,6 +7,7 @@ import {
   limit,
   getDocs
 } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 import { db } from "../../../firebaseConfig";
 
 const INITIAL_LIMIT = 20;
@@ -49,15 +48,12 @@ function computeRelevance(post, query) {
   const body = post.body?.toLowerCase() || "";
   const words = q.split(/\s+/).filter(Boolean);
 
-  // full query match
   if (body.includes(q)) score += 3;
 
-  // keyword matches
   for (const w of words) {
     if (body.includes(w)) score += 1;
   }
 
-  // feelings match
   if (post.feelings?.some(f => f.toLowerCase().includes(q))) {
     score += 1;
   }
@@ -68,6 +64,9 @@ function computeRelevance(post, query) {
 /* ---------- HOOK ---------- */
 
 export function useGlobalSearch() {
+  const auth = getAuth();
+  const currentUid = auth.currentUser?.uid;
+
   const [results, setResults] = useState([]);
   const [limitCount, setLimitCount] = useState(INITIAL_LIMIT);
   const [loading, setLoading] = useState(false);
@@ -75,19 +74,47 @@ export function useGlobalSearch() {
   const [currentQuery, setCurrentQuery] = useState("");
   const [history, setHistory] = useState(loadHistory());
 
+  async function fetchBlockedSet() {
+    if (!currentUid) return new Set();
+
+    const convoQuery = fsQuery(
+      collection(db, "conversations"),
+      where("participants", "array-contains", currentUid)
+    );
+
+    const snap = await getDocs(convoQuery);
+
+    const blocked = new Set();
+
+    snap.docs.forEach(d => {
+      const data = d.data();
+      const other = data.participants.find(p => p !== currentUid);
+
+      if (!other) return;
+
+      if (data.relationshipStatus === "blocked") {
+        blocked.add(other);
+      }
+    });
+
+    return blocked;
+  }
+
   function clearHistory() {
-    localStorage.removeItem("socialSearchHistory");
-    setHistory([]); // 👈 force UI update
-    }
+    localStorage.removeItem(HISTORY_KEY);
+    setHistory([]);
+  }
 
   async function runSearch(queryText, customLimit = INITIAL_LIMIT) {
-    if (!queryText.trim()) return;
+    if (!queryText.trim() || !currentUid) return;
 
     setLoading(true);
     setCurrentQuery(queryText);
 
     saveHistory(queryText);
     setHistory(loadHistory());
+
+    const blockedSet = await fetchBlockedSet();
 
     const q = fsQuery(
       collection(db, "posts"),
@@ -97,10 +124,10 @@ export function useGlobalSearch() {
     );
 
     const snap = await getDocs(q);
-    const docs = snap.docs.map(d => ({
-      id: d.id,
-      ...d.data()
-    }));
+
+    const docs = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(p => !blockedSet.has(p.authorId));
 
     const filtered = docs
       .map(p => ({
@@ -145,6 +172,6 @@ export function useGlobalSearch() {
     clearSearch,
     history,
     currentQuery,
-    clearHistory   
+    clearHistory
   };
 }

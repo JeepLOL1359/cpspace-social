@@ -4,6 +4,7 @@ import "./socialSpace.css";
 import { usePublicPseudonyms } from "./hooks/usePublicPseudonyms";
 import { useGlobalSearch } from "./hooks/useGlobalSearch";
 import { usePosts } from "./hooks/usePosts";
+import { useDisplayNames } from "./hooks/useDisplayNames";
 
 import PostCard from "./components/PostCard";
 import CreatePostModal from "./components/CreatePostModal";
@@ -11,7 +12,6 @@ import SearchResults from "./components/SearchResults";
 
 export default function SocialSpace() {
   const [query, setQuery] = useState("");
-  const pseudonymMap = usePublicPseudonyms();
 
   const [showCreatePost, setShowCreatePost] = useState(false);
 
@@ -36,7 +36,9 @@ export default function SocialSpace() {
 
   const isSearching = currentQuery !== "";
 
-
+  const displayNameMap = useDisplayNames(posts);
+  const searchDisplayMap = useDisplayNames(results);
+  
   function refreshFeed() {
     loadInitial();
   }
@@ -124,7 +126,7 @@ export default function SocialSpace() {
               loading={searching}
               searchedAll={searchedAll}
               onSearchMore={searchMore}
-              pseudonymMap={pseudonymMap}
+              pseudonymMap={searchDisplayMap}
               query={currentQuery}
             />
           ) : (
@@ -133,7 +135,7 @@ export default function SocialSpace() {
                 <PostCard
                   key={p.id}
                   post={p}
-                  pseudonym={pseudonymMap[p.authorId] || "Anonymous"}
+                  pseudonym={displayNameMap[p.authorId] || "Anonymous"}
                   onPostUpdated={refreshFeed}
                   loadMore={loadMore}
                 />

@@ -1,4 +1,3 @@
-// socialSpace/hooks/usePosts.js
 import {
   collection,
   query,
@@ -8,8 +7,8 @@ import {
   getDocs
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { getAuth } from "firebase/auth";
 import { db } from "../../../firebaseConfig";
-import { useRecentEmotion } from "./useRecentEmotion";
 
 const PAGE_SIZE = 20;
 const FETCH_SIZE = 100;
@@ -45,6 +44,16 @@ function computeHotScore(post) {
   return wilson / (1 + ageHours / 8);
 }
 
+/* ---------- HELPER: CHUNK ARRAY ---------- */
+
+function chunkArray(arr, size) {
+  const chunks = [];
+  for (let i = 0; i < arr.length; i += size) {
+    chunks.push(arr.slice(i, i + size));
+  }
+  return chunks;
+}
+
 /* ---------- HOOK ---------- */
 
 export function usePosts(mode = "newest") {
@@ -54,93 +63,124 @@ export function usePosts(mode = "newest") {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  const userEmotion = useRecentEmotion();
-  console.log("[usePosts] mode:", mode);
-  console.log("[usePosts] userEmotion:", userEmotion);
+  const auth = getAuth();
+  const currentUid = auth.currentUser?.uid;
 
-  /* ---------- INITIAL LOAD ---------- */
-  const loadInitial = async () => {
-    setLoading(true);
+  /* ---------- LOAD BLOCKED + CONSENTED ---------- */
 
-    const q = query(
-      collection(db, "posts"),
-      where("moderationStatus", "in", ["Visible", "Flagged"]),
-      orderBy("createdAt", "desc"),
-      limit(FETCH_SIZE)
+  async function fetchRelationshipData() {
+    if (!currentUid) return { blocked: new Set(), consented: [] };
+
+    const convoQuery = query(
+      collection(db, "conversations"),
+      where("participants", "array-contains", currentUid)
     );
 
-    const snap = await getDocs(q);
-    let data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const snap = await getDocs(convoQuery);
 
-    /* ----- MODE PROCESSING ----- */
+    const blocked = new Set();
+    const consented = [];
 
-    if (mode === "hot") {
-      data = data
+    snap.docs.forEach(d => {
+      const data = d.data();
+      const other = data.participants.find(p => p !== currentUid);
+
+      if (!other) return;
+
+      if (data.relationshipStatus === "blocked") {
+        blocked.add(other);
+      }
+
+      if (data.relationshipStatus === "consented") {
+        consented.push(other);
+      }
+    });
+
+    return { blocked, consented };
+  }
+
+  /* ---------- INITIAL LOAD ---------- */
+
+  const loadInitial = async () => {
+    if (!currentUid) return;
+
+    setLoading(true);
+
+    const { blocked, consented } =
+      await fetchRelationshipData();
+
+    let data = [];
+
+    /* ---------- RELEVANT MODE ---------- */
+
+    if (mode === "relevant") {
+      if (consented.length === 0) {
+        setAllPosts([]);
+        setPosts([]);
+        setHasMore(false);
+        setLoading(false);
+        return;
+      }
+
+      const chunks = chunkArray(consented, 10);
+      const results = [];
+
+      for (const chunk of chunks) {
+        const q = query(
+          collection(db, "posts"),
+          where("authorId", "in", chunk),
+          where("moderationStatus", "in", ["Visible", "Flagged"]),
+          orderBy("createdAt", "desc"),
+          limit(FETCH_SIZE)
+        );
+
+        const snap = await getDocs(q);
+        snap.docs.forEach(d =>
+          results.push({ id: d.id, ...d.data() })
+        );
+      }
+
+      data = results
         .map(p => ({ ...p, _score: computeHotScore(p) }))
         .sort((a, b) => b._score - a._score);
     }
 
-    if (mode === "relevant") {
-      console.log("[Relevant] entering relevant mode");
+    /* ---------- NEWEST / HOT ---------- */
 
-      if (userEmotion) {
-        console.log("[Relevant] userEmotion:", userEmotion);
+    else {
+      const q = query(
+        collection(db, "posts"),
+        where("moderationStatus", "in", ["Visible", "Flagged"]),
+        orderBy("createdAt", "desc"),
+        limit(FETCH_SIZE)
+      );
 
-        let relevant = data.filter(
-          p => p.emotionCategory === userEmotion
-        );
+      const snap = await getDocs(q);
 
-        console.log(
-          "[Relevant] matched posts:",
-          relevant.length,
-          relevant.map(p => p.emotionCategory)
-        );
+      data = snap.docs.map(d => ({
+        id: d.id,
+        ...d.data()
+      }));
 
-        if (relevant.length < FETCH_SIZE) {
-          const rest = data.filter(
-            p => p.emotionCategory !== userEmotion
-          );
-            console.log(
-              "[Relevant] relaxing with rest:",
-              rest.length
-            );
+      // filter blocked authors
+      data = data.filter(p => !blocked.has(p.authorId));
 
-          relevant = [...relevant, ...rest].slice(0, FETCH_SIZE);
-        }
-
-        data = relevant
-          .map(p => ({ ...p, _score: computeHotScore(p) }))
-          .sort((a, b) => b._score - a._score);
-
-        console.log(
-          "[Relevant] final ranked emotions:",
-          data.map(p => p.emotionCategory)
-        );
-      } else {
-        // fallback to hot
-        console.log("[Relevant] no userEmotion → fallback hot");
-
+      if (mode === "hot") {
         data = data
           .map(p => ({ ...p, _score: computeHotScore(p) }))
           .sort((a, b) => b._score - a._score);
       }
     }
 
-    // newest = already ordered by createdAt
-
     setAllPosts(data);
     setPosts(data.slice(0, PAGE_SIZE));
     setPage(1);
     setHasMore(data.length > PAGE_SIZE);
     setLoading(false);
-
-    console.log(
-      "[usePosts] visible posts emotions:",
-      data.slice(0, PAGE_SIZE).map(p => p.emotionCategory)
-    )
   };
 
-  /* ---------- LOAD MORE (IN-MEMORY) ---------- */
+  /* ---------- LOAD MORE ---------- */
+
   const loadMore = () => {
     if (loading || !hasMore) return;
 
@@ -155,22 +195,14 @@ export function usePosts(mode = "newest") {
     });
   };
 
-  // Safe helper: call this on any user interaction
-  const tryLoadMore = () => {
-    if (!loading && hasMore) {
-      loadMore();
-    }
-  };
-
   useEffect(() => {
-    console.log("POSTS:", posts.length, "ALL:", allPosts.length);
-  }, [posts]);
+    loadInitial();
+  }, [mode, currentUid]);
 
   return {
     posts,
     loadInitial,
     loadMore,
-    tryLoadMore,
     loading,
     hasMore
   };
