@@ -1,3 +1,5 @@
+/* client/src/pages/DMconvo/DMPage.jsx */
+
 import { useState, useRef, useEffect } from "react";
 import ConversationList from "./ConversationList";
 import ChatWindow from "./ChatWindow";
@@ -27,66 +29,72 @@ export default function DMPage() {
   return (
     <div className="dm-layout">
 
-      {/* HEADER */}
-      <div className="dm-header">
-        <h2>Chats</h2>
-
-        <div className="dm-menu" ref={menuRef}>
-          <button
-            className="dm-dots"
-            onClick={() => setMenuOpen(p => !p)}
-          >
-            ⋮
-          </button>
-
-          {menuOpen && (
-            <div className="dm-dropdown">
-              <div
-                className="dm-dropdown-item"
-                onClick={() => {
-                  setActiveModal("pending");
-                  setMenuOpen(false);
-                }}
-              >
-                Pending Requests
-              </div>
-
-              <div
-                className="dm-dropdown-item"
-                onClick={() => {
-                  setActiveModal("blocked");
-                  setMenuOpen(false);
-                }}
-              >
-                Blocked Users
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* BODY */}
+      {/* BODY ONLY */}
       <div className="dm-body">
-        <ConversationList
-          selected={selectedConvo}
-          onSelect={setSelectedConvo}
-        />
 
-        <ChatWindow conversation={selectedConvo} />
+        {/* LEFT PANEL */}
+        <div className="dm-left">
+
+          <div className="dm-header">
+            <h2>Chats</h2>
+
+            <div className="dm-menu" ref={menuRef}>
+              <button
+                className="dm-dots"
+                onClick={() => setMenuOpen(p => !p)}
+              >
+                ⋮
+              </button>
+
+              {menuOpen && (
+                <div className="dm-dropdown">
+                  <div
+                    className="dm-dropdown-item"
+                    onClick={() => {
+                      setActiveModal("pending");
+                      setMenuOpen(false);
+                    }}
+                  >
+                    Pending Requests
+                  </div>
+
+                  <div
+                    className="dm-dropdown-item"
+                    onClick={() => {
+                      setActiveModal("blocked");
+                      setMenuOpen(false);
+                    }}
+                  >
+                    Blocked Users
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <ConversationList
+            selected={selectedConvo}
+            onSelect={setSelectedConvo}
+          />
+
+        </div>
+
+        {/* RIGHT PANEL */}
+        <div className="dm-right">
+          <ChatWindow conversation={selectedConvo} />
+        </div>
+
       </div>
 
       {/* MODALS */}
       {activeModal === "pending" && (
-        <PendingListModal
-          onClose={() => setActiveModal(null)}
-        />
+        <PendingListModal onClose={() => setActiveModal(null)} />
       )}
 
       {activeModal === "blocked" && (
-        <BlockListModal
-          onClose={() => setActiveModal(null)}
-        />
+        <BlockListModal onClose={() => setActiveModal(null)} />
       )}
     </div>
   );
+
 }

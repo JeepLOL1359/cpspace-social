@@ -1,4 +1,4 @@
-/* src/pages/DMconvo/ChatWindow.jsx */
+/* client/src/pages/DMconvo/ChatWindow.jsx */
 
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +15,7 @@ import {
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { db } from "../../firebaseConfig";
+import { runTransaction } from "firebase/firestore";
 
 import { useRelationship } from "./hooks/useRelationship";
 import { useDisplayNames } from "../socialSpace/hooks/useDisplayNames";
@@ -70,36 +71,45 @@ export default function ChatWindow({ conversation }) {
   async function handleSend() {
     if (!canChat || !input.trim()) return;
 
-    const convoRef = doc(
-      db,
-      "conversations",
-      conversation.id
-    );
-
-    const nextSeq = conversation.nextSeq || 1;
-
-    await addDoc(
-      collection(
+    try {
+      const convoRef = doc(db, "conversations", conversation.id);
+      const messagesRef = collection(
         db,
         "conversations",
         conversation.id,
         "messages"
-      ),
-      {
-        senderId: currentUid,
-        body: input,
-        seq: nextSeq,
-        createdAt: serverTimestamp(),
-        hiddenUntilConsent: false
-      }
-    );
+      );
 
-    await updateDoc(convoRef, {
-      nextSeq: increment(1),
-      lastMessageAt: serverTimestamp()
-    });
+      await runTransaction(db, async (transaction) => {
+        const convoSnap = await transaction.get(convoRef);
 
-    setInput("");
+        if (!convoSnap.exists()) {
+          throw "Conversation does not exist!";
+        }
+
+        const currentNextSeq = convoSnap.data().nextSeq || 1;
+
+        const newMessageRef = doc(messagesRef);
+
+        transaction.set(newMessageRef, {
+          senderId: currentUid,
+          body: input,
+          seq: currentNextSeq,
+          createdAt: serverTimestamp(),
+          hiddenUntilConsent: false
+        });
+
+        transaction.update(convoRef, {
+          nextSeq: currentNextSeq + 1,
+          lastMessageAt: serverTimestamp()
+        });
+      });
+
+      setInput("");
+
+    } catch (err) {
+      console.error("Send failed:", err);
+    }
   }
 
   if (!conversation) {
@@ -123,18 +133,24 @@ export default function ChatWindow({ conversation }) {
       </div>
 
         <div className="dm-messages">
-            {messages.map(m => (
-            <div
+          {messages.map((m, i) => {
+            const isMine = m.senderId === currentUid;
+            const prev = messages[i - 1];
+            const showSpacing = !prev || prev.senderId !== m.senderId;
+
+            return (
+              <div
                 key={m.id}
-                className={
-                m.senderId === currentUid
-                    ? "dm-msg mine"
-                    : "dm-msg"
-                }
-            >
-                {m.body}
-            </div>
-            ))}
+                className={`dm-msg-wrapper ${isMine ? "mine" : ""}`}
+                style={{ marginTop: showSpacing ? "14px" : "4px" }}
+              >
+                <div className={`dm-msg ${isMine ? "mine" : ""}`}>
+                  {m.body}
+                </div>
+              </div>
+            );
+          })}
+
         </div>
 
         {status !== "consented" && (

@@ -37,6 +37,7 @@ export async function requestRelationship(currentUid, targetUid) {
       },
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
+      lastMessageAt: serverTimestamp(),
     });
   } else {
     await updateDoc(ref, {

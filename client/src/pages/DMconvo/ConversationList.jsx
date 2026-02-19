@@ -1,4 +1,4 @@
-/* src/pages/DMconvo/ConversationList.jsx */
+/* client/src/pages/DMconvo/ConversationList.jsx */
 
 import { useEffect, useState } from "react";
 import {
@@ -49,11 +49,28 @@ export default function ConversationList({ selected, onSelect }) {
             }`}
             onClick={() => onSelect(c)}
           >
-            <div>{other}</div>
-            <div className="dm-status">
-              {c.relationshipStatus}
+            <div className="dm-item-left">
+              <div className="dm-avatar">
+                {other[0]?.toUpperCase()}
+              </div>
+
+              <div className="dm-item-text">
+                <div className="dm-name">{other}</div>
+                {/* <div className="dm-preview">
+                  {c.lastMessagePreview || "No messages yet"}
+                </div> */}
+              </div>
+            </div>
+
+            <div className="dm-meta">
+              {c.unreadCount?.[currentUid] > 0 && (
+                <span className="dm-badge">
+                  {c.unreadCount[currentUid]}
+                </span>
+              )}
             </div>
           </div>
+
         );
       })}
     </div>

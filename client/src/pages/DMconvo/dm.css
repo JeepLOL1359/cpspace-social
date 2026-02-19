@@ -1,25 +1,62 @@
+/* client/src/pages/DMconvo/dm.css */
+
+/* ===== CHAT COLOR SYSTEM ===== */
+/* Light mode chat */
+:root {
+  --chat-bg: #f4f7ff;
+  --chat-bubble-other: #ffffff;
+  --chat-bubble-mine: #2563eb;
+  --chat-text-mine: #ffffff;
+  --chat-text-other: #0f172a;
+}
+
+/* Dark mode chat */
+[data-theme="dark"] {
+  --chat-bg: #0b1220;
+  --chat-bubble-other: #1e293b;
+  --chat-bubble-mine: #3b82f6;
+  --chat-text-mine: #ffffff;
+  --chat-text-other: #f1f5f9;
+}
+
+
 /* ---------- DM LAYOUT ---------- */
 .dm-layout {
   width: 100%;
   height: calc(100vh - 80px);
-  display: flex;
-  flex-direction: column;
   padding: 24px 40px;
   box-sizing: border-box;
 }
 
-/* ---------- HEADER ---------- */
+/* ---------- BODY ---------- */
+.dm-body {
+  height: 100%;
+  display: flex;
+  gap: 32px;
+}
+
+/* ---------- LEFT HEADER ---------- */
 .dm-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  padding: 0 8px;
 }
 
-.dm-header h2 {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text-main);
+/* ---------- LEFT PANEL ---------- */
+.dm-left {
+  flex: 0 0 30%;
+  min-width: 280px;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- RIGHT PANEL ---------- */
+.dm-right {
+  flex: 1;
+  display: flex;
 }
 
 /* ---------- DROPDOWN ---------- */
@@ -61,52 +98,94 @@
   color: var(--accent);
 }
 
-/* ---------- BODY ---------- */
-.dm-body {
-  flex: 1;
-  display: flex;
-  gap: 24px;
-  min-height: 0;
-}
-
 /* ---------- CONVERSATION LIST ---------- */
 .dm-list {
-  width: 280px;
+  flex: 1;
   background: var(--bg-card);
-  border-radius: 16px;
-  padding: 16px;
+  border-radius: 20px;
+  padding: 18px;
   overflow-y: auto;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color);
 }
 
 .dm-list-item {
-  padding: 12px 14px;
-  border-radius: 12px;
-  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  border-radius: 14px;
+  margin: 12px;
   transition: background 0.2s ease;
-  margin-bottom: 8px;
-  font-size: 14px;
+  color: var(--accent);
 }
 
 .dm-list-item:hover {
   background: var(--accent-soft);
+  transform: translateX(2px);
 }
 
 .dm-list-item.active {
   background: var(--accent-soft);
-  color: var(--accent);
+  color: var(--chat-bubble-other);
   font-weight: 600;
 }
 
+.dm-item-left {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.dm-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.dm-item-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.dm-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.dm-preview {
+  font-size: 12px;
+  color: var(--text-muted);
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dm-badge {
+  background: var(--accent);
+  color: white;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 999px;
+}
 /* ---------- CHAT WINDOW ---------- */
 .dm-chat {
   flex: 1;
-  background: var(--bg-card);
-  border-radius: 16px;
+  width: 100%;
+  background: var(--chat-bg);
+  border-radius: 20px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color);
 }
 
 /* ---------- CHAT HEADER ---------- */
@@ -135,19 +214,33 @@
   gap: 10px;
 }
 
+.dm-msg-wrapper {
+  display: flex;
+}
+
+.dm-msg-wrapper.mine {
+  justify-content: flex-end;
+}
+
 .dm-msg {
-  max-width: 70%;
+  max-width: 65%;
   padding: 10px 14px;
-  border-radius: 14px;
-  background: var(--border-color);
+  border-radius: 16px;
   font-size: 14px;
   line-height: 1.5;
+  background: var(--chat-bubble-other);
+  color: var(--chat-text-other);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+  transition: transform 0.15s ease;
 }
 
 .dm-msg.mine {
-  align-self: flex-end;
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: var(--chat-bubble-mine);
+  color: var(--chat-text-mine);
+}
+
+.dm-msg:hover {
+  transform: scale(1.01);
 }
 
 /* ---------- WARNING ---------- */
@@ -171,8 +264,8 @@
   border: 1px solid var(--border-color);
   padding: 10px 16px;
   font-size: 14px;
-  background: var(--bg-card);
-  color: var(--text-main);
+  background: var(--chat-bubble-other);
+  color: var(--chat-text-other);
   outline: none;
 }
 

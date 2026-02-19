@@ -147,6 +147,9 @@
   --text-muted: #64748b;
   --text-inverse: #0f172a; 
   --border-color: #e5e7eb;
+  --chat-bg: #eef2ff;        
+  --chat-bubble-other: #ffffff;
+  --chat-bubble-mine: #dbeafe;
 }
 
 /* ===== Dark mode ===== */
@@ -157,4 +160,7 @@
   --text-muted: #9ca3af;
   --text-inverse: #0f172a;
   --border-color: #1f2933;
+  --chat-bg: #0f1a2b;        
+  --chat-bubble-other: #1e293b;
+  --chat-bubble-mine: #1d4ed8;
 }
