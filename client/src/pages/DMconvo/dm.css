@@ -51,6 +51,7 @@
   max-width: 500px;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 
 /* ---------- RIGHT PANEL ---------- */
@@ -107,6 +108,7 @@
   overflow-y: auto;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
   border: 1px solid var(--border-color);
+  overflow-x: hidden;
 }
 
 .dm-list-item {
@@ -135,6 +137,8 @@
   display: flex;
   gap: 12px;
   align-items: center;
+  flex: 1;          /* take available space */
+  min-width: 0;     /* allow shrinking */
 }
 
 .dm-avatar {
@@ -152,11 +156,17 @@
 .dm-item-text {
   display: flex;
   flex-direction: column;
+  min-width: 0;   /* critical for ellipsis */
+  flex: 1;
 }
 
 .dm-name {
   font-weight: 600;
   font-size: 14px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dm-preview {
