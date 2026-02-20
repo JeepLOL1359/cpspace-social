@@ -26,10 +26,26 @@ export default function Profile() {
     const unsub = onAuthStateChanged(auth, async (user) => {
       if (!user) return;
 
-      const snap = await getDoc(doc(db, "users", user.uid));
-      if (snap.exists()) {
-        setUserData(snap.data());
-      }
+    const userRef = doc(db, "users", user.uid);
+    const publicProfileRef = doc(
+      db,
+      "users",
+      user.uid,
+      "publicProfile",
+      "profile"
+    );
+
+    const [userSnap, profileSnap] = await Promise.all([
+      getDoc(userRef),
+      getDoc(publicProfileRef),
+    ]);
+
+    if (userSnap.exists() && profileSnap.exists()) {
+      setUserData({
+        ...userSnap.data(),
+        publicProfile: profileSnap.data(),
+      });
+    }
     });
 
     return unsub;
@@ -93,11 +109,11 @@ export default function Profile() {
     setEditingField(field);
 
     if (field === "name") {
-      setNewDisplayName(userData.profileDisplayName || "");
+      setNewDisplayName(userData.publicProfile?.pseudonym || "");
     }
 
     if (field === "username") {
-      setNewUsername(userData.username?.value || "");
+      setNewUsername(userData.publicProfile?.username?.value || "");
     }
 
     if (field === "age") {
@@ -121,13 +137,24 @@ export default function Profile() {
 
     setSaving(true);
     try {
-      await updateDoc(doc(db, "users", auth.currentUser.uid), {
-        profileDisplayName: newDisplayName.trim(),
+      const profileRef = doc(
+        db,
+        "users",
+        auth.currentUser.uid,
+        "publicProfile",
+        "profile"
+      );
+
+      await updateDoc(profileRef, {
+        pseudonym: newDisplayName.trim(),
       });
 
       setUserData((prev) => ({
         ...prev,
-        profileDisplayName: newDisplayName.trim(),
+        publicProfile: {
+          ...prev.publicProfile,
+          pseudonym: newDisplayName.trim(),
+        },
       }));
 
       setEditingField(null);
@@ -141,17 +168,26 @@ export default function Profile() {
 
     setSaving(true);
     try {
-      await updateDoc(doc(db, "users", auth.currentUser.uid), {
+      const profileRef = doc(
+        db,
+        "users",
+        auth.currentUser.uid,
+        "publicProfile",
+        "profile"
+      );
+
+      await updateDoc(profileRef, {
         "username.value": newUsername.trim(),
-        "username.lastChangedAt": serverTimestamp(),
       });
 
       setUserData((prev) => ({
         ...prev,
-        username: {
-          ...prev.username,
-          value: newUsername.trim(),
-          lastChangedAt: new Date(),
+        publicProfile: {
+          ...prev.publicProfile,
+          username: {
+            ...prev.publicProfile.username,
+            value: newUsername.trim(),
+          },
         },
       }));
 
@@ -160,7 +196,6 @@ export default function Profile() {
       setSaving(false);
     }
   };
-
 
   const saveAge = async () => {
     const age = Number(newAge);
@@ -251,7 +286,7 @@ export default function Profile() {
                   disabled={saving}
                 />
               ) : (
-                <p>{userData.profileDisplayName || "-"}</p>
+                <p>{userData.publicProfile?.pseudonym || "-"}</p>
               )}
             </div>
             <div className="profile-action">
@@ -279,9 +314,9 @@ export default function Profile() {
                 />
               ) : (
                 <p>
-                  {userData.username?.value}
-                  {userData.username?.discriminator &&
-                    `#${userData.username.discriminator}`}
+                  {userData.publicProfile?.username?.value}
+                  {userData.publicProfile?.username?.discriminator &&
+                    `#${userData.publicProfile.username.discriminator}`}
                 </p>
               )}
             </div>
@@ -298,6 +333,13 @@ export default function Profile() {
                 </button>
               )}
             </div>
+          </div>
+
+          {/* Public UID */}
+          <div className="profile-row">
+            <span>Public UID</span>
+            <p>{userData.publicProfile?.publicUID || "-"}</p>
+            <div className="profile-action" />
           </div>
 
           {/* Email */}

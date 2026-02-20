@@ -31,18 +31,29 @@ export default function MainLayout() {
       }
 
       const userRef = doc(db, "users", user.uid);
+      const profileRef = doc(
+        db,
+        "users",
+        user.uid,
+        "publicProfile",
+        "profile"
+      );
 
-      // 🔥 REALTIME LISTENER (single source of truth)
-      unsubUser = onSnapshot(userRef, (snap) => {
-        if (!snap.exists()) return;
+      let rootData = null;
+      let profileData = null;
 
-        const data = snap.data();
-        console.log("🔥 Sidebar user update:", data);
+      const updateState = () => {
+        if (!rootData || !profileData) return;
 
-        setUserData(data);
+        const combined = {
+          ...rootData,
+          publicProfile: profileData,
+        };
 
-        // Apply theme immediately
-        const p = data.preferences;
+        console.log("🔥 Sidebar user update:", combined);
+        setUserData(combined);
+
+        const p = rootData.preferences;
         if (p) {
           document.documentElement.setAttribute(
             "data-theme",
@@ -62,7 +73,24 @@ export default function MainLayout() {
         }
 
         setReady(true);
+      };
+
+      const unsubRoot = onSnapshot(userRef, (snap) => {
+        if (!snap.exists()) return;
+        rootData = snap.data();
+        updateState();
       });
+
+      const unsubProfile = onSnapshot(profileRef, (snap) => {
+        if (!snap.exists()) return;
+        profileData = snap.data();
+        updateState();
+      });
+
+      unsubUser = () => {
+        unsubRoot();
+        unsubProfile();
+      };
     });
 
     return () => {
@@ -120,8 +148,8 @@ export default function MainLayout() {
               referrerPolicy="no-referrer"
             />
             <span>
-              {userData.profileDisplayName ||
-                `${userData.username?.value}#${userData.username?.discriminator}`}
+              {userData.publicProfile?.pseudonym ||
+                `${userData.publicProfile?.username?.value}#${userData.publicProfile?.username?.discriminator}`}
             </span>
           </div>
         )}

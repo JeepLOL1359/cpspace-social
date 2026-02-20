@@ -1,5 +1,16 @@
+// client/src/services/userBootstrap.js
+
 import { db } from "../firebaseConfig";
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  serverTimestamp,
+  collectionGroup,
+  query,
+  where,
+  getDocs
+} from "firebase/firestore";
 
 /**
  * Generate random numeric discriminator (Discord-style)
@@ -44,27 +55,72 @@ function generatePseudonym() {
   return `${adj}${noun}${suffix}`;
 }
 
-export async function bootstrapUser(firebaseUid) {
-  const userRef = doc(db, "users", firebaseUid);
-  const snap = await getDoc(userRef);
+async function generateUniquePublicUid() {
+  let unique = false;
+  let newUid;
+  let attempts = 0;
 
-  if (!snap.exists()) {
+  while (!unique) {
+    attempts++;
+    newUid = generatePublicUid();
+
+    console.log(`🔁 Checking publicUID attempt ${attempts}:`, newUid);
+
+    const q = query(
+      collectionGroup(db, "publicProfile"),
+      where("publicUID", "==", newUid)
+    );
+
+    const snap = await getDocs(q);
+
+    if (snap.empty) {
+      unique = true;
+      console.log("✅ publicUID is unique");
+    } else {
+      console.log("⚠️ Collision detected, regenerating...");
+    }
+  }
+
+  return newUid;
+}
+
+export async function bootstrapUser(firebaseUid) {
+  console.log("🚀 bootstrapUser START for:", firebaseUid);
+
+  try {
+    const userRef = doc(db, "users", firebaseUid);
+    const publicProfileRef = doc(
+      db,
+      "users",
+      firebaseUid,
+      "publicProfile",
+      "profile"
+    );
+
+    console.log("🔎 Checking if root user exists...");
+    const snap = await getDoc(userRef);
+
+    if (snap.exists()) {
+      console.log("⚠️ Root user already exists. Bootstrap exiting.");
+      return;
+    }
+
+    console.log("🆕 Creating new user...");
+
     const pseudonym = generatePseudonym();
-    const publicUid = generatePublicUid();
     const discriminator = generateDiscriminator();
 
+    console.log("🎲 Generated pseudonym:", pseudonym);
+    console.log("🎲 Generated discriminator:", discriminator);
+
+    console.log("🔍 Generating unique publicUID...");
+    const publicUid = await generateUniquePublicUid();
+    console.log("✅ Unique publicUID generated:", publicUid);
+
+    console.log("📄 Writing PRIVATE user document...");
     await setDoc(userRef, {
       firebaseID: firebaseUid,
-      publicUID: publicUid,
       createdAt: serverTimestamp(),
-
-      pseudonym,
-
-      username: {
-        value: pseudonym,
-        discriminator,
-        lastChangedAt: serverTimestamp()
-      },
 
       activeStatus: "active",
       roles: ["user"],
@@ -87,5 +143,25 @@ export async function bootstrapUser(firebaseUid) {
 
       blockedUsers: []
     });
+
+    console.log("✅ PRIVATE user document written");
+
+    console.log("📄 Writing PUBLIC profile document...");
+    await setDoc(publicProfileRef, {
+      uid: firebaseUid,
+      publicUID: publicUid,
+      pseudonym,
+      username: {
+        value: pseudonym,
+        discriminator
+      },
+      createdAt: serverTimestamp()
+    });
+
+    console.log("✅ PUBLIC profile document written");
+    console.log("🎉 bootstrapUser COMPLETED successfully");
+
+  } catch (error) {
+    console.error("❌ bootstrapUser FAILED:", error);
   }
 }

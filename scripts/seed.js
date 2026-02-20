@@ -104,11 +104,6 @@ async function main() {
   await db.collection("users").doc("user00001").set({
     firebaseID: "user00001", // for linking and handling purpose
     createdAt: FieldValue.serverTimestamp(),
-    username: {
-      value: "BrianChen", // default is same as pseudonym
-      discriminator: "4821", // random 4 digit number
-      lastChangedAt: FieldValue.serverTimestamp() // creation is same as user creation time so same
-    }, 
     activeStatus: "active", // default is active
     roles: ["admin"], // default is user, it is either user or admin but sign in is as user only
     preferences: {
@@ -131,11 +126,6 @@ async function main() {
   await db.collection("users").doc("user00002").set({
     firebaseID: "user00002",
     createdAt: FieldValue.serverTimestamp(),
-    username: {
-      value: "KevinNg",
-      discriminator: "4206",
-      lastChangedAt: FieldValue.serverTimestamp()
-    }, 
     activeStatus: "active",
     roles: ["admin"],
     preferences: {
@@ -158,11 +148,6 @@ async function main() {
   await db.collection("users").doc("user00003").set({
     firebaseID: "user00003",
     createdAt: FieldValue.serverTimestamp(),
-    username: {
-      value: "SaraGoh",
-      discriminator: "7852",
-      lastChangedAt: FieldValue.serverTimestamp()
-    }, 
     activeStatus: "active",
     roles: ["user"],
     preferences: {
@@ -185,11 +170,6 @@ async function main() {
   await db.collection("users").doc("user00004").set({
     firebaseID: "user00004",
     createdAt: FieldValue.serverTimestamp(), 
-    username: {
-      value: "MuthuSami",
-      discriminator: "5107",
-      lastChangedAt: FieldValue.serverTimestamp()
-    },
     activeStatus: "active",
     roles: ["user"],
     preferences: {
@@ -212,11 +192,6 @@ async function main() {
   await db.collection("users").doc("user00005").set({
     firebaseID: "user00005",
     createdAt: FieldValue.serverTimestamp(),
-    username: {
-      value: "Kamilah",
-      discriminator: "1448",
-      lastChangedAt: FieldValue.serverTimestamp()
-    }, 
     activeStatus: "active",
     roles: ["user"],
     preferences: {
@@ -239,11 +214,6 @@ async function main() {
   await db.collection("users").doc("user00006").set({
     firebaseID: "user00006",
     createdAt: FieldValue.serverTimestamp(),
-    username: {
-      value: "Jamima",
-      discriminator: "9666",
-      lastChangedAt: FieldValue.serverTimestamp()
-    }, 
     activeStatus: "active",
     roles: ["user"],
     preferences: {
