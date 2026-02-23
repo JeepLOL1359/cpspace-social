@@ -274,79 +274,88 @@ console.log("Default Feelings seeded");
     .collection("users")
     .doc("user00001")
     .collection("publicProfile")
-    .add({
-      publicUID: "user00001", // for adding friend purpose
-      pseudonym: "FirebaseIsLit55", // default is like what you generated randomly
+    .doc("profile")
+    .set({
+      publicUID: "user00001",
+      pseudonym: "FirebaseIsLit55",
       username: {
-        value: "BrianChen", // default is same as pseudonym
-        discriminator: "4821", // random 4 digit number
-      }, 
-  });
+        value: "BrianChen",
+        discriminator: "4821",
+      }
+    });
 
   await db
     .collection("users")
     .doc("user00002")
     .collection("publicProfile")
-    .add({
-      publicUID: "user00002", // for adding friend purpose
-      pseudonym: "dunkMeme1231", // default is like what you generated randomly
+    .doc("profile")
+    .set({
+      publicUID: "user00002",
+      pseudonym: "dunkMeme1231",
       username: {
-        value: "KevinNg", // default is same as pseudonym
-        discriminator: "4206", // random 4 digit number
-      }, 
-  });
+        value: "KevinNg",
+        discriminator: "4206",
+      }
+    });
 
   await db
     .collection("users")
     .doc("user00003")
     .collection("publicProfile")
-    .add({
-      publicUID: "user00003", // for adding friend purpose
-      pseudonym: "youngBoyIsBroke", // default is like what you generated randomly
+    .doc("profile")
+    .set({
+      publicUID: "user00003",
+      pseudonym: "youngBoyIsBroke",
       username: {
-        value: "SaraGoh", // default is same as pseudonym
-        discriminator: "7852", // random 4 digit number
-      }, 
-  });
+        value: "SaraGoh",
+        discriminator: "7852",
+      }
+    });
 
   await db
     .collection("users")
     .doc("user00004")
     .collection("publicProfile")
-    .add({
-      publicUID: "user00004", // for adding friend purpose
-      pseudonym: "weRtheBest", // default is like what you generated randomly
+    .doc("profile")
+    .set({
+      publicUID: "user00004",
+      pseudonym: "weRtheBest",
       username: {
-        value: "MuthuSami", // default is same as pseudonym
-        discriminator: "5107", // random 4 digit number
-      }, 
-  });
+        value: "MuthuSami",
+        discriminator: "5107",
+      }
+    });
 
   await db
     .collection("users")
     .doc("user00005")
     .collection("publicProfile")
-    .add({
-      publicUID: "user00005", // for adding friend purpose
-      pseudonym: "work_King", // default is like what you generated randomly
+    .doc("profile")
+    .set({
+      publicUID: "user00005",
+      pseudonym: "work_King",
       username: {
-        value: "Kamilah", // default is same as pseudonym
-        discriminator: "1448", // random 4 digit number
-      }, 
-  });
+        value: "Kamilah",
+        discriminator: "1448",
+      }
+    });
 
   await db
     .collection("users")
     .doc("user00006")
     .collection("publicProfile")
-    .add({
-      publicUID: "user00006", // for adding friend purpose
-      pseudonym: "hyer22", // default is like what you generated randomly
+    .doc("profile")
+    .set({
+      publicUID: "user00006",
+      pseudonym: "hyer22",
       username: {
-        value: "Jamima", // default is same as pseudonym
-        discriminator: "9666", // random 4 digit number
-      }, 
-  });
+        value: "Jamima",
+        discriminator: "9666",
+      }
+    });
+console.log("Public Profile seeded");
+
+
 
   /*Users's Diaries Entires, 10 entries*/
   await db

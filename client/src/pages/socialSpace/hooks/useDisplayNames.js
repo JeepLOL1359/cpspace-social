@@ -1,3 +1,10 @@
+// socialSpace/hooks/useDisplayNames.js
+
+/*
+1) Can try to use Promise.all. for abtch load
+2) Can try centralize relationship state in a global context
+*/
+
 import { useEffect, useState } from "react";
 import {
   collection,
@@ -13,21 +20,19 @@ import { db } from "../../../firebaseConfig";
 export function useDisplayNames(posts) {
   const auth = getAuth();
   const currentUid = auth.currentUser?.uid;
-
   const [map, setMap] = useState({});
 
   useEffect(() => {
     if (!currentUid || posts.length === 0) return;
 
     async function load() {
-      // 1️⃣ Fetch conversations involving me
+      // 1️⃣ Get consented users
       const convoQuery = query(
         collection(db, "conversations"),
         where("participants", "array-contains", currentUid)
       );
 
       const convoSnap = await getDocs(convoQuery);
-
       const consentedSet = new Set();
 
       convoSnap.docs.forEach(d => {
@@ -39,49 +44,44 @@ export function useDisplayNames(posts) {
         }
       });
 
-      // 2️⃣ Collect unique authorIds in current posts
-      const authorIds = [
-        ...new Set(posts.map(p => p.authorId))
-      ];
+      // 2️⃣ Collect unique authors
+      const authorIds = [...new Set(posts.map(p => p.authorId))];
 
       const result = {};
 
       for (const uid of authorIds) {
-        // 3️⃣ Always fetch pseudonym
-        const publicSnap = await getDocs(
-          collection(db, "users", uid, "publicProfile")
+        if (uid === currentUid) {
+          result[uid] = "You";
+          continue;
+        }
+
+        const profileSnap = await getDoc(
+          doc(db, "users", uid, "publicProfile", "profile")
         );
 
-        let pseudonym = "Anonymous";
+        if (!profileSnap.exists()) {
+          result[uid] = "Anonymous";
+          continue;
+        }
 
-        publicSnap.forEach(p => {
-          const data = p.data();
-          if (data?.pseudonym) {
-            pseudonym = data.pseudonym;
-          }
-        });
+        const profile = profileSnap.data();
 
-        // 4️⃣ If consented → fetch username
+        // If consented → show username
         if (consentedSet.has(uid)) {
-          const userSnap = await getDoc(
-            doc(db, "users", uid)
-          );
-
-          if (userSnap.exists()) {
-            const userData = userSnap.data();
-            const username = userData.username;
-
-            if (username?.value && username?.discriminator) {
-              result[uid] =
-                username.value +
-                "#" +
-                username.discriminator;
-              continue;
-            }
+          if (
+            profile.username?.value &&
+            profile.username?.discriminator
+          ) {
+            result[uid] =
+              profile.username.value +
+              "#" +
+              profile.username.discriminator;
+            continue;
           }
         }
 
-        result[uid] = pseudonym;
+        // Not consented → show pseudonym
+        result[uid] = profile.pseudonym || "Anonymous";
       }
 
       setMap(result);

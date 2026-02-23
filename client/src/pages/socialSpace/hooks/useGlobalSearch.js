@@ -1,3 +1,5 @@
+// socialSpace/hooks/useGlobalSearch.js
+
 import { useEffect, useState } from "react";
 import {
   collection,

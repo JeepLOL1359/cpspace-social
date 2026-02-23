@@ -1,3 +1,5 @@
+  // socialSpace/UserProfilePage.jsx
+
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
@@ -42,25 +44,34 @@ export default function UserProfilePage() {
     isBlocked
   } = useRelationship(currentUid, uid);
 
+  const isSelf = currentUid === uid;
+
   /* ---------- LOAD USER DOC ---------- */
 
   useEffect(() => {
     if (!uid) return;
 
     async function loadUser() {
-      const snap = await getDoc(doc(db, "users", uid));
-      if (snap.exists()) {
-        setUserDoc(snap.data());
+      const userSnap = await getDoc(doc(db, "users", uid));
+      const profileSnap = await getDoc(
+        doc(db, "users", uid, "publicProfile", "profile")
+      );
+
+      if (userSnap.exists() && profileSnap.exists()) {
+        setUserDoc({
+          ...userSnap.data(),
+          publicProfile: profileSnap.data(),
+        });
       }
     }
 
     loadUser();
   }, [uid]);
 
-  /* ---------- LOAD POSTS (ONLY IF CONSENTED) ---------- */
+  /* ---------- LOAD POSTS (ONLY IF CONSENTED OR OURSELF) ---------- */
 
   useEffect(() => {
-    if (!isConsented) return;
+    if (!isConsented && !isSelf) return;
 
     async function loadPosts() {
       const q = query(
@@ -95,11 +106,15 @@ export default function UserProfilePage() {
     );
   }
 
+  const profile = userDoc.publicProfile;
+
   const username =
-    userDoc.username?.value &&
-    userDoc.username?.discriminator
-      ? `${userDoc.username.value}#${userDoc.username.discriminator}`
+    profile?.username?.value &&
+    profile?.username?.discriminator
+      ? `${profile.username.value}#${profile.username.discriminator}`
       : null;
+
+  const pseudonym = profile?.pseudonym || "Anonymous";
 
   /* ---------- HEADER ---------- */
 
@@ -108,62 +123,64 @@ export default function UserProfilePage() {
 
       {/* Placeholder Profile Pic */}
       <div className="profile-circle">
-        {isConsented && username
-          ? username[0].toUpperCase()
-          : "?"}
+        {(isConsented && username
+          ? username
+          : pseudonym)[0]?.toUpperCase()}
       </div>
 
       <h2>
-        {isConsented && username
+        {(isSelf || isConsented) && username
           ? username
-          : "Anonymous User"}
+          : pseudonym}
       </h2>
 
       {/* RELATIONSHIP BUTTONS */}
-
-      {status === "none" || status === "revoked" ? (
-        <button
-          onClick={() =>
-            requestRelationship(currentUid, uid)
-          }
-        >
-          Request Consent
-        </button>
-      ) : null}
-
-      {isPending && (
+      {!isSelf && (
         <>
-          {/* If THEY initiated → show Accept */}
-          <AcceptButton
-            currentUid={currentUid}
-            targetUid={uid}
-          />
-          <button disabled>Pending</button>
-        </>
-      )}
+          {status === "none" || status === "revoked" ? (
+            <button
+              onClick={() =>
+                requestRelationship(currentUid, uid)
+              }
+            >
+              Request Consent
+            </button>
+          ) : null}
 
-      {isConsented && (
-        <>
-          <button
-            onClick={() =>
-              revokeRelationship(currentUid, uid)
-            }
-          >
-            Revoke
-          </button>
+          {isPending && (
+            <>
+              <AcceptButton
+                currentUid={currentUid}
+                targetUid={uid}
+              />
+              <button disabled>Pending</button>
+            </>
+          )}
 
-          <button
-            onClick={() =>
-              blockUser(currentUid, uid)
-            }
-          >
-            Block
-          </button>
+          {isConsented && (
+            <>
+              <button
+                onClick={() =>
+                  revokeRelationship(currentUid, uid)
+                }
+              >
+                Revoke
+              </button>
+
+              <button
+                onClick={() =>
+                  blockUser(currentUid, uid)
+                }
+              >
+                Block
+              </button>
+            </>
+          )}
         </>
       )}
 
       {/* POSTS */}
-      {isConsented && (
+      {(isSelf || isConsented) && (
         <div className="user-posts">
           <h3>Posts</h3>
           {userPosts.map(p => (
