@@ -59,7 +59,7 @@ export default function CreatePostModal({ onClose }) {
     if (!auth.currentUser) return;
 
     const { label, confidence } = await moderateText(body);
-    const moderationStatus = label === "Negative" && confidence >= 0.9 ? "Flagged" : "Visible";
+    const moderationStatus = label === "Negative" && confidence >= 0.7 ? "Flagged" : "Visible";
 
     await addDoc(collection(db, "posts"), {
       authorId: auth.currentUser.uid,

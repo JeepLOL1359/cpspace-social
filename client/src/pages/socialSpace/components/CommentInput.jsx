@@ -26,7 +26,7 @@ export default function CommentInput({ postId }) {
     if (!text.trim()) return;
 
     const { label, confidence } = await moderateText(text);
-    const moderationStatus = label === "Negative" && confidence >= 0.9 ? "Flagged" : "Visible";
+    const moderationStatus = label === "Negative" && confidence >= 0.7 ? "Flagged" : "Visible";
 
     await addDoc(collection(db, "posts", postId, "comments"), {
       authorId: auth.currentUser.uid,
