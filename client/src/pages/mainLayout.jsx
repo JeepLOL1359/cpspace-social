@@ -121,6 +121,11 @@ export default function MainLayout() {
               Manage Strategies
             </NavLink>
           )}
+          {isAdmin && (
+            <NavLink to="/admin/flagged-posts" className="main-link">
+              Manage Posts
+            </NavLink>
+          )}
         </nav>
 
         <button
