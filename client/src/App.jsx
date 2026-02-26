@@ -39,6 +39,7 @@ import StrategyDetail from "./pages/hub/strategyDetail";
 import StrategyList from "./pages/hub/adminHub/strategyList";
 import AddStrategy from "./pages/hub/adminHub/addStrategy";
 import EditStrategy from "./pages/hub/adminHub/editStrategy";
+import FlaggedPostsPage from "./pages/hub/adminHub/FlaggedPostsPage";
 
 // Diary
 import DiaryPage from "./pages/diaries/diaryPage";
@@ -242,6 +243,10 @@ function App() {
           <Route
             path="/admin/strategies"
             element={isAdmin ? <StrategyList /> : <Navigate to="/coping-hub" />}
+          />
+          <Route
+            path="/admin/flagged-posts"
+            element={isAdmin ? <FlaggedPostsPage /> : <Navigate to="/coping-hub" />}
           />
 
           {/* ASSESSMENTS */}
