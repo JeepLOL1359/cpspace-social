@@ -11,7 +11,7 @@ app = Flask(__name__)
 CORS(app)
 
 # --------------------------------
-# Load model ONCE at startup
+# Load model ONCE at startup (new path)
 # --------------------------------
 MODEL_PATH = "./ai/model/trained_distilbert_sentiment"
 
