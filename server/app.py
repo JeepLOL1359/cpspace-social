@@ -13,7 +13,7 @@ CORS(app)
 # --------------------------------
 # Load model ONCE at startup
 # --------------------------------
-MODEL_PATH = "./model/trained_distilbert_sentiment"
+MODEL_PATH = "./ai/model/trained_distilbert_sentiment"
 
 tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
 model = AutoModelForSequenceClassification.from_pretrained(MODEL_PATH)
