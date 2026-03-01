@@ -122,8 +122,8 @@ export default function MainLayout() {
             </NavLink>
           )}
           {isAdmin && (
-            <NavLink to="/admin/flagged-posts" className="main-link">
-              Manage Posts
+            <NavLink to="/admin/moderation" className="main-link">
+              Moderation Panel
             </NavLink>
           )}
         </nav>

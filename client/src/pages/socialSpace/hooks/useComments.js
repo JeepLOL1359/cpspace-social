@@ -12,7 +12,7 @@ export function useComments(postId) {
 
     const q = query(
       collection(db, "posts", postId, "comments"),
-      where("moderationStatus", "==", "Visible"),
+      where("moderationStatus", "in", ["Visible", "Flagged"]),
       orderBy("createdAt", "desc")
     );
 

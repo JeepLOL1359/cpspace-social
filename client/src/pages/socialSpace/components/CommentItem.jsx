@@ -41,6 +41,20 @@ export default function CommentItem({ comment, pseudonym }) {
     );
   };
 
+  async function reportComment() {
+    if (!window.confirm("Report this comment?")) return;
+
+    await updateDoc(
+      doc(db, "posts", comment.postId, "comments", comment.id),
+      {
+        moderationStatus: "Flagged",
+        updatedAt: serverTimestamp()
+      }
+    );
+
+    alert("Comment submitted for review.");
+  }
+
   return (
     <div className="comment">
       <span className="comment-author"
@@ -68,6 +82,10 @@ export default function CommentItem({ comment, pseudonym }) {
           <button onClick={remove}>Delete</button>
         </div>
       )}
+
+      <div className="comment-actions">
+        <button onClick={reportComment}>Report</button>
+      </div>
     </div>
   );
 }

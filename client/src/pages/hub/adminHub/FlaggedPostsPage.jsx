@@ -76,58 +76,77 @@ export default function FlaggedPostsPage() {
   }, []);
 
   return (
-    <div style={{ padding: "16px", maxWidth: "900px", margin: "0 auto" }}>
-      <h2>Flagged Posts</h2>
+      <div className="admin-main">
+        <h2 className="admin-title">Flagged Posts</h2>
 
-      {loading ? (
-        <p>Loading flagged posts...</p>
-      ) : posts.length === 0 ? (
-        <p>No flagged posts found.</p>
-      ) : (
-        <div style={{ display: "grid", gap: "12px" }}>
-          {posts.map((post) => {
-            const isBusy = busyPostId === post.id;
+        {loading ? (
+          <p className="admin-meta">Loading flagged posts...</p>
+        ) : posts.length === 0 ? (
+          <p className="admin-meta">No flagged posts found.</p>
+        ) : (
+          <div style={{ display: "grid", gap: "16px" }}>
+            {posts.map((post) => {
+              const isBusy = busyPostId === post.id;
 
-            return (
-              <div
-                key={post.id}
-                style={{ border: "1px solid #ddd", borderRadius: "8px", padding: "12px" }}
-              >
-                <p style={{ margin: "0 0 8px" }}><strong>Body:</strong> {post.body || "-"}</p>
-                <p style={{ margin: "0 0 8px" }}>
-                  <strong>Emotion:</strong> {post.emotionCategory || "-"}
-                </p>
-                <p style={{ margin: "0 0 8px" }}><strong>AI Label:</strong> {post.ai?.label || "-"}</p>
-                <p style={{ margin: "0 0 8px" }}>
-                  <strong>AI Confidence:</strong>{" "}
-                  {typeof post.ai?.confidence === "number" ? post.ai.confidence : "-"}
-                </p>
-                <p style={{ margin: "0 0 12px" }}>
-                  <strong>Created:</strong> {formatCreatedAt(post.createdAt)}
-                </p>
+              return (
+                <div key={post.id} className="admin-card">
+                  <div className="admin-meta">
+                    <strong>Created:</strong> {formatCreatedAt(post.createdAt)}
+                  </div>
 
-                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                  <button
-                    onClick={() => updateModerationStatus(post.id, "Visible")}
-                    disabled={isBusy}
-                  >
-                    Approve
-                  </button>
-                  <button
-                    onClick={() => updateModerationStatus(post.id, "Hidden")}
-                    disabled={isBusy}
-                  >
-                    Delete
-                  </button>
-                  <button onClick={() => reanalysePost(post)} disabled={isBusy}>
-                    Re-analyse
-                  </button>
+                  <p>
+                    <strong>Body:</strong> {post.body || "-"}
+                  </p>
+
+                  <p>
+                    <strong>Emotion:</strong> {post.emotionCategory || "-"}
+                  </p>
+
+                  <p>
+                    <strong>AI Label:</strong> {post.ai?.label || "-"}
+                  </p>
+
+                  <p>
+                    <strong>AI Confidence:</strong>{" "}
+                    {typeof post.ai?.confidence === "number"
+                      ? post.ai.confidence
+                      : "-"}
+                  </p>
+
+                  <div className="admin-actions">
+                    <button
+                      onClick={() =>
+                        updateModerationStatus(post.id, "Visible")
+                      }
+                      disabled={isBusy}
+                      className="admin-btn"
+                    >
+                      Approve
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        updateModerationStatus(post.id, "Hidden")
+                      }
+                      disabled={isBusy}
+                      className="admin-btn"
+                    >
+                      Delete
+                    </button>
+
+                    <button
+                      onClick={() => reanalysePost(post)}
+                      disabled={isBusy}
+                      className="admin-btn"
+                    >
+                      Re-analyse
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
   );
 }

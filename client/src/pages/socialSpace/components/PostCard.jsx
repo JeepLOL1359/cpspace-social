@@ -118,6 +118,17 @@ export default function PostCard({
     if (loadMore) loadMore();
   }
 
+  async function handleReport() {
+    if (!window.confirm("Report this post?")) return;
+
+    await updateDoc(doc(db, "posts", post.id), {
+      moderationStatus: "Flagged",
+      updatedAt: serverTimestamp()
+    });
+
+    alert("Post submitted for review.");
+  }
+
   useEffect(() => {
     if (!uid) return;
 
@@ -318,6 +329,10 @@ export default function PostCard({
           }}
         >
           💬 Comment
+        </button>
+
+        <button onClick={handleReport}>
+          🚩 Report
         </button>
       </div>
 
