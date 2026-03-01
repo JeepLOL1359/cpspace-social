@@ -50,6 +50,14 @@
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
+.verifyCard h2 {
+  color: #fff;
+}
+
+.verifyCard p {
+  color: #fff;
+}
+
 .verifyActions {
   display: flex;
   gap: 12px;
