@@ -1,4 +1,4 @@
-// src/pages/diaries/diaryPage.jsx
+s// src/pages/diaries/diaryPage.jsx
 import "./diary.css";
 import "../mainLayout.css";
 
