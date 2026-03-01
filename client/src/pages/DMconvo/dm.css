@@ -129,7 +129,7 @@
 
 .dm-list-item.active {
   background: var(--accent-soft);
-  color: var(--chat-bubble-other);
+  color: var(--text-inverse);
   font-weight: 600;
 }
 
@@ -347,6 +347,21 @@
 }
 
 .modal-item button:hover {
+  background: var(--accent);
+  color: white;
+}
+
+.modal button {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: none;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.modal button:hover {
   background: var(--accent);
   color: white;
 }

@@ -4,6 +4,8 @@ import { getAuth } from "firebase/auth";
 import { db } from "../../../firebaseConfig";
 import { unblockUser } from "../services/relationshipService";
 
+import "../dm.css";
+
 export default function BlockListModal({ onClose }) {
   const auth = getAuth();
   const currentUid = auth.currentUser?.uid;

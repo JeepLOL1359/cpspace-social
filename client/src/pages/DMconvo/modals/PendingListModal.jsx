@@ -12,6 +12,8 @@ import { getAuth } from "firebase/auth";
 import { db } from "../../../firebaseConfig";
 import { acceptRelationship } from "../services/relationshipService";
 
+import "../dm.css";
+
 export default function PendingListModal({ onClose }) {
   const auth = getAuth();
   const currentUid = auth.currentUser?.uid;
