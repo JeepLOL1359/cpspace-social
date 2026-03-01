@@ -6,8 +6,11 @@ import { getAuth } from "firebase/auth";
 import { db } from "../../../firebaseConfig";
 import { moderateText } from "../../../services/aiModerationService";
 
+const EMPTY_FEELINGS = { pos: [], neu: [], neg: [] };
+
 export default function CreatePostModal({ onClose }) {
   const auth = getAuth();
+  const uid = auth.currentUser?.uid;
 
   /* ===============================
      STATE (MATCH DIARY MODAL)
@@ -15,23 +18,54 @@ export default function CreatePostModal({ onClose }) {
 
   const [category, setCategory] = useState(null); // pos | neu | neg
   const [selected, setSelected] = useState([]);
-  const [feelings, setFeelings] = useState({ pos: [], neu: [], neg: [] });
+  const [feelings, setFeelings] = useState(EMPTY_FEELINGS);
 
   const [body, setBody] = useState("");
   const [showFlagNotice, setShowFlagNotice] = useState(false);
 
   /* ===============================
-     LOAD DEFAULT FEELINGS
+     LOAD EFFECTIVE FEELINGS
   =============================== */
   useEffect(() => {
     async function loadFeelings() {
-      const snap = await getDoc(doc(db, "defaultFeelings", "default"));
-      if (snap.exists()) {
-        setFeelings(snap.data());
-      }
+      const [defaultSnap, userSnap] = await Promise.all([
+        getDoc(doc(db, "defaultFeelings", "default")),
+        uid ? getDoc(doc(db, "users", uid)) : Promise.resolve(null),
+      ]);
+
+      const defaults = defaultSnap.exists()
+        ? {
+            pos: defaultSnap.data()?.pos ?? [],
+            neu: defaultSnap.data()?.neu ?? [],
+            neg: defaultSnap.data()?.neg ?? [],
+          }
+        : EMPTY_FEELINGS;
+
+      const preferenceFeelings = userSnap?.exists()
+        ? userSnap.data()?.preferences?.feelings
+        : null;
+
+      const added = {
+        pos: preferenceFeelings?.added?.pos ?? [],
+        neu: preferenceFeelings?.added?.neu ?? [],
+        neg: preferenceFeelings?.added?.neg ?? [],
+      };
+
+      const removed = {
+        pos: preferenceFeelings?.removed?.pos ?? [],
+        neu: preferenceFeelings?.removed?.neu ?? [],
+        neg: preferenceFeelings?.removed?.neg ?? [],
+      };
+
+      setFeelings({
+        pos: defaults.pos.filter((f) => !removed.pos.includes(f)).concat(added.pos),
+        neu: defaults.neu.filter((f) => !removed.neu.includes(f)).concat(added.neu),
+        neg: defaults.neg.filter((f) => !removed.neg.includes(f)).concat(added.neg),
+      });
     }
+
     loadFeelings();
-  }, []);
+  }, [uid]);
 
   useEffect(() => {
     if (!showFlagNotice) return undefined;
