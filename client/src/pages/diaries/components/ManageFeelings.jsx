@@ -14,6 +14,9 @@ import {
   deleteFeeling,
   editFeeling,
 } from "./manageFeelingsHelpers";
+import { useNavigate } from "react-router-dom";
+
+import "./manageFeelings.css";
 
 export default function ManageFeelings() {
   const [activeTab, setActiveTab] = useState("pos");
@@ -28,6 +31,8 @@ export default function ManageFeelings() {
   const [error, setError] = useState("");
 
   const uid = getCurrentUid();
+
+  const navigate = useNavigate();
 
   async function loadData() {
     if (!uid) {
@@ -189,154 +194,112 @@ export default function ManageFeelings() {
   const currentCustom = addedFeelings[activeTab] ?? [];
 
   return (
-    <div style={{ padding: 16 }}>
-      <h2>Manage Feelings</h2>
+    <div className="manage-layout">
+      <div className="manage-container">
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        {CATEGORIES.map((category) => (
+        <div className="manage-header">
+          <h2 className="manage-title">Manage Feelings</h2>
           <button
-            key={category}
-            type="button"
-            onClick={() => {
-              setActiveTab(category);
-              setNewFeeling("");
-              setEditingFeeling("");
-              setEditingValue("");
-              setError("");
-            }}
-            disabled={saving}
-            style={{
-              fontWeight: activeTab === category ? 700 : 400,
-            }}
+            className="manage-back-btn"
+            onClick={() => navigate("/diary")}
           >
-            {TAB_LABELS[category]}
-          </button>
-        ))}
-      </div>
-
-      {error ? <p style={{ color: "#b91c1c" }}>{error}</p> : null}
-
-      <section style={{ marginBottom: 20 }}>
-        <h3>Default Feelings</h3>
-        {currentDefaults.map((feeling) => {
-          const hidden = currentRemoved.includes(feeling);
-
-          return (
-            <div
-              key={feeling}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                opacity: hidden ? 0.5 : 1,
-                marginBottom: 8,
-              }}
-            >
-              <span>{feeling}</span>
-              <button
-                type="button"
-                onClick={() => handleToggleDefault(feeling, hidden)}
-                disabled={saving}
-              >
-                {hidden ? "Restore" : "Hide"}
-              </button>
-            </div>
-          );
-        })}
-      </section>
-
-      <section style={{ marginBottom: 20 }}>
-        <h3>Custom Feelings ({customCount}/{MAX_CUSTOM_PER_CATEGORY})</h3>
-
-        {currentCustom.map((feeling) => {
-          const isEditing = editingFeeling === feeling;
-
-          return (
-            <div
-              key={feeling}
-              style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}
-            >
-              {isEditing ? (
-                <>
-                  <input
-                    value={editingValue}
-                    onChange={(e) => setEditingValue(e.target.value)}
-                    maxLength={MAX_FEELING_LENGTH}
-                    disabled={saving}
-                  />
-                  <span>{editingValue.trim().length}/{MAX_FEELING_LENGTH}</span>
-                  <button type="button" onClick={() => handleEdit(feeling)} disabled={saving}>
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingFeeling("");
-                      setEditingValue("");
-                    }}
-                    disabled={saving}
-                  >
-                    Cancel
-                  </button>
-                </>
-              ) : (
-                <>
-                  <span>{feeling}</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingFeeling(feeling);
-                      setEditingValue(feeling);
-                    }}
-                    disabled={saving}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteCustom(feeling)}
-                    disabled={saving}
-                  >
-                    Delete
-                  </button>
-                </>
-              )}
-            </div>
-          );
-        })}
-      </section>
-
-      <section style={{ marginBottom: 24 }}>
-        <h3>Add Feeling</h3>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <input
-            value={newFeeling}
-            onChange={(e) => setNewFeeling(e.target.value)}
-            placeholder="Enter custom feeling"
-            maxLength={MAX_FEELING_LENGTH}
-            disabled={saving || customCount >= MAX_CUSTOM_PER_CATEGORY}
-          />
-          <button
-            type="button"
-            onClick={handleAdd}
-            disabled={saving || customCount >= MAX_CUSTOM_PER_CATEGORY}
-          >
-            Add
+            ← Back
           </button>
         </div>
-        <p>{newFeeling.trim().length}/{MAX_FEELING_LENGTH}</p>
-        {customCount >= MAX_CUSTOM_PER_CATEGORY ? (
-          <p style={{ marginTop: 4 }}>Custom feeling limit reached for this category.</p>
-        ) : null}
-      </section>
 
-      <section style={{ marginBottom: 24 }}>
-        <h3>Effective Feelings Preview</h3>
-        <p>{effectiveFeelings[activeTab].join(", ") || "No feelings available."}</p>
-      </section>
+        <div className="manage-tabs">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              className={`manage-tab ${activeTab === cat ? "active" : ""}`}
+              onClick={() => setActiveTab(cat)}
+            >
+              {TAB_LABELS[cat]}
+            </button>
+          ))}
+        </div>
 
-      <button type="button" onClick={handleRestoreAll} disabled={saving}>
-        Restore All Feelings to Default
-      </button>
+        {/* DEFAULT SECTION */}
+        <div className="manage-section">
+          <div className="manage-section-title">Default Feelings</div>
+          <div className="manage-tag-grid">
+            {currentDefaults.map((f) => {
+              const hidden = currentRemoved.includes(f);
+              return (
+                <div key={f} className="manage-tag-item">
+                  <span className={`manage-tag ${hidden ? "hidden" : ""}`}>
+                    {f}
+                  </span>
+                  <span
+                    className="manage-tag-action"
+                    onClick={() =>
+                      handleToggleDefault(f, hidden)
+                    }
+                  >
+                    {hidden ? "Restore" : "Hide"}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* CUSTOM SECTION */}
+        <div className="manage-section">
+          <div className="manage-section-title">
+            Custom Feelings ({customCount}/5)
+          </div>
+
+          <div className="manage-tag-grid">
+            {currentCustom.map((f) => (
+              <div key={f} className="manage-tag-item">
+                <span className="manage-tag custom">{f}</span>
+                <span
+                  className="manage-tag-action"
+                  onClick={() => setEditingFeeling(f)}
+                >
+                  Edit
+                </span>
+                <span
+                  className="manage-tag-action"
+                  onClick={() => handleDeleteCustom(f)}
+                >
+                  Delete
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div className="manage-add-row">
+            <input
+              className="manage-input"
+              value={newFeeling}
+              onChange={(e) => setNewFeeling(e.target.value)}
+              placeholder="Add custom feeling"
+              maxLength={20}
+            />
+            <button
+              className="manage-add-btn"
+              onClick={handleAdd}
+              disabled={customCount >= 5}
+            >
+              Add
+            </button>
+          </div>
+
+          <div className="manage-meta">
+            {newFeeling.length}/20 characters
+          </div>
+        </div>
+
+        <button
+          className="manage-restore-all"
+          onClick={handleRestoreAll}
+        >
+          Restore All Feelings to Default
+        </button>
+
+      </div>
     </div>
   );
 }

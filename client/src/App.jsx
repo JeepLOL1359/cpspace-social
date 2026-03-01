@@ -44,6 +44,7 @@ import FlaggedPostsPage from "./pages/hub/adminHub/FlaggedPostsPage";
 // Diary
 import DiaryPage from "./pages/diaries/diaryPage";
 import CalendarPage from "./pages/diaries/CalendarPage";
+import ManageFeelings from "./pages/diaries/components/ManageFeelings";
 
 // Social Space
 import SocialSpace from "./pages/socialSpace/SocialSpace";
@@ -216,6 +217,11 @@ function App() {
 
           {/* DIARY */}
           <Route path="diary" element={<DiaryPage />} />
+          <Route
+            path="/diaries/manage-feelings"
+            element={<ManageFeelings />}
+          />
+
           {/* CALENDAR */}
           <Route path="calendar" element={<CalendarPage />} />
 
