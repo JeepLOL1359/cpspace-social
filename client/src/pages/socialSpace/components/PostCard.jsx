@@ -8,15 +8,15 @@ import {
   updateDoc,
   serverTimestamp,
   getDoc,
-  runTransaction,
-  collection,
-  setDoc
+  runTransaction
 } from "firebase/firestore";
 import { db } from "../../../firebaseConfig";
 
 import CommentList from "./CommentList";
 import CommentInput from "./CommentInput";
 import "./PostCard.css";
+
+const EMPTY_FEELINGS = { pos: [], neu: [], neg: [] };
 
 export default function PostCard({
   post,
@@ -25,8 +25,9 @@ export default function PostCard({
   loadMore
 }) {
   const auth = getAuth();
+  const uid = auth.currentUser?.uid;
   const navigate = useNavigate();
-  const isOwner = auth.currentUser?.uid === post.authorId;
+  const isOwner = uid === post.authorId;
 
   const [showAllComments, setShowAllComments] = useState(false);
 
@@ -118,7 +119,7 @@ export default function PostCard({
   }
 
   useEffect(() => {
-    if (!auth.currentUser) return;
+    if (!uid) return;
 
     async function loadMyVote() {
       const voteRef = doc(
@@ -126,7 +127,7 @@ export default function PostCard({
         "posts",
         post.id,
         "votes",
-        auth.currentUser.uid
+        uid
       );
 
       const snap = await getDoc(voteRef);
@@ -139,7 +140,7 @@ export default function PostCard({
     }
 
     loadMyVote();
-  }, [post.id]);
+  }, [post.id, uid]);
 
   // map stored category → internal key
   function toKey(cat) {
@@ -160,7 +161,7 @@ export default function PostCard({
 
   const [category, setCategory] = useState(toKey(post.emotionCategory));
   const [selected, setSelected] = useState(post.feelings || []);
-  const [allFeelings, setAllFeelings] = useState({ pos: [], neu: [], neg: [] });
+  const [allFeelings, setAllFeelings] = useState(EMPTY_FEELINGS);
 
   const savePost = async () => {
     await updateDoc(doc(db, "posts", post.id), {
@@ -186,13 +187,44 @@ export default function PostCard({
 
   useEffect(() => {
     async function loadFeelings() {
-      const snap = await getDoc(doc(db, "defaultFeelings", "default"));
-      if (snap.exists()) {
-        setAllFeelings(snap.data());
-      }
+      const [defaultSnap, userSnap] = await Promise.all([
+        getDoc(doc(db, "defaultFeelings", "default")),
+        uid ? getDoc(doc(db, "users", uid)) : Promise.resolve(null),
+      ]);
+
+      const defaults = defaultSnap.exists()
+        ? {
+            pos: defaultSnap.data()?.pos ?? [],
+            neu: defaultSnap.data()?.neu ?? [],
+            neg: defaultSnap.data()?.neg ?? [],
+          }
+        : EMPTY_FEELINGS;
+
+      const preferenceFeelings = userSnap?.exists()
+        ? userSnap.data()?.preferences?.feelings
+        : null;
+
+      const added = {
+        pos: preferenceFeelings?.added?.pos ?? [],
+        neu: preferenceFeelings?.added?.neu ?? [],
+        neg: preferenceFeelings?.added?.neg ?? [],
+      };
+
+      const removed = {
+        pos: preferenceFeelings?.removed?.pos ?? [],
+        neu: preferenceFeelings?.removed?.neu ?? [],
+        neg: preferenceFeelings?.removed?.neg ?? [],
+      };
+
+      setAllFeelings({
+        pos: defaults.pos.filter((f) => !removed.pos.includes(f)).concat(added.pos),
+        neu: defaults.neu.filter((f) => !removed.neu.includes(f)).concat(added.neu),
+        neg: defaults.neg.filter((f) => !removed.neg.includes(f)).concat(added.neg),
+      });
     }
+
     loadFeelings();
-  }, []);
+  }, [uid]);
 
   return (
     <div className="post-card">
@@ -228,7 +260,7 @@ export default function PostCard({
 
           {/* FEELINGS */}
           <div className="feelings">
-            {allFeelings[category]?.map(f => (
+            {[...(allFeelings[category] ?? []), ...selected.filter((f) => !(allFeelings[category] ?? []).includes(f))].map(f => (
               <span
                 key={f}
                 className={selected.includes(f) ? "tag active" : "tag"}

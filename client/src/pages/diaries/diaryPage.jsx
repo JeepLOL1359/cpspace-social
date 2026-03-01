@@ -314,11 +314,13 @@ export default function DiaryPage() {
                 })
               }
             >
-              &lt; {getMonthLabel(activeDate)}
+              {getMonthLabel(activeDate)}
             </button>
+
             <button onClick={() => setShowEmotionModal(true)}>
               Today’s Emotion +
             </button>
+
             <button
               onClick={() => {
                 setIsReflectionMode(true);
@@ -326,6 +328,12 @@ export default function DiaryPage() {
               }}
             >
               Diary +
+            </button>
+
+            <button
+              onClick={() => navigate("/diaries/manage-feelings")}
+            >
+              Manage Feelings
             </button>
           </div>
 
