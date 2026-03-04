@@ -334,6 +334,11 @@ export default function PostCard({
         <button onClick={handleReport}>
           🚩 Report
         </button>
+
+        {/* Emotion category display */}
+        <span className={`emotion-badge ${post.emotionCategory}`}>
+          {post.emotionCategory}
+        </span>
       </div>
 
       <CommentList
