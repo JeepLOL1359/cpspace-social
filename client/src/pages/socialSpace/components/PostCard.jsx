@@ -11,6 +11,7 @@ import {
   runTransaction
 } from "firebase/firestore";
 import { db } from "../../../firebaseConfig";
+import { timeAgo } from "../../../utils/timeAgo";
 
 import CommentList from "./CommentList";
 import CommentInput from "./CommentInput";
@@ -241,13 +242,16 @@ export default function PostCard({
     <div className="post-card">
       <div className="post-header">
         <strong
-          onClick={() =>
-            navigate(`/user/${post.authorId}`)
-          }
+          onClick={() => navigate(`/user/${post.authorId}`)}
           style={{ cursor: "pointer" }}
         >
           {pseudonym}
         </strong>
+
+        <span className="post-time">
+          · {timeAgo(post.createdAt)}
+        </span>
+
         {post.isEdited && <span className="edited-label"> · edited</span>}
       </div>
 

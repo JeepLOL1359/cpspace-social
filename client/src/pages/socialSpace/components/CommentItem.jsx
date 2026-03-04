@@ -6,6 +6,7 @@ import { getAuth } from "firebase/auth";
 import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../../../firebaseConfig";
 import "./Comment.css";
+import { timeAgo } from "../../../utils/timeAgo";
 
 export default function CommentItem({ comment, pseudonym }) {
   const auth = getAuth();
@@ -64,6 +65,7 @@ export default function CommentItem({ comment, pseudonym }) {
         style={{ cursor: "pointer" }}
       >
         {pseudonym}
+        {comment.createdAt && ` · ${timeAgo(comment.createdAt)}`}
         {comment.isEdited && " · edited"}
       </span>
 
