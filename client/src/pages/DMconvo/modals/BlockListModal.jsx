@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot
+} from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { db } from "../../../firebaseConfig";
 import { unblockUser } from "../services/relationshipService";
@@ -13,18 +18,32 @@ export default function BlockListModal({ onClose }) {
   const [blockedList, setBlockedList] = useState([]);
 
   useEffect(() => {
-    async function loadBlocked() {
-      const snap = await getDoc(
-        doc(db, "users", currentUid)
-      );
+    if (!currentUid) return;
 
-      if (snap.exists()) {
-        const data = snap.data();
-        setBlockedList(data.blockedUsers || []);
-      }
-    }
+    const q = query(
+      collection(db, "conversations"),
+      where("participants", "array-contains", currentUid),
+      where("relationshipStatus", "==", "blocked")
+    );
 
-    loadBlocked();
+    const unsub = onSnapshot(q, snap => {
+      const data = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(c => c.consent?.[currentUid]) // I am blocker
+        .map(c => {
+          const other = c.participants.find(
+            p => p !== currentUid
+          );
+          return {
+            conversationId: c.id,
+            uid: other
+          };
+        });
+
+      setBlockedList(data);
+    });
+
+    return () => unsub();
   }, [currentUid]);
 
   return (
@@ -36,13 +55,13 @@ export default function BlockListModal({ onClose }) {
           <p>No blocked users.</p>
         )}
 
-        {blockedList.map(uid => (
-          <div key={uid} className="modal-item">
-            <span>{uid}</span>
+        {blockedList.map(user => (
+          <div key={user.uid} className="modal-item">
+            <span>{user.uid}</span>
 
             <button
               onClick={() =>
-                unblockUser(currentUid, uid)
+                unblockUser(currentUid, user.uid)
               }
             >
               Unblock

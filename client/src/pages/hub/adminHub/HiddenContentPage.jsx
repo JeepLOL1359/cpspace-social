@@ -80,7 +80,7 @@ export default function HiddenContentPage() {
   }
 
     return (
-        <div className="admin-main">
+        <div className="admin-content">
         <h2 className="admin-title">Hidden Content</h2>
 
         {/* Hidden Posts */}

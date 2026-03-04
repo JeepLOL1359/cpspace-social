@@ -101,7 +101,7 @@ export default function FlaggedCommentsPage() {
   }, []);
 
     return (
-        <div className="admin-main">
+        <div className="admin-content">
             <h2 className="admin-title">Flagged Comments</h2>
 
             {loading ? (

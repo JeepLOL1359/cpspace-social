@@ -83,11 +83,10 @@ export async function blockUser(currentUid, targetUid) {
 
   await updateDoc(convoRef, {
     relationshipStatus: "blocked",
-    [`consent.${currentUid}`]: false,
-    [`consent.${targetUid}`]: false,
+    [`consent.${currentUid}`]: true,   // blocker
+    [`consent.${targetUid}`]: false,   // blocked user
     updatedAt: serverTimestamp(),
   });
-
 }
 
 /* ------------------ UNBLOCK ------------------ */
@@ -95,8 +94,21 @@ export async function unblockUser(currentUid, targetUid) {
   const conversationId = generateConversationId(currentUid, targetUid);
   const convoRef = doc(db, "conversations", conversationId);
 
+  const snap = await getDoc(convoRef);
+  if (!snap.exists()) return;
+
+  const data = snap.data();
+
+  // Only the blocker can unblock
+  if (!data.consent?.[currentUid]) {
+    console.warn("Only blocker can unblock");
+    return;
+  }
+
   await updateDoc(convoRef, {
     relationshipStatus: "revoked",
+    [`consent.${currentUid}`]: false,
+    [`consent.${targetUid}`]: false,
     updatedAt: serverTimestamp(),
   });
 }

@@ -76,7 +76,7 @@ export default function FlaggedPostsPage() {
   }, []);
 
   return (
-      <div className="admin-main">
+      <div className="admin-content">
         <h2 className="admin-title">Flagged Posts</h2>
 
         {loading ? (
