@@ -28,7 +28,7 @@ const OPTIONS = [
 
 // GAD-7 severity interpretation
 const getGAD7Severity = (score) => {
-  if (score <= 4) return "Minimal";
+  if (score <= 4) return "None";
   if (score <= 9) return "Mild";
   if (score <= 14) return "Moderate";
   return "Severe";
@@ -71,6 +71,7 @@ export default function GAD7() {
         collection(db, "users", user.uid, "assessments"),
         {
           type: "GAD-7",
+          answers,
           score,
           severity,
           createdAt: serverTimestamp(),
@@ -83,6 +84,7 @@ export default function GAD7() {
           type: "GAD-7",
           score,
           severity,
+          answers
         },
       });
     } catch (err) {

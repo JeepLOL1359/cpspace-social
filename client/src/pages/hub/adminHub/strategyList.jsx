@@ -1,21 +1,32 @@
 import { useEffect, useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams, useLocation } from "react-router-dom";
 import {
   getAllStrategies,
   deleteStrategy,
 } from "../../../services/adminHubService";
+import { TAG_LABELS } from "../../../domain/tagLabels";
 import "./strategyList.css";
+import "../../settings/preferences.css";
 
 export default function AdminStrategyList() {
   const [strategies, setStrategies] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const [searchQuery, setSearchQuery] = useState("");
-
   const ITEMS_PER_PAGE = 20;
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
+  const currentPage = parseInt(searchParams.get("page") || "1", 10);
+
+  const setCurrentPage = (page) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("page", page.toString());
+    setSearchParams(params);
+  };
 
   const scrollTopRef = useRef(null);
+  const location = useLocation();
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [strategyToDelete, setStrategyToDelete] = useState(null);
 
   useEffect(() => {
     async function fetchStrategies() {
@@ -39,23 +50,29 @@ export default function AdminStrategyList() {
     });
   }, [currentPage]);
 
-  async function handleDelete(id) {
-    const ok = window.confirm(
-      "Are you sure you want to delete this strategy?"
-    );
-    if (!ok) return;
+  async function confirmDelete() {
+    if (!strategyToDelete) return;
 
     try {
-      await deleteStrategy(id);
-      setStrategies((prev) => prev.filter((s) => s.id !== id));
+      await deleteStrategy(strategyToDelete);
+      setStrategies((prev) => {
+        const updated = prev.filter((s) => s.id !== strategyToDelete);
+
+        const newTotalPages = Math.ceil(updated.length / ITEMS_PER_PAGE);
+
+        if (currentPage > newTotalPages && newTotalPages > 0) {
+          setCurrentPage(newTotalPages);
+        }
+
+        return updated;
+      });
     } catch (err) {
       console.error("Failed to delete strategy:", err);
+    } finally {
+      setShowDeleteConfirm(false);
+      setStrategyToDelete(null);
     }
   }
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery]);
 
   if (loading) {
     return <p>Loading strategies...</p>;
@@ -81,8 +98,7 @@ export default function AdminStrategyList() {
   );
 
   return (
-    <div className="admin-strategy-page">
-      <div ref={scrollTopRef} />
+  <div className="admin-strategy-page">
 
     <div className="admin-header">
       <h2>Manage Strategies</h2>
@@ -98,7 +114,15 @@ export default function AdminStrategyList() {
         type="text"
         placeholder="Search strategies..."
         value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
+        onChange={(e) => {
+          const value = e.target.value;
+          setSearchQuery(value);
+
+          const params = new URLSearchParams(searchParams);
+          params.set("q", value);
+          params.set("page", 1);
+          setSearchParams(params);
+        }}
         className="admin-search"
       />
     </div>
@@ -122,19 +146,27 @@ export default function AdminStrategyList() {
                 <td>{s.title}</td>
                 <td>{s.author}</td>
                 <td>
-                  {Array.isArray(s.tags) ? s.tags.join(", ") : ""}
+                  {Array.isArray(s.tags)
+                    ? s.tags
+                        .map(tag => TAG_LABELS[tag] || tag)
+                        .join(", ")
+                    : ""}
                 </td>
                 <td className="actions">
-                  <Link
-                    to={`/admin/strategies/edit/${s.id}`}
-                    className="edit-btn"
-                  >
-                    Edit
-                  </Link>
+                <Link
+                  to={`/admin/strategies/edit/${s.id}?page=${currentPage}`}
+                  replace={false}
+                  className="edit-btn"
+                >
+                  Edit
+                </Link>
 
                   <button
                     className="delete-btn"
-                    onClick={() => handleDelete(s.id)}
+                    onClick={() => {
+                      setStrategyToDelete(s.id);
+                      setShowDeleteConfirm(true);
+                    }}
                   >
                     Delete
                   </button>
@@ -150,7 +182,7 @@ export default function AdminStrategyList() {
         <button
           className="page-nav"
           disabled={currentPage === 1}
-          onClick={() => setCurrentPage(p => p - 1)}
+          onClick={() => setCurrentPage(currentPage - 1)}
         >
           ‹
         </button>
@@ -172,10 +204,37 @@ export default function AdminStrategyList() {
         <button
           className="page-nav"
           disabled={currentPage === totalPages}
-          onClick={() => setCurrentPage(p => p + 1)}
+          onClick={() => setCurrentPage(currentPage + 1)}
         >
           ›
         </button>
+      </div>
+    )}
+    {showDeleteConfirm && (
+      <div className="pref-modal-overlay">
+        <div className="pref-modal-dialog">
+          <h3>Delete Feedback?</h3>
+
+          <p>
+            This action cannot be undone.
+          </p>
+
+          <div className="pref-modal-actions">
+            <button
+              className="pref-confirm"
+              onClick={confirmDelete}
+            >
+              Delete
+            </button>
+
+            <button
+              className="pref-cancel"
+              onClick={() => setShowDeleteConfirm(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       </div>
     )}
     </div>

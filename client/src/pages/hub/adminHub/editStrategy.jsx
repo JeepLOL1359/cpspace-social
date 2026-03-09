@@ -1,21 +1,28 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   getStrategyById,
   updateStrategy,
 } from "../../../services/adminHubService";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../../../firebaseConfig";
-import "./EditStrategy.css";
+import { TAG_LABELS } from "../../../domain/tagLabels";
+import "./strategyLayout.css";
 
 export default function EditStrategy() {
   const { id } = useParams();
   const navigate = useNavigate();
+  
+  const [searchParams] = useSearchParams();
+  const page = searchParams.get("page") || 1;
 
   const [loading, setLoading] = useState(true);
 
   const [audioFile, setAudioFile] = useState(null);
   const [videoFile, setVideoFile] = useState(null);
+
+  const [descLength, setDescLength] = useState(0);
+  const [instLength, setInstLength] = useState(0);
 
   const [existingAudio, setExistingAudio] = useState(null);
   const [existingVideo, setExistingVideo] = useState(null);
@@ -25,7 +32,7 @@ export default function EditStrategy() {
     author: "",
     description: "",
     instructions: "",
-    tags: "",
+    tags: [],
   });
 
   useEffect(() => {
@@ -33,7 +40,7 @@ export default function EditStrategy() {
       try {
         const data = await getStrategyById(id);
         if (!data) {
-          navigate("/admin/strategies");
+        navigate(`/admin/strategies?page=${page}`, { replace: true });
           return;
         }
 
@@ -42,8 +49,11 @@ export default function EditStrategy() {
           author: data.author || "",
           description: data.description || "",
           instructions: data.instructions || "",
-          tags: Array.isArray(data.tags) ? data.tags.join(", ") : "",
+          tags: Array.isArray(data.tags) ? data.tags : [],
         });
+        
+        setDescLength((data.description || "").length);
+        setInstLength((data.instructions || "").length);
 
         setExistingAudio(data.audioUrl || null);
         setExistingVideo(data.videoUrl || null);
@@ -58,11 +68,31 @@ export default function EditStrategy() {
   }, [id, navigate]);
 
   function handleChange(e) {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    if (name === "description") {
+      if (value.length > 500) return;
+      setDescLength(value.length);
+    }
+
+    if (name === "instructions") {
+      if (value.length > 2000) return;
+      setInstLength(value.length);
+    }
+
+    setForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
   }
 
-  async function handleSubmit(e) {
+async function handleSubmit(e) {
     e.preventDefault();
+
+    if (form.tags.length === 0) {
+      alert("Please select at least one tag.");
+      return;
+    }
 
     let audioUrl = existingAudio;
     let videoUrl = existingVideo;
@@ -104,68 +134,140 @@ export default function EditStrategy() {
       author: form.author.trim(),
       description: form.description.trim(),
       instructions: form.instructions.trim(),
-      tags: form.tags
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean),
-
+      tags: form.tags,
       audioUrl,
       videoUrl,
     };
 
     try {
       await updateStrategy(id, payload);
-      navigate("/admin/strategies");
+      navigate(`/admin/strategies?page=${page}`, { replace: true });
     } catch (err) {
       console.error("Failed to update strategy:", err);
     }
   }
 
+  function toggleTag(tag) {
+    setForm(prev => {
+      const exists = prev.tags.includes(tag);
+
+      if (exists) {
+        return {
+          ...prev,
+          tags: prev.tags.filter(t => t !== tag)
+        };
+      } else {
+        return {
+          ...prev,
+          tags: [...prev.tags, tag]
+        };
+      }
+    });
+  }
+
   if (loading) return <p>Loading strategy...</p>;
 
   return (
-    <div className="edit-strategy-page">
+    <div className="strategy-page">
       <h2>Edit Coping Strategy</h2>
 
-      <form className="edit-strategy-form" onSubmit={handleSubmit}>
+      <form className="strategy-form" onSubmit={handleSubmit}>
+        <label>Title</label>
+
         <input
           name="title"
-          placeholder="Title"
+          placeholder="Enter title..."
           value={form.title}
           onChange={handleChange}
+          maxLength={100}
           required
         />
+
+        <label>Author</label>
 
         <input
           name="author"
-          placeholder="Author"
+          placeholder="Enter author..."
           value={form.author}
           onChange={handleChange}
+          maxLength={100}
           required
         />
 
-        <textarea
-          name="description"
-          placeholder="Description"
-          value={form.description}
-          onChange={handleChange}
-          required
-        />
+        <label>Description</label>
 
-        <textarea
-          name="instructions"
-          placeholder="Instructions"
-          value={form.instructions}
-          onChange={handleChange}
-          required
-        />
+        <div className="strategy-textarea-wrapper">
+          <textarea
+            name="description"
+            placeholder="Enter description..."
+            value={form.description}
+            onChange={handleChange}
+            maxLength={500}
+            required
+          />
 
-        <input
-          name="tags"
-          placeholder="Tags (comma separated)"
-          value={form.tags}
-          onChange={handleChange}
-        />
+          <span className={`strategy-counter ${descLength > 450 ? "limit" : ""}`}>
+            {descLength} / 500
+          </span>
+        </div>
+
+        {descLength >= 450 && descLength < 500 && (
+          <p className="strategy-warning">
+            You are nearing the character limit.
+          </p>
+        )}
+
+        {descLength === 500 && (
+          <p className="strategy-error">
+            You have reached the maximum character limit.
+          </p>
+        )}
+
+        <label>Instructions</label>
+
+        <div className="strategy-textarea-wrapper">
+          <textarea
+            name="instructions"
+            placeholder="Enter instructions..."
+            value={form.instructions}
+            onChange={handleChange}
+            maxLength={2000}
+            required
+          />
+
+          <span className={`strategy-counter ${instLength > 1800 ? "limit" : ""}`}>
+            {instLength} / 2000
+          </span>
+        </div>
+
+        {instLength >= 1800 && instLength < 2000 && (
+          <p className="strategy-warning">
+            You are nearing the character limit.
+          </p>
+        )}
+
+        {instLength === 2000 && (
+          <p className="strategy-error">
+            You have reached the maximum character limit.
+          </p>
+        )}
+
+        <div className="tag-selection">
+          <label className="section-label">Select Tags</label>
+
+          <div className="tag-options">
+            {Object.entries(TAG_LABELS).map(([key, label]) => (
+              <label key={key} className="tag-checkbox">
+                <input
+                  type="checkbox"
+                  checked={form.tags.includes(key)}
+                  onChange={() => toggleTag(key)}
+                />
+                <span>{label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
 
         <label>Audio (optional)</label>
         {existingAudio && (
@@ -235,12 +337,12 @@ export default function EditStrategy() {
           )}
         </div>
 
-        <div className="edit-actions">
+        <div className="strategy-actions">
           <button type="submit">Save Changes</button>
           <button
             type="button"
             className="secondary"
-            onClick={() => navigate("/admin/strategies")}
+            onClick={() => navigate(`/admin/strategies?page=${page}`)}
           >
             Cancel
           </button>

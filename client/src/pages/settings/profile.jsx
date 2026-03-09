@@ -5,6 +5,8 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../../firebaseConfig";
 import "./profile.css";
 
+import editIcon from "../../assets/editIcon.png";
+
 export default function Profile() {
   const auth = getAuth();
   const fileInputRef = useRef();
@@ -26,26 +28,10 @@ export default function Profile() {
     const unsub = onAuthStateChanged(auth, async (user) => {
       if (!user) return;
 
-    const userRef = doc(db, "users", user.uid);
-    const publicProfileRef = doc(
-      db,
-      "users",
-      user.uid,
-      "publicProfile",
-      "profile"
-    );
-
-    const [userSnap, profileSnap] = await Promise.all([
-      getDoc(userRef),
-      getDoc(publicProfileRef),
-    ]);
-
-    if (userSnap.exists() && profileSnap.exists()) {
-      setUserData({
-        ...userSnap.data(),
-        publicProfile: profileSnap.data(),
-      });
-    }
+      const snap = await getDoc(doc(db, "users", user.uid));
+      if (snap.exists()) {
+        setUserData(snap.data());
+      }
     });
 
     return unsub;
@@ -109,11 +95,11 @@ export default function Profile() {
     setEditingField(field);
 
     if (field === "name") {
-      setNewDisplayName(userData.publicProfile?.pseudonym || "");
+      setNewDisplayName(userData.profileDisplayName || "");
     }
 
     if (field === "username") {
-      setNewUsername(userData.publicProfile?.username?.value || "");
+      setNewUsername(userData.username?.value || "");
     }
 
     if (field === "age") {
@@ -133,31 +119,22 @@ export default function Profile() {
      SAVE FUNCTIONS
   ====================== */
   const saveDisplayName = async () => {
-    if (!newDisplayName.trim()) return;
-
     setSaving(true);
-    try {
-      const profileRef = doc(
-        db,
-        "users",
-        auth.currentUser.uid,
-        "publicProfile",
-        "profile"
-      );
 
-      await updateDoc(profileRef, {
-        pseudonym: newDisplayName.trim(),
+    try {
+      const value = newDisplayName.trim();
+
+      await updateDoc(doc(db, "users", auth.currentUser.uid), {
+        profileDisplayName: value || null
       });
 
       setUserData((prev) => ({
         ...prev,
-        publicProfile: {
-          ...prev.publicProfile,
-          pseudonym: newDisplayName.trim(),
-        },
+        profileDisplayName: value || null
       }));
 
       setEditingField(null);
+
     } finally {
       setSaving(false);
     }
@@ -168,26 +145,17 @@ export default function Profile() {
 
     setSaving(true);
     try {
-      const profileRef = doc(
-        db,
-        "users",
-        auth.currentUser.uid,
-        "publicProfile",
-        "profile"
-      );
-
-      await updateDoc(profileRef, {
+      await updateDoc(doc(db, "users", auth.currentUser.uid), {
         "username.value": newUsername.trim(),
+        "username.lastChangedAt": serverTimestamp(),
       });
 
       setUserData((prev) => ({
         ...prev,
-        publicProfile: {
-          ...prev.publicProfile,
-          username: {
-            ...prev.publicProfile.username,
-            value: newUsername.trim(),
-          },
+        username: {
+          ...prev.username,
+          value: newUsername.trim(),
+          lastChangedAt: new Date(),
         },
       }));
 
@@ -197,10 +165,21 @@ export default function Profile() {
     }
   };
 
+
   const saveAge = async () => {
     const age = Number(newAge);
-    if (!age || age < 13 || age > 120) {
+    if (!age) {
       alert("Please enter a valid age");
+      return;
+    }
+
+    if (age < 18) {
+      alert("Age cannot be smaller than 18.");
+      return;
+    }
+
+    if (age > 120) {
+      alert("Age cannot be greater than 120.");
       return;
     }
 
@@ -286,7 +265,7 @@ export default function Profile() {
                   disabled={saving}
                 />
               ) : (
-                <p>{userData.publicProfile?.pseudonym || "-"}</p>
+                <p>{userData.profileDisplayName || "-"}</p>
               )}
             </div>
             <div className="profile-action">
@@ -296,7 +275,9 @@ export default function Profile() {
                   <button onClick={cancelEdit} disabled={saving}>Cancel</button>
                 </>
               ) : (
-                <button className="edit-btn" onClick={() => startEdit("name")}>✏️</button>
+                <button className="edit-btn" onClick={() => startEdit("name")}>
+                  <img src={editIcon} alt="Edit" className="edit-icon" />
+                </button>
               )}
             </div>
           </div>
@@ -314,9 +295,9 @@ export default function Profile() {
                 />
               ) : (
                 <p>
-                  {userData.publicProfile?.username?.value}
-                  {userData.publicProfile?.username?.discriminator &&
-                    `#${userData.publicProfile.username.discriminator}`}
+                  {userData.username?.value}
+                  {userData.username?.discriminator &&
+                    `#${userData.username.discriminator}`}
                 </p>
               )}
             </div>
@@ -329,17 +310,10 @@ export default function Profile() {
                 </>
               ) : (
                 <button className="edit-btn" onClick={() => startEdit("username")}>
-                  ✏️
+                  <img src={editIcon} alt="Edit" className="edit-icon" />
                 </button>
               )}
             </div>
-          </div>
-
-          {/* Public UID */}
-          <div className="profile-row">
-            <span>Public UID</span>
-            <p>{userData.publicProfile?.publicUID || "-"}</p>
-            <div className="profile-action" />
           </div>
 
           {/* Email */}
@@ -371,7 +345,9 @@ export default function Profile() {
                   <button onClick={cancelEdit} disabled={saving}>Cancel</button>
                 </>
               ) : (
-                <button className="edit-btn" onClick={() => startEdit("age")}>✏️</button>
+                <button className="edit-btn" onClick={() => startEdit("age")}>
+                  <img src={editIcon} alt="Edit" className="edit-icon" />
+                </button>
               )}
             </div>
           </div>
@@ -401,7 +377,9 @@ export default function Profile() {
                   <button onClick={cancelEdit} disabled={saving}>Cancel</button>
                 </>
               ) : (
-                <button className="edit-btn" onClick={() => startEdit("gender")}>✏️</button>
+                <button className="edit-btn" onClick={() => startEdit("gender")}>
+                  <img src={editIcon} alt="Edit" className="edit-icon" />
+                </button>
               )}
             </div>
           </div>

@@ -9,7 +9,7 @@
   background: var(--bg-card);
   border-radius: 12px;
   padding: 32px 36px;
-  margin: 12px auto 0;
+  margin: 36px auto 0;
   width: 100%;
   max-width: 720px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
@@ -135,4 +135,19 @@
 
 .profile-edit button:hover {
   background: var(--accent-soft);
+}
+
+.edit-icon {
+  width: 14px;   /* match emoji size */
+  height: 14px;
+  display: block;
+}
+
+/* dark mode invert like bookmark */
+[data-theme="light"] .edit-icon {
+  filter: invert(1);
+}
+
+[data-theme="dark"] .edit-icon {
+  filter: invert(1);
 }

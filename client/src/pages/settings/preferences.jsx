@@ -38,7 +38,9 @@ export default function Preferences() {
   const [prefs, setPrefs] = useState(null);
   const auth = getAuth();
   const [showAutoConfirm, setShowAutoConfirm] = useState(false);
+  const [showDisableConfirm, setShowDisableConfirm] = useState(false);
   const [autoLoading, setAutoLoading] = useState(false);
+  const [autoError, setAutoError] = useState("");
 
   /* === APPLY UI EFFECTS (your old logic) === */
   const applyTheme = (mode) => {
@@ -60,8 +62,22 @@ export default function Preferences() {
       const ref = doc(db, "users", user.uid);
       const snap = await getDoc(ref);
 
-      const data = snap.exists() ? snap.data().preferences : {};
+      let data = {};
+
+      if (snap.exists()) {
+        data = snap.data().preferences || {};
+      }
+
       const merged = { ...DEFAULT_PREFS, ...data };
+
+      // if preferences didn't exist before, save defaults
+      if (!snap.data()?.preferences) {
+        await setDoc(
+          doc(db, "users", user.uid),
+          { preferences: DEFAULT_PREFS },
+          { merge: true }
+        );
+      }
 
       setPrefs(merged);
       applyTheme(merged.themeMode);
@@ -127,7 +143,7 @@ export default function Preferences() {
     await savePrefs(newPrefs);
   }
 
-  if (!prefs) return <p>Loading preferences...</p>;
+  if (!prefs) return null;
 
   return (
     <div className="personalization-panel">
@@ -138,6 +154,8 @@ export default function Preferences() {
         <label>Chatbot Tone</label>
         <select
           value={prefs.chatbotTone}
+          disabled={prefs.autoPersonalisation}
+          className={prefs.autoPersonalisation ? "disabled" : ""}
           onChange={(e) =>
             savePrefs({ chatbotTone: e.target.value })
           }
@@ -153,21 +171,32 @@ export default function Preferences() {
         <label>Theme</label>
         <div className="theme-toggle">
           <div
-            className={`theme-circle ${prefs.themeMode === "light" ? "active" : ""}`}
-            onClick={() => {
-              applyTheme("light");
-              localStorage.setItem("theme", "light");
-              savePrefs({ themeMode: "light" });
-            }}
+            className={`theme-slider ${
+              prefs.themeMode === "dark" ? "right" : "left"
+            }`}
           />
-          <div
-            className={`theme-circle dark ${prefs.themeMode === "dark" ? "active" : ""}`}
-            onClick={() => {
-              applyTheme("dark");
-              localStorage.setItem("theme", "dark");
-              savePrefs({ themeMode: "dark" });
-            }}
-          />
+        <div
+          className={`theme-circle ${prefs.themeMode === "light" ? "active" : ""} ${
+            prefs.autoPersonalisation ? "disabled" : ""
+          }`}
+          onClick={() => {
+            if (prefs.autoPersonalisation) return;
+            applyTheme("light");
+            localStorage.setItem("theme", "light");
+            savePrefs({ themeMode: "light" });
+          }}
+        />
+        <div
+          className={`theme-circle dark ${prefs.themeMode === "dark" ? "active" : ""} ${
+            prefs.autoPersonalisation ? "disabled" : ""
+          }`}
+          onClick={() => {
+            if (prefs.autoPersonalisation) return; // 🔒 block
+            applyTheme("dark");
+            localStorage.setItem("theme", "dark");
+            savePrefs({ themeMode: "dark" });
+          }}
+        />
         </div>
       </div>
 
@@ -175,41 +204,64 @@ export default function Preferences() {
       <div className="setting-row">
         <label>Color Palette</label>
         <div className="color-palette">
-          {Object.keys(COLOR_MAP).map((color) => (
-            <div
-              key={color}
-              className={`color-circle ${color} ${
-                prefs.colorPalette === color ? "selected" : ""
-              }`}
-              onClick={() => {
-                applyColor(color);
-                savePrefs({ colorPalette: color });
-              }}
-            />
-          ))}
+          <div
+            className="color-slider"
+            style={{
+              transform: `translateX(${
+                Math.max(0, Object.keys(COLOR_MAP).indexOf(prefs.colorPalette)) * 52
+              }px) scale(1.15)`
+            }}
+          />
+        {Object.keys(COLOR_MAP).map((color) => (
+          <div
+            key={color}
+            className={`color-circle ${color} ${
+              prefs.colorPalette === color ? "selected" : ""
+            } ${prefs.autoPersonalisation ? "disabled" : ""}`}
+            onClick={() => {
+              if (prefs.autoPersonalisation) return; // 🔒 block
+              applyColor(color);
+              savePrefs({ colorPalette: color });
+            }}
+          />
+        ))}
         </div>
       </div>
 
       {/* Auto Personalisation */}
       <div className="setting-row">
         <label>Auto Personalisation</label>
+
+        <p className="auto-description">
+          Auto personalisation analyses emotional patterns from your most recent
+          diary records (up to 14 entries) to adjust theme, color palette,
+          and chatbot tone automatically.
+        </p>
+
         <div className="yes-no">
-          <button
-            className={prefs.autoPersonalisation ? "active" : ""}
-            onClick={() => {
-              if (prefs.autoPersonalisation || showAutoConfirm) return;
-              setShowAutoConfirm(true);
-            }}
-          >
-            YES
-          </button>
+        <button
+          className={prefs.autoPersonalisation ? "active" : ""}
+          onClick={() => {
+            if (prefs.autoPersonalisation || showAutoConfirm) return;
+            setAutoError("");
+            setShowAutoConfirm(true);
+          }}
+        >
+          YES
+        </button>
           <button
             className={!prefs.autoPersonalisation ? "active" : ""}
-            onClick={() => savePrefs({ autoPersonalisation: false })}
+            onClick={() => {
+              if (!prefs.autoPersonalisation) return;
+              setShowDisableConfirm(true);
+            }}
           >
             NO
           </button>
-        </div> 
+        </div>
+        {autoError && (
+          <p className="auto-error">{autoError}</p>
+        )}
       </div>
       {showAutoConfirm && (
       <div className="pref-modal-overlay">
@@ -233,10 +285,11 @@ export default function Preferences() {
                 await savePrefs({ autoPersonalisation: true });
 
                 const diaries = await fetchRecentDiaries(user.uid);
-                console.log("Auto-personalisation diaries:", diaries);
+
+                console.log("Auto-personalisation diaries FULL:", JSON.stringify(diaries, null, 2));
 
                 if (!diaries.length) {
-                  alert("Please record at least one emotion diary before using Auto Personalisation.");
+                  setAutoError("You must record at least one emotion diary before enabling Auto Personalisation.");
                   await savePrefs({ autoPersonalisation: false });
                   setAutoLoading(false);
                   setShowAutoConfirm(false);
@@ -258,6 +311,8 @@ export default function Preferences() {
                 }
 
                 const result = await res.json();
+
+                console.log("Auto cluster result:", result);
                 await applyAutoPersonalisation(result.cluster);
 
                 setAutoLoading(false);
@@ -279,6 +334,42 @@ export default function Preferences() {
           </div>
         </div>
       </div>
+    )}
+    {showDisableConfirm && (
+      <div className="pref-modal-overlay">
+        <div className="pref-modal-dialog">
+          <h3>Disable Auto Personalisation?</h3>
+
+          <p>
+            You will return to manual control of theme, colors, and chatbot tone.
+          </p>
+
+          <div className="pref-modal-actions">
+            <button
+              className="pref-confirm"
+              onClick={async () => {
+                await savePrefs({ autoPersonalisation: false });
+                setShowDisableConfirm(false);
+              }}
+            >
+              Confirm
+            </button>
+
+            <button
+              className="pref-cancel"
+              onClick={() => setShowDisableConfirm(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    {prefs.autoPersonalisation && (
+      <p className="auto-locked-message">
+        Manual theme and color settings are disabled while Auto Personalisation is enabled.
+        Please turn it off to customise manually.
+      </p>
     )}
     </div>
   );

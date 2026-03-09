@@ -10,11 +10,15 @@ import {
   updateDoc,
   deleteDoc,
   serverTimestamp,
+  query,
+  orderBy
 } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import "./chatbot.css";
 import { getTodaysEmotion } from "../../services/diaryService";
 import { recommendCopingStrategies } from "../../services/copingStrategyService";
+
+import redTrashCan from "../../assets/redTrashCan.png";
 
 export default function Chatbot() {
   const auth = getAuth();
@@ -32,6 +36,7 @@ export default function Chatbot() {
   const [hoverRating, setHoverRating] = useState(0);
   const [feedbackText, setFeedbackText] = useState("");
   const [submittingFeedback, setSubmittingFeedback] = useState(false);
+  const [feedbackError, setFeedbackError] = useState("");
   const [displayName, setDisplayName] = useState("");
 
   const menuRef = useRef(null);
@@ -77,6 +82,8 @@ export default function Chatbot() {
         "chatbotSessions"
       );
 
+      const q = query(ref, orderBy("createdAt", "desc"));
+
       const userRef = doc(db, "users", currentUser.uid);
 
       unsubPrefs = onSnapshot(userRef, (snap) => {
@@ -95,7 +102,7 @@ export default function Chatbot() {
         }
       });
 
-      unsubSessions = onSnapshot(ref, (snap) => {
+      unsubSessions = onSnapshot(q, (snap) => {
         const loaded = snap.docs.map((d) => {
           const data = d.data();
           return {
@@ -110,11 +117,9 @@ export default function Chatbot() {
           setSessions(loaded);
         }
 
-        // 🔒 keep current session if it exists
         setActiveSessionId((prev) => {
-          if (prev && loaded.some((s) => s.id === prev)) {
-            return prev;
-          }
+          if (prev) return prev;
+
           return loaded[0]?.id || null;
         });
       });
@@ -171,7 +176,7 @@ export default function Chatbot() {
   const activeSession = sessions.find((s) => s.id === activeSessionId);
 
   /* =====================
-     BACKEND CALLS (UNCHANGED)
+     BACKEND CALLS
   ====================== */
   const getAIReply = async (message, history) => {
     const res = await fetch("http://localhost:5000/api/chat", {
@@ -403,16 +408,24 @@ export default function Chatbot() {
      SUBMIT FEEDBACK (NEW, ISOLATED)
   ====================== */
   const submitFeedback = async () => {
-    if (!user || !activeSessionId || feedbackRating === 0) return;
+    if (!user || !activeSessionId) return;
 
+    if (feedbackRating === 0) {
+      setFeedbackError("Please select a rating before submitting.");
+      return;
+    }
+
+    setFeedbackError("");
     setSubmittingFeedback(true);
 
     try {
       await addDoc(collection(db, "chatbotFeedback"), {
         userId: user.uid,
+        username: displayName,
         sessionId: activeSessionId,
         rating: feedbackRating,
         description: feedbackText.trim(),
+        status: "new",
         createdAt: serverTimestamp(),
       });
 
@@ -519,7 +532,11 @@ export default function Chatbot() {
               className="chat-delete"
               onClick={() => deleteChat(s.id)}
             >
-              🗑️
+              <img
+                src={redTrashCan}
+                alt="Delete"
+                className="trash-icon"
+              />
             </button>
           </div>
         ))}
@@ -550,10 +567,31 @@ export default function Chatbot() {
             </div>
 
             <label>Description (optional)</label>
-            <textarea
-              value={feedbackText}
-              onChange={(e) => setFeedbackText(e.target.value)}
-            />
+
+            <div className="feedback-textarea-wrapper">
+              <textarea
+                value={feedbackText}
+                maxLength={1000}
+                onChange={(e) => setFeedbackText(e.target.value)}
+              />
+
+              <span className={`feedback-counter ${feedbackText.length > 900 ? "limit" : ""}`}>
+                {feedbackText.length} / 1000
+              </span>
+            </div>
+
+            {/* Warning messages */}
+            {feedbackText.length >= 900 && feedbackText.length < 1000 && (
+              <p className="feedback-warning">
+                You are nearing the character limit.
+              </p>
+            )}
+
+            {feedbackText.length === 1000 && (
+              <p className="feedback-error">
+                You have reached the maximum character limit.
+              </p>
+            )}
 
             <div className="modal-actions">
               <button onClick={() => setShowFeedback(false)}>Cancel</button>
@@ -565,6 +603,12 @@ export default function Chatbot() {
                 Submit
               </button>
             </div>
+
+            {feedbackError && (
+              <p style={{ color: "red", fontSize: "14px", marginTop: "6px" }}>
+                {feedbackError}
+              </p>
+            )}
           </div>
         </div>
       )}
