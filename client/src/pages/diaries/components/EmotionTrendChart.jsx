@@ -34,20 +34,20 @@ export default function EmotionTrendChart({ trendData }) {
     const borderColor = accent || "#5B8DEF";
 
     const data = {
-    labels,
-    datasets: [
-        {
-        label: "Emotional Balance",
-        data: trendData.map((d) => d.score),
-        borderColor: borderColor,
-        backgroundColor: borderColor,
-        borderWidth: 2,
-        tension: 0.4,
-        spanGaps: true,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        },
-    ],
+        labels,
+        datasets: [
+            {
+            label: "Emotional Balance",
+            data: trendData.map((d) => d.score),
+            borderColor: borderColor,
+            backgroundColor: borderColor,
+            borderWidth: 2,
+            tension: 0.4,
+            spanGaps: true,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            },
+        ],
     };
 
     const options = {
