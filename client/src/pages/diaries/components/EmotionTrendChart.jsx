@@ -81,16 +81,16 @@ export default function EmotionTrendChart({ trendData }) {
         max: 1,
         ticks: {
             stepSize: 0.5,
-            // This function converts the numeric value to your custom label
+            // This function converts the numeric value to the custom label
             callback: function(value) {
-            const labels = {
-                1: 'Very Pleasant',
-                0.5: 'Pleasant',
-                0: 'Neutral',
-                '-0.5': 'Unpleasant',
-                '-1': 'Very Unpleasant'
-            };
-            return labels[value] || value;
+                const labels = {
+                    1: 'Very Pleasant',
+                    0.5: 'Pleasant',
+                    0: 'Neutral',
+                    '-0.5': 'Unpleasant',
+                    '-1': 'Very Unpleasant'
+                };
+                return labels[value] || value;
             }
         },
         grid: {
